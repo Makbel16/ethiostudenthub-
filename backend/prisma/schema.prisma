@@ -1,0 +1,246 @@
+// EthioStudentHub - Core Database Schema
+// This covers the core MVP entities. Additional tables (marketplace, jobs,
+// scholarships, badges, messages, audit logs) are sketched at the bottom
+// as a starting point for future feature passes — see backend README.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GUEST
+  STUDENT
+  UNIVERSITY_REP
+  MODERATOR
+  ADMIN
+}
+
+enum ResourceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ResourceType {
+  BOOK
+  LECTURE_NOTE
+  ASSIGNMENT
+  PROJECT
+  LAB_MANUAL
+  RESEARCH_PAPER
+  PREVIOUS_EXAM
+  MODEL_EXAM
+  CHEAT_SHEET
+  CODE
+  VIDEO
+  OTHER
+}
+
+enum ExamType {
+  MID
+  FINAL
+  QUIZ
+  LAB
+  PRACTICAL
+}
+
+model User {
+  id            String   @id @default(uuid())
+  fullName      String
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(STUDENT)
+  university    University? @relation(fields: [universityId], references: [id])
+  universityId  String?
+  bio           String?
+  avatarUrl     String?
+  reputation    Int      @default(0)
+  isVerified    Boolean  @default(false)
+  isBanned      Boolean  @default(false)
+  refreshToken  String?
+  verifyToken       String?
+  verifyTokenExpires    DateTime?
+  resetToken        String?
+  resetTokenExpires    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  resources     Resource[]
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  reports       Report[]
+  notifications Notification[]
+  questions     Question[]
+  answers       Answer[]
+
+  @@index([email])
+}
+
+model University {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  city        String?
+  logoUrl     String?
+  description String?
+  website     String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  departments Department[]
+  users       User[]
+  resources   Resource[]
+}
+
+model Department {
+  id           String   @id @default(uuid())
+  name         String
+  university   University @relation(fields: [universityId], references: [id])
+  universityId String
+  createdAt    DateTime @default(now())
+
+  courses      Course[]
+  resources    Resource[]
+
+  @@unique([universityId, name])
+}
+
+model Course {
+  id           String   @id @default(uuid())
+  code         String?
+  title        String
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String
+  year         Int?
+  semester     Int?
+  createdAt    DateTime @default(now())
+
+  resources    Resource[]
+
+  @@index([departmentId])
+}
+
+model Resource {
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  type          ResourceType
+  fileUrl       String
+  thumbnailUrl  String?
+  instructor    String?
+  examType      ExamType?
+  tags          String[]
+  status        ResourceStatus @default(PENDING)
+  downloadCount Int            @default(0)
+  viewCount     Int            @default(0)
+
+  uploader      User        @relation(fields: [uploaderId], references: [id])
+  uploaderId    String
+  university    University? @relation(fields: [universityId], references: [id])
+  universityId  String?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  departmentId  String?
+  course        Course?     @relation(fields: [courseId], references: [id])
+  courseId      String?
+
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  reports       Report[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([universityId, departmentId, courseId])
+  @@index([status])
+  @@index([type])
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  content    String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  resourceId String
+  createdAt  DateTime @default(now())
+}
+
+model Like {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  resourceId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+}
+
+model Bookmark {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  resourceId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reason     String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  resourceId String
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  tags      String[]
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  answers   Answer[]
+  createdAt DateTime @default(now())
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  body       String
+  isAccepted Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  createdAt  DateTime @default(now())
+}
+
+// --- Roadmap models (not yet wired to API — future passes) ---
+// model Scholarship { ... }
+// model Job { ... }
+// model MarketplaceListing { ... }
+// model Badge { ... }
+// model Message { ... }
+// model AuditLog { ... }

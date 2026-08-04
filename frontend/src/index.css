@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 39px,
+    #D8D3C433 40px
+  );
+}
+
+.margin-rule {
+  border-left: 2px solid #E3A008;
+  padding-left: 1rem;
+}
+
+.course-tab {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.05em;
+}
+
+::selection {
+  background: #E3A008;
+  color: #16233D;
+}
+
+:focus-visible {
+  outline: 2px solid #2F6B4F;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
