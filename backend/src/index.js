@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.routes.js";
 import universityRoutes from "./routes/university.routes.js";
 import resourceRoutes from "./routes/resource.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import { localUploadDir } from "./config/upload.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -19,9 +20,12 @@ const io = new Server(httpServer, {
 
 app.set("io", io); // accessible in routes via req.app.get("io")
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false })); // allow /uploads files to load cross-origin from the frontend
 app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
 app.use(express.json({ limit: "2mb" }));
+
+// Serves locally-stored uploads when Cloudinary isn't configured (dev fallback — see config/upload.js)
+app.use("/uploads", express.static(localUploadDir));
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300 });
 app.use("/api", limiter);

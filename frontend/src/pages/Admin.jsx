@@ -18,6 +18,27 @@ export default function Admin() {
     enabled: tab === "Users",
   });
 
+  const universities = useQuery({
+    queryKey: ["admin-universities"],
+    queryFn: () => api.get("/universities").then((r) => r.data),
+    enabled: tab === "Universities",
+  });
+
+  const [newUni, setNewUni] = useState({ name: "", slug: "", city: "" });
+
+  const createUniversity = useMutation({
+    mutationFn: (data) => api.post("/universities", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-universities"] });
+      setNewUni({ name: "", slug: "", city: "" });
+    },
+  });
+
+  const deleteUniversity = useMutation({
+    mutationFn: (id) => api.delete(`/universities/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-universities"] }),
+  });
+
   const moderate = useMutation({
     mutationFn: ({ id, status }) => api.patch(`/resources/${id}/moderate`, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["moderation-queue"] }),
@@ -33,7 +54,7 @@ export default function Admin() {
       <h1 className="font-display text-3xl font-semibold mb-8">Admin</h1>
 
       <div className="flex gap-6 border-b border-line mb-8">
-        {["Moderation", "Users"].map((t) => (
+        {["Moderation", "Users", "Universities"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -107,6 +128,63 @@ export default function Admin() {
             ))}
           </tbody>
         </table>
+      )}
+      {tab === "Universities" && (
+        <div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createUniversity.mutate(newUni);
+            }}
+            className="flex gap-2 mb-6"
+          >
+            <input
+              placeholder="Name"
+              value={newUni.name}
+              onChange={(e) => setNewUni({ ...newUni, name: e.target.value })}
+              required
+              className="border border-line px-3 py-2 rounded-sm text-sm flex-1"
+            />
+            <input
+              placeholder="slug (e.g. aau)"
+              value={newUni.slug}
+              onChange={(e) => setNewUni({ ...newUni, slug: e.target.value })}
+              required
+              className="border border-line px-3 py-2 rounded-sm text-sm w-40"
+            />
+            <input
+              placeholder="City"
+              value={newUni.city}
+              onChange={(e) => setNewUni({ ...newUni, city: e.target.value })}
+              className="border border-line px-3 py-2 rounded-sm text-sm w-40"
+            />
+            <button className="bg-ink text-paper px-4 py-2 rounded-sm text-sm hover:bg-highland transition-colors">
+              Add
+            </button>
+          </form>
+
+          <div className="space-y-2">
+            {universities.isLoading && <p className="text-ink/60">Loading…</p>}
+            {universities.data?.map((u) => (
+              <div key={u.id} className="border border-line rounded-sm p-4 bg-white flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{u.name}</p>
+                  <p className="text-xs text-ink/50">{u.city} · /{u.slug}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete ${u.name}? This also removes its departments and courses.`)) {
+                      deleteUniversity.mutate(u.id);
+                    }
+                  }}
+                  className="text-xs text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

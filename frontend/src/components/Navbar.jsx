@@ -32,6 +32,9 @@ export default function Navbar() {
                   Admin
                 </Link>
               )}
+              <Link to="/upload" className="text-sm font-medium hover:text-highland transition-colors">
+                Upload
+              </Link>
               <Link to="/dashboard" className="text-sm font-medium hover:text-highland transition-colors">
                 Dashboard
               </Link>

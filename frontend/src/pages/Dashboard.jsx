@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import api from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -9,6 +9,7 @@ const TABS = ["Uploads", "Bookmarks", "Notifications"];
 export default function Dashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState("Uploads");
+  const queryClient = useQueryClient();
 
   const uploads = useQuery({
     queryKey: ["me-uploads"],
@@ -24,6 +25,11 @@ export default function Dashboard() {
     queryKey: ["me-notifications"],
     queryFn: () => api.get("/users/me/notifications").then((r) => r.data),
     enabled: tab === "Notifications",
+  });
+
+  const deleteResource = useMutation({
+    mutationFn: (id) => api.delete(`/resources/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["me-uploads"] }),
   });
 
   return (
@@ -62,11 +68,21 @@ export default function Dashboard() {
           {uploads.isLoading && <p className="text-ink/60">Loading…</p>}
           {uploads.data?.length === 0 && <p className="text-ink/50">You haven't uploaded anything yet.</p>}
           {uploads.data?.map((r) => (
-            <Link key={r.id} to={`/resources/${r.id}`} className="border border-line rounded-sm p-5 bg-white hover:border-highland transition-colors">
-              <p className="course-tab text-xs text-highland mb-2">{r.status}</p>
-              <p className="font-medium">{r.title}</p>
-              <p className="text-xs text-ink/40 mt-3">{r.downloadCount} downloads · {r._count?.likes ?? 0} likes</p>
-            </Link>
+            <div key={r.id} className="border border-line rounded-sm p-5 bg-white hover:border-highland transition-colors">
+              <Link to={`/resources/${r.id}`}>
+                <p className="course-tab text-xs text-highland mb-2">{r.status}</p>
+                <p className="font-medium">{r.title}</p>
+                <p className="text-xs text-ink/40 mt-3">{r.downloadCount} downloads · {r._count?.likes ?? 0} likes</p>
+              </Link>
+              <button
+                onClick={() => {
+                  if (confirm(`Delete "${r.title}"? This can't be undone.`)) deleteResource.mutate(r.id);
+                }}
+                className="mt-3 text-xs text-red-600 hover:underline"
+              >
+                Delete
+              </button>
+            </div>
           ))}
         </div>
       )}
