@@ -4,37 +4,122 @@
 
 :root {
   color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 39px,
-    #D8D3C433 40px
-  );
+  margin: 0;
+  min-width: 320px;
+  background:
+    linear-gradient(180deg, rgba(15, 122, 82, 0.08), rgba(255, 255, 255, 0) 340px),
+    radial-gradient(circle at top right, rgba(217, 154, 0, 0.12), transparent 320px),
+    #f7f9f4;
+  color: #17213a;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.margin-rule {
-  border-left: 2px solid #E3A008;
-  padding-left: 1rem;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.course-tab {
-  font-family: "IBM Plex Mono", monospace;
-  letter-spacing: 0.05em;
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 ::selection {
-  background: #E3A008;
-  color: #16233D;
+  background: #d99a00;
+  color: #17213a;
 }
 
 :focus-visible {
-  outline: 2px solid #2F6B4F;
+  outline: 3px solid rgba(15, 122, 82, 0.28);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-panel {
+    @apply border border-line bg-white shadow-sm;
+  }
+
+  .surface-card {
+    @apply border border-line bg-white shadow-sm transition-colors;
+  }
+
+  .surface-card:hover {
+    @apply border-highland/50;
+  }
+
+  .eyebrow {
+    @apply font-mono text-xs font-semibold uppercase text-highland;
+    letter-spacing: 0.08em;
+  }
+
+  .muted {
+    @apply text-sm text-muted;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-highland px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-highland-dark disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-dark {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-highland disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-highland hover:text-highland disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-mist hover:text-ink;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-ink;
+  }
+
+  .input-field {
+    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-muted/70 focus:border-highland focus:outline-none;
+  }
+
+  .select-field {
+    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors focus:border-highland focus:outline-none;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-mist px-2.5 py-1 text-xs font-semibold text-ink/75;
+  }
+
+  .badge-green {
+    @apply inline-flex items-center gap-1 rounded-full border border-highland/20 bg-highland/10 px-2.5 py-1 text-xs font-semibold text-highland;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-1 rounded-full border border-gold/25 bg-gold/10 px-2.5 py-1 text-xs font-semibold text-ink;
+  }
+
+  .stat-tile {
+    @apply border-l-4 border-highland bg-white px-5 py-4 shadow-sm;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-lg border border-line bg-white shadow-sm;
+  }
+
+  .empty-state {
+    @apply rounded-lg border border-dashed border-line bg-white/70 px-6 py-10 text-center text-sm text-muted;
+  }
 }

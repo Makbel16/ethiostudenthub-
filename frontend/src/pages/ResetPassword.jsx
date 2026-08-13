@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { KeyRound } from "lucide-react";
 import api from "../api/client.js";
 
 export default function ResetPassword() {
@@ -20,25 +21,37 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="max-w-sm mx-auto px-6 py-16">
-      <h1 className="font-display text-3xl font-semibold mb-4">Set a new password</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="text-sm font-medium">New password</label>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            minLength={8}
-            required
-            className="w-full border border-line px-3 py-2 rounded-sm mt-1 focus:outline-none focus:border-highland"
-          />
+    <div className="page-shell py-16">
+      <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 shadow-lg">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland">
+          <KeyRound size={24} />
         </div>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button className="w-full bg-ink text-paper py-2.5 rounded-sm hover:bg-highland transition-colors">
-          Update password
-        </button>
-      </form>
+        <h1 className="mt-6 font-display text-3xl font-semibold text-ink">Set a new password</h1>
+        <p className="mt-2 text-sm leading-6 text-muted">Choose a password with at least 8 characters.</p>
+
+        <form onSubmit={onSubmit} className="mt-6 space-y-5">
+          <div>
+            <label className="field-label">New password</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              minLength={8}
+              required
+              className="input-field"
+            />
+          </div>
+          {error && (
+            <div className="rounded-lg border border-ember/25 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember">
+              {error}
+            </div>
+          )}
+          <button className="btn-dark w-full">Update password</button>
+          <p className="text-center text-sm text-muted">
+            <Link to="/login" className="font-semibold text-highland hover:underline">Back to login</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

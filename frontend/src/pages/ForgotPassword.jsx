@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { MailCheck, Send } from "lucide-react";
 import api from "../api/client.js";
 
 export default function ForgotPassword() {
@@ -12,29 +14,42 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="max-w-sm mx-auto px-6 py-16">
-      <h1 className="font-display text-3xl font-semibold mb-4">Reset your password</h1>
-      {sent ? (
-        <p className="text-ink/60">
-          If an account exists for {email}, a reset link is on its way. Check your inbox.
-        </p>
-      ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Email</label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              required
-              className="w-full border border-line px-3 py-2 rounded-sm mt-1 focus:outline-none focus:border-highland"
-            />
+    <div className="page-shell py-16">
+      <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 shadow-lg">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland">
+          <MailCheck size={24} />
+        </div>
+        <h1 className="mt-6 font-display text-3xl font-semibold text-ink">Reset your password</h1>
+        {sent ? (
+          <div className="mt-5">
+            <p className="text-sm leading-6 text-muted">
+              If an account exists for <span className="font-semibold text-ink">{email}</span>, a reset link is on its way.
+              Check your inbox.
+            </p>
+            <Link to="/login" className="btn-primary mt-6 w-full">Back to login</Link>
           </div>
-          <button className="w-full bg-ink text-paper py-2.5 rounded-sm hover:bg-highland transition-colors">
-            Send reset link
-          </button>
-        </form>
-      )}
+        ) : (
+          <form onSubmit={onSubmit} className="mt-6 space-y-5">
+            <div>
+              <label className="field-label">Email</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                required
+                className="input-field"
+              />
+            </div>
+            <button className="btn-dark w-full">
+              <Send size={16} />
+              Send reset link
+            </button>
+            <p className="text-center text-sm text-muted">
+              Remembered it? <Link to="/login" className="font-semibold text-highland hover:underline">Log in</Link>
+            </p>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

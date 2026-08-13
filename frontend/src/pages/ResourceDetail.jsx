@@ -1,15 +1,40 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Bookmark, Trash2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Bookmark,
+  BookOpen,
+  Building2,
+  CalendarDays,
+  Download,
+  Eye,
+  Heart,
+  MessageCircle,
+  Tag,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import api from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const LEVEL_LABELS = {
-  YEAR_1: "Year 1", YEAR_2: "Year 2", YEAR_3: "Year 3", YEAR_4: "Year 4",
-  YEAR_5: "Year 5", YEAR_6: "Year 6", MASTERS: "Master's", PHD: "PhD",
+  YEAR_1: "Year 1",
+  YEAR_2: "Year 2",
+  YEAR_3: "Year 3",
+  YEAR_4: "Year 4",
+  YEAR_5: "Year 5",
+  YEAR_6: "Year 6",
+  MASTERS: "Master's",
+  PHD: "PhD",
 };
-const SEMESTER_LABELS = { SEMESTER_1: "Semester 1", SEMESTER_2: "Semester 2", SUMMER: "Summer" };
+
+const SEMESTER_LABELS = {
+  SEMESTER_1: "Semester 1",
+  SEMESTER_2: "Semester 2",
+  SUMMER: "Summer",
+};
+
+const typeLabel = (type) => type?.replaceAll("_", " ") || "RESOURCE";
 
 export default function ResourceDetail() {
   const { id } = useParams();
@@ -18,7 +43,11 @@ export default function ResourceDetail() {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
 
-  const { data: resource, isLoading } = useQuery({
+  const {
+    data: resource,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["resource", id],
     queryFn: () => api.get(`/resources/${id}`).then((r) => r.data),
   });
@@ -29,10 +58,12 @@ export default function ResourceDetail() {
     mutationFn: () => api.post(`/resources/${id}/like`),
     onSuccess: invalidate,
   });
+
   const bookmark = useMutation({
     mutationFn: () => api.post(`/resources/${id}/bookmark`),
     onSuccess: invalidate,
   });
+
   const postComment = useMutation({
     mutationFn: (content) => api.post(`/resources/${id}/comments`, { content }),
     onSuccess: () => {
@@ -40,143 +71,217 @@ export default function ResourceDetail() {
       invalidate();
     },
   });
+
   const deleteComment = useMutation({
     mutationFn: (commentId) => api.delete(`/resources/${id}/comments/${commentId}`),
     onSuccess: invalidate,
   });
+
   const deleteResource = useMutation({
     mutationFn: () => api.delete(`/resources/${id}`),
     onSuccess: () => navigate("/browse"),
   });
 
-  if (isLoading) return <p className="max-w-3xl mx-auto px-6 py-12 text-ink/60">Loading…</p>;
-  if (!resource) return <p className="max-w-3xl mx-auto px-6 py-12 text-ink/60">Resource not found.</p>;
+  if (isLoading) return <p className="page-shell py-12 text-sm text-muted">Loading resource...</p>;
+  if (isError || !resource) {
+    return (
+      <div className="page-shell py-12">
+        <div className="empty-state">Resource not found or unavailable.</div>
+      </div>
+    );
+  }
 
   const canManage = user && (user.id === resource.uploader?.id || ["ADMIN", "MODERATOR"].includes(user.role));
+  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  const metaItems = [
+    resource.university?.name && { icon: Building2, label: "University", value: resource.university.name },
+    resource.department?.name && { icon: Building2, label: "Department", value: resource.department.name },
+    resource.courseCode && { icon: BookMetaIcon, label: "Course code", value: resource.courseCode },
+    resource.level && { icon: CalendarDays, label: "Level", value: LEVEL_LABELS[resource.level] || resource.level },
+    resource.semester && { icon: CalendarDays, label: "Semester", value: SEMESTER_LABELS[resource.semester] || resource.semester },
+    resource.academicYear && { icon: CalendarDays, label: "Academic year", value: resource.academicYear },
+  ].filter(Boolean);
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="course-tab text-xs text-highland mb-2">{resource.type?.replace("_", " ")}</p>
-          <h1 className="font-display text-3xl font-semibold">{resource.title}</h1>
-        </div>
-        {canManage && (
-          <button
-            onClick={() => {
-              if (confirm(`Delete "${resource.title}"? This can't be undone.`)) deleteResource.mutate();
-            }}
-            className="flex items-center gap-1 text-sm text-red-600 hover:underline"
-          >
-            <Trash2 size={14} /> Delete
-          </button>
-        )}
+    <div className="page-shell py-10">
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <article className="section-panel rounded-xl p-6 sm:p-8">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+            <div>
+              <div className="mb-4 flex flex-wrap gap-2">
+                <span className="badge-green">{typeLabel(resource.type)}</span>
+                {resource.status && resource.status !== "APPROVED" && <span className="badge-gold">{resource.status}</span>}
+                {resource.examType && <span className="badge">{resource.examType}</span>}
+              </div>
+              <h1 className="font-display text-4xl font-semibold leading-tight text-ink">{resource.title}</h1>
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+                <UserRound size={16} />
+                Uploaded by {resource.uploader?.fullName || "Student contributor"}
+                {resource.college?.name && <span>- {resource.college.name}</span>}
+              </p>
+            </div>
+
+            {canManage && (
+              <button
+                onClick={() => {
+                  if (confirm(`Delete "${resource.title}"? This cannot be undone.`)) deleteResource.mutate();
+                }}
+                className="btn-secondary border-ember/30 text-ember hover:border-ember hover:text-ember"
+              >
+                <Trash2 size={16} />
+                Delete
+              </button>
+            )}
+          </div>
+
+          {resource.description && (
+            <p className="mt-8 rounded-lg border border-line bg-paper p-5 text-sm leading-7 text-ink/80">
+              {resource.description}
+            </p>
+          )}
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {metaItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={`${item.label}-${item.value}`} className="rounded-lg border border-line bg-white p-4">
+                  <p className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+                    <Icon size={15} className="text-highland" />
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-ink">{item.value}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {resource.tags?.length > 0 && (
+            <div className="mt-8">
+              <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+                <Tag size={16} className="text-highland" />
+                Tags
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {resource.tags.map((tag) => (
+                  <span key={tag} className="badge">{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <section className="mt-10 border-t border-line pt-8">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Discussion</h2>
+                <p className="mt-1 text-sm text-muted">Ask for context, corrections, or missing details.</p>
+              </div>
+              <span className="badge">{resource.comments?.length ?? 0} comments</span>
+            </div>
+
+            {user ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (comment.trim()) postComment.mutate(comment.trim());
+                }}
+                className="mb-6 rounded-lg border border-line bg-paper p-3"
+              >
+                <label className="sr-only" htmlFor="comment">Add a comment</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Add a helpful comment"
+                  rows={3}
+                  className="input-field resize-none"
+                />
+                <div className="mt-3 flex justify-end">
+                  <button disabled={postComment.isPending} className="btn-primary">
+                    <MessageCircle size={16} />
+                    Post comment
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="mb-6 rounded-lg border border-line bg-paper p-4 text-sm text-muted">
+                <Link to="/login" className="font-semibold text-highland">Log in</Link> to comment, like, or bookmark this resource.
+              </div>
+            )}
+
+            {resource.comments?.length === 0 && <div className="empty-state">No comments yet.</div>}
+            <ul className="space-y-3">
+              {resource.comments?.map((c) => (
+                <li key={c.id} className="rounded-lg border border-line bg-white p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-semibold text-ink">{c.user?.fullName || "Student"}</p>
+                      <p className="mt-1 text-sm leading-6 text-muted">{c.content}</p>
+                    </div>
+                    {user && (user.id === c.user?.id || ["ADMIN", "MODERATOR"].includes(user.role)) && (
+                      <button
+                        onClick={() => deleteComment.mutate(c.id)}
+                        className="text-xs font-semibold text-ember hover:underline"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </article>
+
+        <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+          <div className="section-panel rounded-xl p-5">
+            <a href={`${apiBase}/resources/${id}/download`} className="btn-dark w-full">
+              <Download size={18} />
+              Download file
+            </a>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button disabled={!user || like.isPending} onClick={() => like.mutate()} className="btn-secondary">
+                <Heart size={16} />
+                {resource._count?.likes ?? 0}
+              </button>
+              <button disabled={!user || bookmark.isPending} onClick={() => bookmark.mutate()} className="btn-secondary">
+                <Bookmark size={16} />
+                Save
+              </button>
+            </div>
+            {!user && <p className="mt-3 text-center text-xs text-muted">Log in to like or save resources.</p>}
+          </div>
+
+          <div className="section-panel rounded-xl p-5">
+            <p className="font-semibold text-ink">Resource activity</p>
+            <dl className="mt-4 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-2 text-muted"><Download size={15} /> Downloads</dt>
+                <dd className="font-semibold text-ink">{resource.downloadCount ?? 0}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-2 text-muted"><Eye size={15} /> Views</dt>
+                <dd className="font-semibold text-ink">{resource.viewCount ?? 0}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="flex items-center gap-2 text-muted"><Bookmark size={15} /> Bookmarks</dt>
+                <dd className="font-semibold text-ink">{resource._count?.bookmarks ?? 0}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-xl border border-highland/20 bg-highland-light p-5">
+            <p className="font-semibold text-highland-dark">Keep the library useful</p>
+            <p className="mt-2 text-sm leading-6 text-highland-dark/75">
+              Download only what you need, add context in comments, and upload better copies when you have them.
+            </p>
+          </div>
+        </aside>
       </div>
-
-      <p className="text-ink/60 mt-2">
-        {resource.university?.name}
-        {resource.college?.name && ` · ${resource.college.name}`}
-        {resource.department?.name && ` · ${resource.department.name}`}
-        {" · "}Uploaded by {resource.uploader?.fullName}
-      </p>
-
-      <div className="flex flex-wrap gap-2 mt-4">
-        {resource.courseCode && (
-          <span className="course-tab text-xs bg-highland/10 text-highland px-2.5 py-1 rounded-sm">
-            {resource.courseCode}
-          </span>
-        )}
-        {resource.courseTitle && (
-          <span className="text-xs bg-ink/5 text-ink/70 px-2.5 py-1 rounded-sm">{resource.courseTitle}</span>
-        )}
-        {resource.level && (
-          <span className="text-xs bg-ink/5 text-ink/70 px-2.5 py-1 rounded-sm">{LEVEL_LABELS[resource.level]}</span>
-        )}
-        {resource.semester && (
-          <span className="text-xs bg-ink/5 text-ink/70 px-2.5 py-1 rounded-sm">{SEMESTER_LABELS[resource.semester]}</span>
-        )}
-        {resource.academicYear && (
-          <span className="text-xs bg-ink/5 text-ink/70 px-2.5 py-1 rounded-sm">{resource.academicYear}</span>
-        )}
-        {resource.examType && (
-          <span className="text-xs bg-ink/5 text-ink/70 px-2.5 py-1 rounded-sm">{resource.examType}</span>
-        )}
-      </div>
-
-      {resource.description && <p className="mt-6 text-ink/80">{resource.description}</p>}
-
-      <div className="flex items-center gap-3 mt-8">
-        <a
-          href={`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/resources/${id}/download`}
-          className="bg-ink text-paper px-5 py-2.5 rounded-sm hover:bg-highland transition-colors text-sm"
-        >
-          Download file
-        </a>
-        {user && (
-          <>
-            <button
-              onClick={() => like.mutate()}
-              className="flex items-center gap-1.5 border border-line px-4 py-2.5 rounded-sm text-sm hover:border-highland"
-            >
-              <Heart size={16} /> {resource._count?.likes ?? 0}
-            </button>
-            <button
-              onClick={() => bookmark.mutate()}
-              className="flex items-center gap-1.5 border border-line px-4 py-2.5 rounded-sm text-sm hover:border-highland"
-            >
-              <Bookmark size={16} /> Save
-            </button>
-          </>
-        )}
-      </div>
-
-      <section className="mt-12 border-t border-line pt-8">
-        <h2 className="font-display text-xl font-semibold mb-4">Comments</h2>
-
-        {user ? (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (comment.trim()) postComment.mutate(comment.trim());
-            }}
-            className="flex gap-2 mb-6"
-          >
-            <input
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a comment"
-              className="flex-1 border border-line px-3 py-2 rounded-sm text-sm focus:outline-none focus:border-highland"
-            />
-            <button className="bg-ink text-paper px-4 py-2 rounded-sm text-sm hover:bg-highland transition-colors">
-              Post
-            </button>
-          </form>
-        ) : (
-          <p className="text-sm text-ink/50 mb-6">
-            <Link to="/login" className="text-highland">Log in</Link> to comment.
-          </p>
-        )}
-
-        {resource.comments?.length === 0 && <p className="text-ink/50 text-sm">No comments yet.</p>}
-        <ul className="space-y-4">
-          {resource.comments?.map((c) => (
-            <li key={c.id} className="text-sm flex items-start justify-between">
-              <span>
-                <span className="font-medium">{c.user?.fullName}</span>{" "}
-                <span className="text-ink/70">{c.content}</span>
-              </span>
-              {user && (user.id === c.user?.id || ["ADMIN", "MODERATOR"].includes(user.role)) && (
-                <button
-                  onClick={() => deleteComment.mutate(c.id)}
-                  className="text-xs text-ink/40 hover:text-red-600 ml-4 shrink-0"
-                >
-                  Delete
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
+}
+
+function BookMetaIcon(props) {
+  return <BookOpen {...props} />;
 }

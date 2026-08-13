@@ -4,11 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#16233D",
-        paper: "#FAFAF7",
-        gold: "#E3A008",
-        highland: "#2F6B4F",
-        line: "#D8D3C4",
+        ink: "#17213A",
+        paper: "#F7F9F4",
+        surface: "#FFFFFF",
+        mist: "#EEF4EF",
+        muted: "#667085",
+        gold: "#D99A00",
+        ember: "#B42318",
+        highland: {
+          DEFAULT: "#0F7A52",
+          dark: "#0A5C3E",
+          light: "#DFF3E9",
+        },
+        sky: "#2563EB",
+        line: "#DADFD3",
       },
       fontFamily: {
         display: ["Fraunces", "serif"],

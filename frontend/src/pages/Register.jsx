@@ -1,7 +1,8 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { BookOpen, CheckCircle2, UserPlus } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
 import api from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -14,7 +15,12 @@ const schema = z.object({
 export default function Register() {
   const navigate = useNavigate();
   const { refresh } = useAuth();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm({
     resolver: zodResolver(schema),
   });
 
@@ -31,29 +37,68 @@ export default function Register() {
   };
 
   return (
-    <div className="max-w-sm mx-auto px-6 py-16">
-      <h1 className="font-display text-3xl font-semibold mb-8">Join EthioStudentHub</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="text-sm font-medium">Full name</label>
-          <input {...register("fullName")} className="w-full border border-line px-3 py-2 rounded-sm mt-1 focus:outline-none focus:border-highland" />
-          {errors.fullName && <p className="text-red-600 text-xs mt-1">{errors.fullName.message}</p>}
-        </div>
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <input {...register("email")} className="w-full border border-line px-3 py-2 rounded-sm mt-1 focus:outline-none focus:border-highland" />
-          {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
-        </div>
-        <div>
-          <label className="text-sm font-medium">Password</label>
-          <input type="password" {...register("password")} className="w-full border border-line px-3 py-2 rounded-sm mt-1 focus:outline-none focus:border-highland" />
-          {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
-        </div>
-        {errors.root && <p className="text-red-600 text-sm">{errors.root.message}</p>}
-        <button disabled={isSubmitting} className="w-full bg-ink text-paper py-2.5 rounded-sm hover:bg-highland transition-colors disabled:opacity-60">
-          {isSubmitting ? "Creating account…" : "Create account"}
-        </button>
-      </form>
+    <div className="page-shell py-12">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-line bg-white shadow-lg lg:grid-cols-[1fr_420px]">
+        <section className="bg-highland p-8 text-white sm:p-10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-highland">
+            <BookOpen size={25} />
+          </div>
+          <h1 className="mt-8 font-display text-4xl font-semibold leading-tight">
+            Join a clearer academic resource network.
+          </h1>
+          <p className="mt-4 max-w-md text-sm leading-6 text-white/75">
+            Create an account to upload materials, save resources, comment, and build your contributor profile.
+          </p>
+          <ul className="mt-8 space-y-3 text-sm text-white/85">
+            {["Upload resources for review", "Bookmark useful files", "Track your student dashboard"].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <CheckCircle2 size={17} className="text-gold" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="p-8 sm:p-10">
+          <p className="eyebrow">Create account</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold text-ink">Join EthioStudentHub</h2>
+          <p className="mt-2 text-sm text-muted">Start with your name, email, and a secure password.</p>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+            <div>
+              <label className="field-label">Full name</label>
+              <input {...register("fullName")} className="input-field" />
+              {errors.fullName && <p className="mt-1 text-xs font-semibold text-ember">{errors.fullName.message}</p>}
+            </div>
+            <div>
+              <label className="field-label">Email</label>
+              <input {...register("email")} type="email" className="input-field" />
+              {errors.email && <p className="mt-1 text-xs font-semibold text-ember">{errors.email.message}</p>}
+            </div>
+            <div>
+              <label className="field-label">Password</label>
+              <input type="password" {...register("password")} className="input-field" />
+              {errors.password && <p className="mt-1 text-xs font-semibold text-ember">{errors.password.message}</p>}
+            </div>
+            {errors.root && (
+              <div className="rounded-lg border border-ember/25 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember">
+                {errors.root.message}
+              </div>
+            )}
+            <button disabled={isSubmitting} className="btn-dark w-full">
+              <UserPlus size={17} />
+              {isSubmitting ? "Creating account..." : "Create account"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted">
+            Already have an account?{" "}
+            <Link to="/login" className="font-semibold text-highland hover:underline">
+              Log in
+            </Link>
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

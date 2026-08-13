@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Building2, CheckCircle2, Layers3, ShieldCheck, Trash2, UsersRound, XCircle } from "lucide-react";
 import api from "../api/client.js";
+
+const TABS = [
+  { value: "Moderation", icon: ShieldCheck },
+  { value: "Users", icon: UsersRound },
+  { value: "Universities", icon: Building2 },
+  { value: "Structure", icon: Layers3 },
+];
 
 export default function Admin() {
   const [tab, setTab] = useState("Moderation");
@@ -49,7 +57,6 @@ export default function Admin() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
   });
 
-  // --- Structure tab (colleges + departments for a chosen university) ---
   const [structureUniId, setStructureUniId] = useState("");
   const [newCollegeName, setNewCollegeName] = useState("");
   const [newDept, setNewDept] = useState({ name: "", collegeId: "" });
@@ -59,6 +66,7 @@ export default function Admin() {
     queryFn: () => api.get(`/universities/${structureUniId}/colleges`).then((r) => r.data),
     enabled: !!structureUniId,
   });
+
   const departments = useQuery({
     queryKey: ["admin-departments", structureUniId],
     queryFn: () => api.get(`/universities/${structureUniId}/departments`).then((r) => r.data),
@@ -72,6 +80,7 @@ export default function Admin() {
       setNewCollegeName("");
     },
   });
+
   const deleteCollege = useMutation({
     mutationFn: (id) => api.delete(`/universities/colleges/${id}`),
     onSuccess: () => {
@@ -87,252 +96,274 @@ export default function Admin() {
       setNewDept({ name: "", collegeId: "" });
     },
   });
+
   const deleteDepartment = useMutation({
     mutationFn: (id) => api.delete(`/universities/departments/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-departments", structureUniId] }),
   });
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
-      <h1 className="font-display text-3xl font-semibold mb-8">Admin</h1>
+    <div className="page-shell py-10">
+      <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+            <ShieldCheck size={16} />
+            Admin workspace
+          </div>
+          <h1 className="font-display text-4xl font-semibold text-ink">Moderate and organize the platform</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+            Review submitted resources, manage user access, and maintain the university structure used across upload and browse.
+          </p>
+        </div>
+      </div>
 
-      <div className="flex gap-6 border-b border-line mb-8">
-        {["Moderation", "Users", "Universities", "Structure"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`pb-3 text-sm font-medium course-tab ${
-              tab === t ? "text-highland border-b-2 border-highland" : "text-ink/50"
-            }`}
-          >
-            {t.toUpperCase()}
-          </button>
-        ))}
+      <div className="mb-6 overflow-x-auto rounded-xl border border-line bg-white p-2 shadow-sm">
+        <div className="flex min-w-max gap-2">
+          {TABS.map((item) => {
+            const Icon = item.icon;
+            const active = tab === item.value;
+            return (
+              <button
+                key={item.value}
+                onClick={() => setTab(item.value)}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  active ? "bg-highland text-white" : "text-muted hover:bg-mist hover:text-ink"
+                }`}
+              >
+                <Icon size={16} />
+                {item.value}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {tab === "Moderation" && (
-        <div className="space-y-4">
-          {queue.isLoading && <p className="text-ink/60">Loading…</p>}
-          {queue.data?.length === 0 && <p className="text-ink/50">Nothing pending review.</p>}
-          {queue.data?.map((r) => (
-            <div key={r.id} className="border border-line rounded-sm p-5 bg-white flex items-center justify-between">
-              <div>
-                <p className="font-medium">{r.title}</p>
-                <p className="text-sm text-ink/60">
-                  {r.type} · uploaded by {r.uploader?.fullName} ({r.uploader?.email})
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => moderate.mutate({ id: r.id, status: "APPROVED" })}
-                  className="text-sm bg-highland text-paper px-3 py-1.5 rounded-sm hover:opacity-90"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => moderate.mutate({ id: r.id, status: "REJECTED" })}
-                  className="text-sm border border-line px-3 py-1.5 rounded-sm hover:border-red-500 hover:text-red-600"
-                >
-                  Reject
-                </button>
+        <section className="space-y-4">
+          {queue.isLoading && <p className="text-sm text-muted">Loading moderation queue...</p>}
+          {queue.data?.length === 0 && <div className="empty-state">Nothing pending review.</div>}
+          {queue.data?.map((resource) => (
+            <div key={resource.id} className="surface-card rounded-xl p-5">
+              <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+                <div>
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <span className="badge-gold">PENDING</span>
+                    <span className="badge">{resource.type?.replaceAll("_", " ")}</span>
+                    {resource.university?.name && <span className="badge">{resource.university.name}</span>}
+                  </div>
+                  <h2 className="text-xl font-semibold text-ink">{resource.title}</h2>
+                  <p className="mt-2 text-sm text-muted">
+                    Uploaded by {resource.uploader?.fullName} ({resource.uploader?.email})
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => moderate.mutate({ id: resource.id, status: "APPROVED" })}
+                    className="btn-primary"
+                  >
+                    <CheckCircle2 size={16} />
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => moderate.mutate({ id: resource.id, status: "REJECTED" })}
+                    className="btn-secondary border-ember/30 text-ember hover:border-ember hover:text-ember"
+                  >
+                    <XCircle size={16} />
+                    Reject
+                  </button>
+                </div>
               </div>
             </div>
           ))}
-        </div>
+        </section>
       )}
 
       {tab === "Users" && (
-        <table className="w-full text-sm border border-line rounded-sm overflow-hidden bg-white">
-          <thead className="bg-ink/5 course-tab text-xs text-ink/60">
-            <tr>
-              <th className="text-left p-3">Name</th>
-              <th className="text-left p-3">Email</th>
-              <th className="text-left p-3">Role</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-line">
-            {users.data?.items?.map((u) => (
-              <tr key={u.id}>
-                <td className="p-3">{u.fullName}</td>
-                <td className="p-3 text-ink/60">{u.email}</td>
-                <td className="p-3">{u.role}</td>
-                <td className="p-3">{u.isBanned ? "Banned" : "Active"}</td>
-                <td className="p-3">
-                  <button
-                    onClick={() => banUser.mutate({ id: u.id, banned: !u.isBanned })}
-                    className="text-xs border border-line px-2 py-1 rounded-sm hover:border-highland"
-                  >
-                    {u.isBanned ? "Unban" : "Ban"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <section className="table-shell">
+          {users.isLoading && <div className="p-4 text-sm text-muted">Loading users...</div>}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="bg-mist text-xs uppercase text-muted">
+                <tr>
+                  <th className="p-4 text-left">Name</th>
+                  <th className="p-4 text-left">Email</th>
+                  <th className="p-4 text-left">Role</th>
+                  <th className="p-4 text-left">Verification</th>
+                  <th className="p-4 text-left">Status</th>
+                  <th className="p-4 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {users.data?.items?.map((user) => (
+                  <tr key={user.id}>
+                    <td className="p-4 font-semibold text-ink">{user.fullName}</td>
+                    <td className="p-4 text-muted">{user.email}</td>
+                    <td className="p-4"><span className="badge">{user.role}</span></td>
+                    <td className="p-4">{user.isVerified ? <span className="badge-green">Verified</span> : <span className="badge-gold">Unverified</span>}</td>
+                    <td className="p-4">{user.isBanned ? <span className="badge-gold">Banned</span> : <span className="badge-green">Active</span>}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => banUser.mutate({ id: user.id, banned: !user.isBanned })}
+                        className="btn-secondary min-h-9 px-3 py-1.5"
+                      >
+                        {user.isBanned ? "Unban" : "Ban"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       {tab === "Universities" && (
-        <div>
+        <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               createUniversity.mutate(newUni);
             }}
-            className="flex gap-2 mb-6"
+            className="section-panel h-fit rounded-xl p-5"
           >
-            <input
-              placeholder="Name"
-              value={newUni.name}
-              onChange={(e) => setNewUni({ ...newUni, name: e.target.value })}
-              required
-              className="border border-line px-3 py-2 rounded-sm text-sm flex-1"
-            />
-            <input
-              placeholder="slug (e.g. aau)"
-              value={newUni.slug}
-              onChange={(e) => setNewUni({ ...newUni, slug: e.target.value })}
-              required
-              className="border border-line px-3 py-2 rounded-sm text-sm w-40"
-            />
-            <input
-              placeholder="City"
-              value={newUni.city}
-              onChange={(e) => setNewUni({ ...newUni, city: e.target.value })}
-              className="border border-line px-3 py-2 rounded-sm text-sm w-40"
-            />
-            <button className="bg-ink text-paper px-4 py-2 rounded-sm text-sm hover:bg-highland transition-colors">
-              Add
-            </button>
+            <h2 className="text-lg font-semibold text-ink">Add university</h2>
+            <p className="mt-1 text-sm text-muted">Create a university record used in upload and browse filters.</p>
+            <div className="mt-5 space-y-4">
+              <div>
+                <label className="field-label">Name</label>
+                <input
+                  value={newUni.name}
+                  onChange={(e) => setNewUni({ ...newUni, name: e.target.value })}
+                  required
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="field-label">Slug</label>
+                <input
+                  value={newUni.slug}
+                  onChange={(e) => setNewUni({ ...newUni, slug: e.target.value })}
+                  required
+                  placeholder="aau"
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="field-label">City</label>
+                <input
+                  value={newUni.city}
+                  onChange={(e) => setNewUni({ ...newUni, city: e.target.value })}
+                  placeholder="Addis Ababa"
+                  className="input-field"
+                />
+              </div>
+              <button disabled={createUniversity.isPending} className="btn-dark w-full">Add university</button>
+            </div>
           </form>
 
-          <div className="space-y-2">
-            {universities.isLoading && <p className="text-ink/60">Loading…</p>}
-            {universities.data?.map((u) => (
-              <div key={u.id} className="border border-line rounded-sm p-4 bg-white flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{u.name}</p>
-                  <p className="text-xs text-ink/50">{u.city} · /{u.slug}</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {universities.isLoading && <p className="text-sm text-muted">Loading universities...</p>}
+            {universities.data?.map((university) => (
+              <div key={university.id} className="surface-card rounded-xl p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-semibold text-ink">{university.name}</h2>
+                    <p className="mt-1 text-sm text-muted">{university.city || "City not set"} - /{university.slug}</p>
+                    <p className="mt-3 text-xs font-semibold text-muted">
+                      {university._count?.departments ?? 0} departments - {university._count?.resources ?? 0} resources
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Delete ${university.name}? This also removes its colleges, departments, and courses.`)) {
+                        deleteUniversity.mutate(university.id);
+                      }
+                    }}
+                    className="text-ember hover:text-ember"
+                    aria-label={`Delete ${university.name}`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    if (confirm(`Delete ${u.name}? This also removes its colleges/departments/courses.`)) {
-                      deleteUniversity.mutate(u.id);
-                    }
-                  }}
-                  className="text-xs text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {tab === "Structure" && (
-        <div>
-          <div className="mb-6">
-            <label className="text-xs course-tab text-ink/50 block mb-1">University</label>
+        <section>
+          <div className="section-panel mb-6 rounded-xl p-5">
+            <label className="field-label">University</label>
             <select
               value={structureUniId}
               onChange={(e) => setStructureUniId(e.target.value)}
-              className="w-full max-w-sm border border-line bg-white px-3 py-2 rounded-sm text-sm"
+              className="select-field max-w-xl"
             >
               <option value="">Select a university to manage</option>
-              {universities.data?.map((u) => (
-                <option key={u.id} value={u.id}>{u.name}</option>
+              {universities.data?.map((university) => (
+                <option key={university.id} value={university.id}>{university.name}</option>
               ))}
             </select>
           </div>
 
           {structureUniId && (
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Colleges */}
-              <div>
-                <p className="course-tab text-xs text-highland mb-3">COLLEGES / SCHOOLS</p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (newCollegeName.trim()) createCollege.mutate(newCollegeName.trim());
-                  }}
-                  className="flex gap-2 mb-4"
-                >
-                  <input
-                    placeholder="College name"
-                    value={newCollegeName}
-                    onChange={(e) => setNewCollegeName(e.target.value)}
-                    className="flex-1 border border-line px-3 py-2 rounded-sm text-sm"
-                  />
-                  <button className="bg-ink text-paper px-4 py-2 rounded-sm text-sm hover:bg-highland transition-colors">
-                    Add
-                  </button>
-                </form>
-                <div className="space-y-2">
-                  {colleges.isLoading && <p className="text-ink/60 text-sm">Loading…</p>}
-                  {colleges.data?.length === 0 && (
-                    <p className="text-ink/50 text-sm">No colleges yet — optional layer, you can skip it.</p>
-                  )}
-                  {colleges.data?.map((c) => (
-                    <div key={c.id} className="border border-line rounded-sm p-3 bg-white flex items-center justify-between text-sm">
-                      <span>{c.name}</span>
-                      <button
-                        onClick={() => {
-                          if (confirm(`Delete "${c.name}"? Departments under it will become unassigned.`)) {
-                            deleteCollege.mutate(c.id);
-                          }
-                        }}
-                        className="text-xs text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <StructurePanel
+                title="Colleges / Schools"
+                description="Optional layer between university and department."
+                inputValue={newCollegeName}
+                inputPlaceholder="College name"
+                onInputChange={setNewCollegeName}
+                onSubmit={() => newCollegeName.trim() && createCollege.mutate(newCollegeName.trim())}
+                items={colleges.data}
+                isLoading={colleges.isLoading}
+                emptyText="No colleges yet. You can attach departments directly to the university."
+                onDelete={(item) => {
+                  if (confirm(`Delete "${item.name}"? Departments under it will become unassigned.`)) deleteCollege.mutate(item.id);
+                }}
+              />
 
-              {/* Departments */}
-              <div>
-                <p className="course-tab text-xs text-highland mb-3">DEPARTMENTS</p>
+              <div className="section-panel rounded-xl p-5">
+                <h2 className="text-lg font-semibold text-ink">Departments</h2>
+                <p className="mt-1 text-sm text-muted">Departments power the upload form and browse filters.</p>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (newDept.name.trim()) createDepartment.mutate(newDept);
                   }}
-                  className="space-y-2 mb-4"
+                  className="mt-5 space-y-3"
                 >
                   <input
                     placeholder="Department name"
                     value={newDept.name}
                     onChange={(e) => setNewDept({ ...newDept, name: e.target.value })}
-                    className="w-full border border-line px-3 py-2 rounded-sm text-sm"
+                    className="input-field"
                   />
                   <select
                     value={newDept.collegeId}
                     onChange={(e) => setNewDept({ ...newDept, collegeId: e.target.value })}
-                    className="w-full border border-line px-3 py-2 rounded-sm text-sm"
+                    className="select-field"
                   >
-                    <option value="">No college (attach directly to university)</option>
-                    {colleges.data?.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                    <option value="">No college</option>
+                    {colleges.data?.map((college) => (
+                      <option key={college.id} value={college.id}>{college.name}</option>
                     ))}
                   </select>
-                  <button className="w-full bg-ink text-paper px-4 py-2 rounded-sm text-sm hover:bg-highland transition-colors">
-                    Add department
-                  </button>
+                  <button className="btn-dark w-full">Add department</button>
                 </form>
-                <div className="space-y-2">
-                  {departments.isLoading && <p className="text-ink/60 text-sm">Loading…</p>}
-                  {departments.data?.length === 0 && <p className="text-ink/50 text-sm">No departments yet.</p>}
-                  {departments.data?.map((d) => (
-                    <div key={d.id} className="border border-line rounded-sm p-3 bg-white flex items-center justify-between text-sm">
-                      <span>{d.name}</span>
+
+                <div className="mt-5 space-y-2">
+                  {departments.isLoading && <p className="text-sm text-muted">Loading departments...</p>}
+                  {departments.data?.length === 0 && <div className="empty-state py-6">No departments yet.</div>}
+                  {departments.data?.map((department) => (
+                    <div key={department.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
+                      <span className="font-semibold text-ink">{department.name}</span>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete "${d.name}"?`)) deleteDepartment.mutate(d.id);
+                          if (confirm(`Delete "${department.name}"?`)) deleteDepartment.mutate(department.id);
                         }}
-                        className="text-xs text-red-600 hover:underline"
+                        className="text-ember hover:underline"
                       >
                         Delete
                       </button>
@@ -342,8 +373,53 @@ export default function Admin() {
               </div>
             </div>
           )}
-        </div>
+        </section>
       )}
+    </div>
+  );
+}
+
+function StructurePanel({
+  title,
+  description,
+  inputValue,
+  inputPlaceholder,
+  onInputChange,
+  onSubmit,
+  items,
+  isLoading,
+  emptyText,
+  onDelete,
+}) {
+  return (
+    <div className="section-panel rounded-xl p-5">
+      <h2 className="text-lg font-semibold text-ink">{title}</h2>
+      <p className="mt-1 text-sm text-muted">{description}</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+        className="mt-5 flex gap-2"
+      >
+        <input
+          placeholder={inputPlaceholder}
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+          className="input-field"
+        />
+        <button className="btn-dark shrink-0">Add</button>
+      </form>
+      <div className="mt-5 space-y-2">
+        {isLoading && <p className="text-sm text-muted">Loading...</p>}
+        {items?.length === 0 && <div className="empty-state py-6">{emptyText}</div>}
+        {items?.map((item) => (
+          <div key={item.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
+            <span className="font-semibold text-ink">{item.name}</span>
+            <button onClick={() => onDelete(item)} className="text-ember hover:underline">Delete</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
