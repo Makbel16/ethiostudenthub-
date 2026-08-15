@@ -1,7 +1,10 @@
 import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import { Readable } from "stream";
 import prisma from "../config/prisma.js";
 import { requireAuth, requireRole, optionalAuth } from "../middleware/auth.js";
-import { upload, uploadToCloudinary } from "../config/upload.js";
+import { localUploadDir, upload, uploadToCloudinary } from "../config/upload.js";
 
 const router = Router();
 
@@ -15,6 +18,163 @@ const REQUIRED_UPLOAD_FIELDS = [
   "semester",
   "academicYear",
 ];
+
+const CONTENT_TYPE_BY_EXTENSION = {
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".zip": "application/zip",
+};
+
+const GENERIC_CONTENT_TYPES = new Set(["application/octet-stream", "binary/octet-stream"]);
+
+const sanitizeFilename = (value) => {
+  const cleaned = String(value || "resource")
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 150);
+
+  return cleaned || "resource";
+};
+
+const encodeRFC5987 = (value) =>
+  encodeURIComponent(value).replace(/['()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+
+const getFileExtension = (fileUrl = "") => {
+  try {
+    const pathname = decodeURIComponent(new URL(fileUrl).pathname);
+    const extension = path.extname(pathname).toLowerCase();
+    return extension.length <= 12 ? extension : "";
+  } catch {
+    const extension = path.extname(fileUrl).toLowerCase();
+    return extension.length <= 12 ? extension : "";
+  }
+};
+
+const getResourceFilename = (resource) => {
+  const title = sanitizeFilename(resource.title);
+  const titleExtension = path.extname(title).toLowerCase();
+  const fileExtension = getFileExtension(resource.fileUrl);
+
+  return titleExtension in CONTENT_TYPE_BY_EXTENSION || !fileExtension ? title : `${title}${fileExtension}`;
+};
+
+const contentDisposition = (disposition, filename) => {
+  const asciiFilename = sanitizeFilename(filename).replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "'");
+  return `${disposition}; filename="${asciiFilename}"; filename*=UTF-8''${encodeRFC5987(filename)}`;
+};
+
+const inferContentType = (fileUrl, upstreamContentType) => {
+  const normalized = upstreamContentType?.split(";")[0]?.trim().toLowerCase();
+  if (normalized && !GENERIC_CONTENT_TYPES.has(normalized)) return upstreamContentType;
+
+  return CONTENT_TYPE_BY_EXTENSION[getFileExtension(fileUrl)] || upstreamContentType || "application/octet-stream";
+};
+
+const getLocalUploadPath = (fileUrl) => {
+  try {
+    const pathname = decodeURIComponent(new URL(fileUrl).pathname);
+    if (!pathname.startsWith("/uploads/")) return null;
+
+    const filename = path.basename(pathname);
+    const uploadRoot = path.resolve(localUploadDir);
+    const localPath = path.resolve(uploadRoot, filename);
+    const relativePath = path.relative(uploadRoot, localPath);
+
+    if (!filename || relativePath.startsWith("..") || path.isAbsolute(relativePath)) return null;
+    return localPath;
+  } catch {
+    return null;
+  }
+};
+
+const getRemoteFileUrl = (fileUrl) => {
+  try {
+    const url = new URL(fileUrl);
+    return ["http:", "https:"].includes(url.protocol) ? url : null;
+  } catch {
+    return null;
+  }
+};
+
+const allowEmbeddedPreview = (res) => {
+  // Helmet's default frame headers block the API file response inside the React app.
+  res.removeHeader("X-Frame-Options");
+  res.removeHeader("Content-Security-Policy");
+};
+
+const sendResourceFile = async (req, res, resource, disposition, onReady) => {
+  if (!resource.fileUrl) return res.status(404).json({ error: "No file is attached to this resource" });
+
+  const filename = getResourceFilename(resource);
+  const headers = {
+    "Content-Disposition": contentDisposition(disposition, filename),
+    "Access-Control-Expose-Headers": "Content-Disposition, Content-Length, Content-Type, Content-Range, Accept-Ranges",
+  };
+
+  if (disposition === "inline") allowEmbeddedPreview(res);
+
+  const localPath = getLocalUploadPath(resource.fileUrl);
+  if (localPath) {
+    if (!fs.existsSync(localPath)) return res.status(404).json({ error: "Stored file not found" });
+
+    await onReady?.();
+    return res.sendFile(localPath, { headers }, (err) => {
+      if (err) {
+        console.error(err);
+        if (!res.headersSent) res.status(err.statusCode || 500).json({ error: "Unable to send file" });
+      }
+    });
+  }
+
+  const remoteUrl = getRemoteFileUrl(resource.fileUrl);
+  if (!remoteUrl) return res.status(502).json({ error: "Stored file URL is invalid" });
+
+  const upstreamHeaders = {};
+  if (req.headers.range) upstreamHeaders.Range = req.headers.range;
+
+  const upstream = await fetch(remoteUrl, { headers: upstreamHeaders, redirect: "follow" });
+  if (upstream.status === 416) {
+    const contentRange = upstream.headers.get("content-range");
+    if (contentRange) res.setHeader("Content-Range", contentRange);
+    return res.status(416).end();
+  }
+
+  if (!upstream.ok || !upstream.body) {
+    return res.status(502).json({ error: "Could not retrieve stored file" });
+  }
+
+  await onReady?.();
+
+  headers["Content-Type"] = inferContentType(resource.fileUrl, upstream.headers.get("content-type"));
+
+  const contentLength = upstream.headers.get("content-length");
+  const contentRange = upstream.headers.get("content-range");
+  const acceptRanges = upstream.headers.get("accept-ranges");
+
+  if (contentLength) headers["Content-Length"] = contentLength;
+  if (contentRange) headers["Content-Range"] = contentRange;
+  if (acceptRanges) headers["Accept-Ranges"] = acceptRanges;
+
+  res.status(upstream.status === 206 ? 206 : 200);
+  Object.entries(headers).forEach(([key, value]) => res.setHeader(key, value));
+
+  Readable.fromWeb(upstream.body)
+    .on("error", (err) => {
+      console.error(err);
+      if (!res.headersSent) res.status(502).json({ error: "Could not stream stored file" });
+      else res.destroy(err);
+    })
+    .pipe(res);
+};
 
 // GET /api/resources - search + filter + paginate
 // query params: q, universityId, collegeId, departmentId, courseId, courseCode,
@@ -294,13 +454,40 @@ router.delete("/:id/comments/:commentId", requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// GET /api/resources/:id/download - increments count and redirects to file
-router.get("/:id/download", async (req, res) => {
-  const resource = await prisma.resource.update({
-    where: { id: req.params.id },
-    data: { downloadCount: { increment: 1 } },
-  });
-  res.redirect(resource.fileUrl);
+// GET /api/resources/:id/open - authenticated inline stream for in-browser preview
+router.get("/:id/open", requireAuth, async (req, res) => {
+  try {
+    const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
+    if (!resource) return res.status(404).json({ error: "Resource not found" });
+
+    await sendResourceFile(req, res, resource, "inline");
+  } catch (err) {
+    console.error(err);
+    if (!res.headersSent) res.status(500).json({ error: "Unable to open file" });
+  }
+});
+
+// GET /api/resources/:id/download - authenticated download stream
+router.get("/:id/download", requireAuth, async (req, res) => {
+  try {
+    const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
+    if (!resource) return res.status(404).json({ error: "Resource not found" });
+
+    const shouldIncrementDownload = !req.headers.range || /^bytes=0-/i.test(req.headers.range);
+
+    await sendResourceFile(req, res, resource, "attachment", async () => {
+      if (!shouldIncrementDownload) return;
+      await prisma.resource
+        .update({
+          where: { id: req.params.id },
+          data: { downloadCount: { increment: 1 } },
+        })
+        .catch((err) => console.error("Failed to increment download count", err));
+    });
+  } catch (err) {
+    console.error(err);
+    if (!res.headersSent) res.status(500).json({ error: "Unable to download file" });
+  }
 });
 
 // GET /api/resources/moderation/queue - moderator/admin: list pending resources

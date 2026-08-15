@@ -12,16 +12,47 @@ import resourceRoutes from "./routes/resource.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import { localUploadDir } from "./config/upload.js";
 
+const DEFAULT_CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const splitEnvList = (value) =>
+  (value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const configuredClientOrigins = new Set([DEFAULT_CLIENT_URL, ...splitEnvList(process.env.CLIENT_URLS)]);
+
+const isAllowedClientOrigin = (origin) => {
+  if (!origin) return true;
+
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname.toLowerCase();
+
+    return (
+      configuredClientOrigins.has(origin) ||
+      ["localhost", "127.0.0.1", "::1"].includes(hostname) ||
+      hostname.endsWith(".ngrok-free.app") ||
+      hostname.endsWith(".ngrok.app")
+    );
+  } catch {
+    return false;
+  }
+};
+
+const corsOrigin = (origin, callback) => {
+  callback(null, isAllowedClientOrigin(origin));
+};
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_URL || "*" },
+  cors: { origin: corsOrigin, credentials: true },
 });
 
 app.set("io", io); // accessible in routes via req.app.get("io")
 
 app.use(helmet({ crossOriginResourcePolicy: false })); // allow /uploads files to load cross-origin from the frontend
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json({ limit: "2mb" }));
 
 // Serves locally-stored uploads when Cloudinary isn't configured (dev fallback — see config/upload.js)

@@ -16,7 +16,49 @@ import {
 } from "../utils/email.js";
 
 const router = Router();
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const DEFAULT_CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const splitEnvList = (value) =>
+  (value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const configuredClientOrigins = new Set([DEFAULT_CLIENT_URL, ...splitEnvList(process.env.CLIENT_URLS)]);
+
+const isTrustedClientOrigin = (origin) => {
+  if (!origin) return false;
+
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname.toLowerCase();
+
+    return (
+      configuredClientOrigins.has(origin) ||
+      ["localhost", "127.0.0.1", "::1"].includes(hostname) ||
+      hostname.endsWith(".ngrok-free.app") ||
+      hostname.endsWith(".ngrok.app")
+    );
+  } catch {
+    return false;
+  }
+};
+
+const getRequestClientUrl = (req) => {
+  const origin = req.get("origin");
+  if (isTrustedClientOrigin(origin)) return origin;
+
+  const referer = req.get("referer");
+  if (referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (isTrustedClientOrigin(refererOrigin)) return refererOrigin;
+    } catch {
+      // Ignore malformed referer headers and fall back to configured local URL.
+    }
+  }
+
+  return DEFAULT_CLIENT_URL;
+};
 
 const registerSchema = z.object({
   fullName: z.string().min(2),
@@ -47,7 +89,7 @@ router.post("/register", async (req, res) => {
   await sendEmail({
     to: email,
     subject: "Verify your EthioStudentHub email",
-    html: verifyEmailTemplate(`${CLIENT_URL}/verify-email?token=${verifyToken}`),
+    html: verifyEmailTemplate(`${getRequestClientUrl(req)}/verify-email?token=${encodeURIComponent(verifyToken)}`),
   }).catch((err) => console.error("Failed to send verification email:", err.message));
 
   const accessToken = signAccessToken(user);
@@ -92,7 +134,7 @@ router.post("/resend-verification", async (req, res) => {
   await sendEmail({
     to: email,
     subject: "Verify your EthioStudentHub email",
-    html: verifyEmailTemplate(`${CLIENT_URL}/verify-email?token=${verifyToken}`),
+    html: verifyEmailTemplate(`${getRequestClientUrl(req)}/verify-email?token=${encodeURIComponent(verifyToken)}`),
   }).catch((err) => console.error("Failed to send verification email:", err.message));
 
   res.json({ success: true });
@@ -112,7 +154,7 @@ router.post("/forgot-password", async (req, res) => {
   await sendEmail({
     to: email,
     subject: "Reset your EthioStudentHub password",
-    html: resetPasswordTemplate(`${CLIENT_URL}/reset-password?token=${resetToken}`),
+    html: resetPasswordTemplate(`${getRequestClientUrl(req)}/reset-password?token=${encodeURIComponent(resetToken)}`),
   }).catch((err) => console.error("Failed to send reset email:", err.message));
 
   res.json({ success: true });

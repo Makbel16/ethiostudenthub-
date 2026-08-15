@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Download,
   Eye,
+  ExternalLink,
   Heart,
   MessageCircle,
   Tag,
@@ -36,12 +37,50 @@ const SEMESTER_LABELS = {
 
 const typeLabel = (type) => type?.replaceAll("_", " ") || "RESOURCE";
 
+const getFileExtension = (fileUrl = "") => {
+  try {
+    const pathname = new URL(fileUrl).pathname;
+    return pathname.includes(".") ? pathname.slice(pathname.lastIndexOf(".")).toLowerCase() : "";
+  } catch {
+    const cleanUrl = fileUrl.split(/[?#]/)[0];
+    return cleanUrl.includes(".") ? cleanUrl.slice(cleanUrl.lastIndexOf(".")).toLowerCase() : "";
+  }
+};
+
+const getPreviewKind = (resource) => {
+  const extension = getFileExtension(resource.fileUrl);
+
+  if ([".jpg", ".jpeg", ".png"].includes(extension)) return "image";
+  if (extension === ".mp4" || resource.type === "VIDEO") return "video";
+  if (extension === ".pdf") return "document";
+  return null;
+};
+
+const getFilenameFromDisposition = (disposition, fallback) => {
+  const fallbackName = fallback || "resource";
+  if (!disposition) return fallbackName;
+
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded);
+    } catch {
+      return fallbackName;
+    }
+  }
+
+  return disposition.match(/filename="([^"]+)"/i)?.[1] || fallbackName;
+};
+
 export default function ResourceDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
+  const [fileActionError, setFileActionError] = useState("");
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+  const [isDownloadingFile, setIsDownloadingFile] = useState(false);
 
   const {
     data: resource,
@@ -82,6 +121,25 @@ export default function ResourceDetail() {
     onSuccess: () => navigate("/browse"),
   });
 
+  const preview = useQuery({
+    queryKey: ["resource-preview", id],
+    queryFn: async () => {
+      const response = await api.get(`/resources/${id}/open`, { responseType: "blob" });
+      return URL.createObjectURL(response.data);
+    },
+    enabled: Boolean(user && resource && getPreviewKind(resource)),
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+  });
+
+  useEffect(() => {
+    const previewUrl = preview.data;
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [preview.data]);
+
   if (isLoading) return <p className="page-shell py-12 text-sm text-muted">Loading resource...</p>;
   if (isError || !resource) {
     return (
@@ -92,7 +150,70 @@ export default function ResourceDetail() {
   }
 
   const canManage = user && (user.id === resource.uploader?.id || ["ADMIN", "MODERATOR"].includes(user.role));
-  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const previewKind = getPreviewKind(resource);
+
+  const handleOpenFile = async () => {
+    if (!user) return;
+
+    setFileActionError("");
+    setIsOpeningFile(true);
+
+    const openedWindow = window.open("", "_blank");
+    if (openedWindow) {
+      openedWindow.document.title = "Opening file";
+      openedWindow.opener = null;
+    }
+
+    try {
+      let blobUrl = preview.data;
+      let shouldRevoke = false;
+
+      if (!blobUrl) {
+        const response = await api.get(`/resources/${id}/open`, { responseType: "blob" });
+        blobUrl = URL.createObjectURL(response.data);
+        shouldRevoke = true;
+      }
+
+      if (openedWindow) {
+        openedWindow.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, "_blank", "noopener,noreferrer");
+      }
+
+      if (shouldRevoke) setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch (err) {
+      if (openedWindow) openedWindow.close();
+      setFileActionError(err.response?.data?.error || "Could not open this file. Please log in again and retry.");
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
+
+  const handleDownloadFile = async () => {
+    if (!user) return;
+
+    setFileActionError("");
+    setIsDownloadingFile(true);
+
+    try {
+      const response = await api.get(`/resources/${id}/download`, { responseType: "blob" });
+      const blobUrl = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = getFilenameFromDisposition(response.headers["content-disposition"], resource.title);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+      setTimeout(invalidate, 800);
+    } catch (err) {
+      setFileActionError(err.response?.data?.error || "Could not download this file. Please log in again and retry.");
+    } finally {
+      setIsDownloadingFile(false);
+    }
+  };
 
   const metaItems = [
     resource.university?.name && { icon: Building2, label: "University", value: resource.university.name },
@@ -170,6 +291,38 @@ export default function ResourceDetail() {
             </div>
           )}
 
+          {user && previewKind && (
+            <section className="mt-10 border-t border-line pt-8">
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <h2 className="font-display text-2xl font-semibold text-ink">File preview</h2>
+                <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary">
+                  <ExternalLink size={16} />
+                  {isOpeningFile ? "Opening..." : "Open in new tab"}
+                </button>
+              </div>
+
+              {preview.isLoading && <div className="empty-state">Loading file preview...</div>}
+              {preview.isError && <div className="empty-state">Could not load the file preview.</div>}
+              {preview.data && (
+                <div className="overflow-hidden rounded-lg border border-line bg-paper">
+                  {previewKind === "image" && (
+                    <img src={preview.data} alt={resource.title} className="max-h-[70vh] w-full bg-white object-contain" />
+                  )}
+                  {previewKind === "video" && (
+                    <video src={preview.data} controls preload="metadata" className="aspect-video w-full bg-black" />
+                  )}
+                  {previewKind === "document" && (
+                    <iframe
+                      src={preview.data}
+                      title={`${resource.title} file preview`}
+                      className="h-[70vh] min-h-[420px] w-full bg-white"
+                    />
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="mt-10 border-t border-line pt-8">
             <div className="mb-5 flex items-center justify-between">
               <div>
@@ -235,10 +388,26 @@ export default function ResourceDetail() {
 
         <aside className="h-fit space-y-4 lg:sticky lg:top-24">
           <div className="section-panel rounded-xl p-5">
-            <a href={`${apiBase}/resources/${id}/download`} className="btn-dark w-full">
-              <Download size={18} />
-              Download file
-            </a>
+            {user ? (
+              <div className="space-y-3">
+                <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary w-full">
+                  <ExternalLink size={18} />
+                  {isOpeningFile ? "Opening..." : "Open file"}
+                </button>
+                <button type="button" onClick={handleDownloadFile} disabled={isDownloadingFile} className="btn-dark w-full">
+                  <Download size={18} />
+                  {isDownloadingFile ? "Downloading..." : "Download file"}
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-line bg-paper p-4 text-center">
+                <p className="text-sm leading-6 text-muted">Log in to open or download this file.</p>
+                <Link to="/login" className="btn-dark mt-3 w-full">
+                  Log in
+                </Link>
+              </div>
+            )}
+            {fileActionError && <p className="mt-3 text-center text-xs font-semibold text-ember">{fileActionError}</p>}
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button disabled={!user || like.isPending} onClick={() => like.mutate()} className="btn-secondary">
                 <Heart size={16} />
