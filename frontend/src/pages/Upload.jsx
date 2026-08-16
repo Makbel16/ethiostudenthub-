@@ -70,7 +70,7 @@ export default function Upload() {
 
   const { data: universities } = useQuery({
     queryKey: ["universities"],
-    queryFn: () => api.get("/universities").then((r) => r.data),
+    queryFn: () => api.get("/universities/options").then((r) => r.data),
   });
 
   const { data: colleges } = useQuery({
@@ -269,6 +269,71 @@ export default function Upload() {
               </div>
             </div>
           </section>
+
+          {isUsefulLink && (
+          <section className="section-panel rounded-xl p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+                <GraduationCap size={20} />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-ink">Institution association</h2>
+                <p className="text-sm text-muted">Connect this useful link to a university when it belongs to one.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              <div>
+                <label className="field-label">University</label>
+                <select name="universityId" value={form.universityId} onChange={onChange} className="select-field">
+                  <option value="">General useful link</option>
+                  {universities?.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {form.universityId && colleges?.length > 0 && (
+                <div>
+                  <label className="field-label">College / School</label>
+                  <select name="collegeId" value={form.collegeId} onChange={onChange} className="select-field">
+                    <option value="">No college selected</option>
+                    {colleges.map((college) => (
+                      <option key={college.id} value={college.id}>{college.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="field-label">Department</label>
+                <select
+                  name="departmentId"
+                  value={form.departmentId}
+                  onChange={onChange}
+                  disabled={!form.universityId}
+                  className="select-field"
+                >
+                  <option value="">{form.universityId ? "No department selected" : "Select university first"}</option>
+                  {departments?.map((department) => (
+                    <option key={department.id} value={department.id}>{department.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="field-label">Tags</label>
+                <input
+                  name="tags"
+                  value={form.tags}
+                  onChange={onChange}
+                  placeholder="portal, library, admissions"
+                  className="input-field"
+                />
+              </div>
+            </div>
+          </section>
+          )}
 
           {!isUsefulLink && (
           <section className="section-panel rounded-xl p-6">

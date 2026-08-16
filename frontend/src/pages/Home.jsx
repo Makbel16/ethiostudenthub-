@@ -23,6 +23,12 @@ const pathways = [
 
 const featureCards = [
   {
+    icon: Building2,
+    title: "University Directory",
+    text: "Find official websites, student portals, library links, locations, and contact details.",
+    to: "/universities",
+  },
+  {
     icon: Search,
     title: "Find materials fast",
     text: "Search by course code, university, department, year, semester, or material type.",
@@ -48,7 +54,7 @@ export default function Home() {
 
   const universities = useQuery({
     queryKey: ["home-universities"],
-    queryFn: () => api.get("/universities").then((r) => r.data),
+    queryFn: () => api.get("/universities?pageSize=1").then((r) => r.data),
     retry: false,
   });
 
@@ -63,7 +69,7 @@ export default function Home() {
     navigate(`/browse${query ? `?q=${encodeURIComponent(query)}` : ""}`);
   };
 
-  const universityCount = universities.data?.length ? `${universities.data.length}+` : "Growing";
+  const universityCount = universities.data?.total ? `${universities.data.total}+` : "Growing";
   const resourceCount = resources.data?.total ? `${resources.data.total}+` : "Curated";
   const examCount = resources.data?.items?.filter((item) => item.type === "PREVIOUS_EXAM").length;
 
@@ -102,6 +108,10 @@ export default function Home() {
             </form>
 
             <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/universities" className="btn-primary">
+                University Directory
+                <ArrowRight size={16} />
+              </Link>
               <Link to="/browse" className="btn-primary">
                 Browse library
                 <ArrowRight size={16} />
@@ -184,7 +194,7 @@ export default function Home() {
 
       <section className="border-y border-line bg-white">
         <div className="page-shell py-12">
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {featureCards.map((card) => {
               const Icon = card.icon;
               return (

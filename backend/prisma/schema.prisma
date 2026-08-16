@@ -27,6 +27,23 @@ enum ResourceStatus {
   REJECTED
 }
 
+enum InstitutionType {
+  UNIVERSITY
+  COLLEGE
+  INSTITUTE
+  OTHER
+}
+
+enum InstitutionOwnership {
+  PUBLIC
+  PRIVATE
+}
+
+enum UniversityVerificationStatus {
+  VERIFIED
+  UNVERIFIED
+}
+
 enum ResourceType {
   BOOK
   LECTURE_NOTE
@@ -70,25 +87,25 @@ enum Semester {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  fullName      String
-  email         String   @unique
-  passwordHash  String
-  role          Role     @default(STUDENT)
-  university    University? @relation(fields: [universityId], references: [id])
-  universityId  String?
-  bio           String?
-  avatarUrl     String?
-  reputation    Int      @default(0)
-  isVerified    Boolean  @default(false)
-  isBanned      Boolean  @default(false)
-  refreshToken  String?
-  verifyToken       String?
-  verifyTokenExpires    DateTime?
-  resetToken        String?
-  resetTokenExpires    DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String      @id @default(uuid())
+  fullName           String
+  email              String      @unique
+  passwordHash       String
+  role               Role        @default(STUDENT)
+  university         University? @relation(fields: [universityId], references: [id])
+  universityId       String?
+  bio                String?
+  avatarUrl          String?
+  reputation         Int         @default(0)
+  isVerified         Boolean     @default(false)
+  isBanned           Boolean     @default(false)
+  refreshToken       String?
+  verifyToken        String?
+  verifyTokenExpires DateTime?
+  resetToken         String?
+  resetTokenExpires  DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   resources     Resource[]
   comments      Comment[]
@@ -103,64 +120,88 @@ model User {
 }
 
 model University {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  slug        String   @unique
-  city        String?
-  logoUrl     String?
-  description String?
-  website     String?
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id                         String                       @id @default(uuid())
+  name                       String                       @unique
+  slug                       String                       @unique
+  shortName                  String?
+  institutionType            InstitutionType              @default(UNIVERSITY)
+  ownership                  InstitutionOwnership         @default(PUBLIC)
+  region                     String?
+  city                       String?
+  address                    String?
+  logoUrl                    String?
+  description                String?
+  website                    String?
+  studentPortalUrl           String?
+  libraryUrl                 String?
+  digitalLibraryUrl          String?
+  libraryCatalogUrl          String?
+  institutionalRepositoryUrl String?
+  contactEmail               String?
+  contactPhone               String?
+  additionalContactInfo      String?
+  latitude                   Float?
+  longitude                  Float?
+  verificationStatus         UniversityVerificationStatus @default(UNVERIFIED)
+  isActive                   Boolean                      @default(true)
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
 
   colleges    College[]
   departments Department[]
   users       User[]
   resources   Resource[]
+
+  @@index([region])
+  @@index([city])
+  @@index([institutionType])
+  @@index([ownership])
+  @@index([verificationStatus])
+  @@index([isActive])
 }
 
 // Ethiopian universities are typically organized as University -> College
 // (or "School"/"Faculty") -> Department. This layer is optional: smaller
 // institutions can attach departments directly to a university without one.
 model College {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String
   university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   universityId String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
 
-  departments  Department[]
-  resources    Resource[]
+  departments Department[]
+  resources   Resource[]
 
   @@unique([universityId, name])
 }
 
 model Department {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String
   university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   universityId String
   college      College?   @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   collegeId    String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
 
-  courses      Course[]
-  resources    Resource[]
+  courses   Course[]
+  resources Resource[]
 
   @@unique([universityId, name])
 }
 
 model Course {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   code         String?
   title        String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   departmentId String
   year         Int?
   semester     Int?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
 
-  resources    Resource[]
+  resources Resource[]
 
   @@index([departmentId])
 }
@@ -183,30 +224,30 @@ model Resource {
   // aren't blocked on an admin having pre-created a Course record for every
   // course; the optional Course relation below is for structured browsing
   // once a catalog exists.
-  courseCode    String?
-  courseTitle   String?
-  level         AcademicLevel?
-  semester      Semester?
-  academicYear  String?  // e.g. "2016" (E.C.) or "2024" (G.C.) — free text since both calendars are in use
+  courseCode   String?
+  courseTitle  String?
+  level        AcademicLevel?
+  semester     Semester?
+  academicYear String? // e.g. "2016" (E.C.) or "2024" (G.C.) — free text since both calendars are in use
 
-  uploader      User        @relation(fields: [uploaderId], references: [id])
-  uploaderId    String
-  university    University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
-  universityId  String?
-  college       College?    @relation(fields: [collegeId], references: [id], onDelete: SetNull)
-  collegeId     String?
-  department    Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  departmentId  String?
-  course        Course?     @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  courseId      String?
+  uploader     User        @relation(fields: [uploaderId], references: [id])
+  uploaderId   String
+  university   University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  universityId String?
+  college      College?    @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  collegeId    String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  departmentId String?
+  course       Course?     @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  courseId     String?
 
-  comments      Comment[]
-  likes         Like[]
-  bookmarks     Bookmark[]
-  reports       Report[]
+  comments  Comment[]
+  likes     Like[]
+  bookmarks Bookmark[]
+  reports   Report[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([universityId, collegeId, departmentId, courseId])
   @@index([courseCode])

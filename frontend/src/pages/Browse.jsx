@@ -63,7 +63,7 @@ export default function Browse() {
 
   const universities = useQuery({
     queryKey: ["universities"],
-    queryFn: () => api.get("/universities").then((r) => r.data),
+    queryFn: () => api.get("/universities/options").then((r) => r.data),
   });
 
   const departments = useQuery({

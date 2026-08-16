@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, Menu, Search, ShieldCheck, UploadCloud, X } from "lucide-react";
+import { BookOpen, Building2, LayoutDashboard, Menu, Search, ShieldCheck, UploadCloud, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Navbar() {
@@ -36,6 +36,9 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
+            <NavLink to="/universities" className={linkClass}>
+              Universities
+            </NavLink>
             <NavLink to="/browse" className={linkClass}>
               Browse
             </NavLink>
@@ -100,6 +103,10 @@ export default function Navbar() {
         {open && (
           <div className="border-t border-line py-3 lg:hidden">
             <nav className="grid gap-1">
+              <NavLink to="/universities" onClick={close} className={linkClass}>
+                <Building2 size={16} />
+                Universities
+              </NavLink>
               <NavLink to="/browse" onClick={close} className={linkClass}>
                 <Search size={16} />
                 Browse resources

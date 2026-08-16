@@ -5,6 +5,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Home from "./pages/Home.jsx";
 import Browse from "./pages/Browse.jsx";
 import ResourceDetail from "./pages/ResourceDetail.jsx";
+import UniversityDirectory from "./pages/UniversityDirectory.jsx";
+import UniversityDetail from "./pages/UniversityDetail.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -23,6 +25,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/resources/:id" element={<ResourceDetail />} />
+          <Route path="/universities" element={<UniversityDirectory />} />
+          <Route path="/universities/:idOrSlug" element={<UniversityDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
