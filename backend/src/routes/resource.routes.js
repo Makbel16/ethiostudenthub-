@@ -8,7 +8,11 @@ import { localUploadDir, upload, uploadToCloudinary } from "../config/upload.js"
 
 const router = Router();
 
-const REQUIRED_UPLOAD_FIELDS = [
+const USEFUL_LINK_TYPE = "USEFUL_LINK";
+
+const REQUIRED_RESOURCE_FIELDS = ["title", "type"];
+
+const REQUIRED_FILE_UPLOAD_FIELDS = [
   "title",
   "type",
   "universityId",
@@ -104,6 +108,18 @@ const getRemoteFileUrl = (fileUrl) => {
     return null;
   }
 };
+
+const normalizeHttpUrl = (value) => {
+  try {
+    const url = new URL(String(value || "").trim());
+    return ["http:", "https:"].includes(url.protocol) && url.hostname ? url.toString() : null;
+  } catch {
+    return null;
+  }
+};
+
+const isUsefulLink = (resourceOrType) =>
+  (typeof resourceOrType === "string" ? resourceOrType : resourceOrType?.type) === USEFUL_LINK_TYPE;
 
 const allowEmbeddedPreview = (res) => {
   // Helmet's default frame headers block the API file response inside the React app.
@@ -267,6 +283,12 @@ router.get("/:id", optionalAuth, async (req, res) => {
   });
   if (!resource) return res.status(404).json({ error: "Resource not found" });
 
+  const canViewPending =
+    req.user && (req.user.id === resource.uploaderId || ["ADMIN", "MODERATOR"].includes(req.user.role));
+  if (resource.status !== "APPROVED" && !canViewPending) {
+    return res.status(404).json({ error: "Resource not found" });
+  }
+
   // fire-and-forget view count increment
   prisma.resource.update({ where: { id: resource.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
 
@@ -275,11 +297,9 @@ router.get("/:id", optionalAuth, async (req, res) => {
 
 // POST /api/resources - authenticated students upload
 router.post("/", requireAuth, upload.single("file"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "file is required" });
-
-  const missing = REQUIRED_UPLOAD_FIELDS.filter((f) => !req.body[f]);
-  if (missing.length > 0) {
-    return res.status(400).json({ error: `Missing required field(s): ${missing.join(", ")}` });
+  const missingBaseFields = REQUIRED_RESOURCE_FIELDS.filter((f) => !req.body[f]);
+  if (missingBaseFields.length > 0) {
+    return res.status(400).json({ error: `Missing required field(s): ${missingBaseFields.join(", ")}` });
   }
 
   const {
@@ -298,7 +318,41 @@ router.post("/", requireAuth, upload.single("file"), async (req, res) => {
     instructor,
     examType,
     tags,
+    url,
+    fileUrl,
   } = req.body;
+
+  if (isUsefulLink(type)) {
+    const linkUrl = normalizeHttpUrl(url || fileUrl);
+    if (!linkUrl) {
+      return res.status(400).json({ error: "A valid http/https URL is required for useful links" });
+    }
+
+    try {
+      const resource = await prisma.resource.create({
+        data: {
+          title,
+          description,
+          type,
+          fileUrl: linkUrl,
+          thumbnailUrl: null,
+          tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          uploaderId: req.user.id,
+          status: "PENDING",
+        },
+      });
+      return res.status(201).json(resource);
+    } catch (err) {
+      return res.status(500).json({ error: "Upload failed", details: err.message });
+    }
+  }
+
+  if (!req.file) return res.status(400).json({ error: "file is required" });
+
+  const missing = REQUIRED_FILE_UPLOAD_FIELDS.filter((f) => !req.body[f]);
+  if (missing.length > 0) {
+    return res.status(400).json({ error: `Missing required field(s): ${missing.join(", ")}` });
+  }
 
   try {
     const uploaded = await uploadToCloudinary(req.file.buffer, "ethiostudenthub", req.file.originalname);
@@ -459,6 +513,7 @@ router.get("/:id/open", requireAuth, async (req, res) => {
   try {
     const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
     if (!resource) return res.status(404).json({ error: "Resource not found" });
+    if (isUsefulLink(resource)) return res.status(400).json({ error: "Useful links do not have a file preview" });
 
     await sendResourceFile(req, res, resource, "inline");
   } catch (err) {
@@ -472,6 +527,7 @@ router.get("/:id/download", requireAuth, async (req, res) => {
   try {
     const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
     if (!resource) return res.status(404).json({ error: "Resource not found" });
+    if (isUsefulLink(resource)) return res.status(400).json({ error: "Useful links do not have a downloadable file" });
 
     const shouldIncrementDownload = !req.headers.range || /^bytes=0-/i.test(req.headers.range);
 

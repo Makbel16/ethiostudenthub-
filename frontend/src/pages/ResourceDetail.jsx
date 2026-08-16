@@ -37,6 +37,34 @@ const SEMESTER_LABELS = {
 
 const typeLabel = (type) => type?.replaceAll("_", " ") || "RESOURCE";
 
+const USEFUL_LINK_TYPE = "USEFUL_LINK";
+
+const getYouTubeVideoId = (value = "") => {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.replace(/^www\./, "").toLowerCase();
+
+    if (hostname === "youtu.be") {
+      return normalizeYouTubeId(url.pathname.split("/").filter(Boolean)[0]);
+    }
+
+    if (hostname !== "youtube.com" && !hostname.endsWith(".youtube.com")) return null;
+    if (url.pathname === "/watch") return normalizeYouTubeId(url.searchParams.get("v"));
+
+    const [section, id] = url.pathname.split("/").filter(Boolean);
+    if (["shorts", "embed"].includes(section)) return normalizeYouTubeId(id);
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
+const normalizeYouTubeId = (value) => {
+  const id = String(value || "").trim();
+  return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+};
+
 const getFileExtension = (fileUrl = "") => {
   try {
     const pathname = new URL(fileUrl).pathname;
@@ -91,6 +119,8 @@ export default function ResourceDetail() {
     queryFn: () => api.get(`/resources/${id}`).then((r) => r.data),
   });
 
+  const isUsefulLinkResource = resource?.type === USEFUL_LINK_TYPE;
+
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["resource", id] });
 
   const like = useMutation({
@@ -127,7 +157,7 @@ export default function ResourceDetail() {
       const response = await api.get(`/resources/${id}/open`, { responseType: "blob" });
       return URL.createObjectURL(response.data);
     },
-    enabled: Boolean(user && resource && getPreviewKind(resource)),
+    enabled: Boolean(user && resource && !isUsefulLinkResource && getPreviewKind(resource)),
     staleTime: Infinity,
     gcTime: 0,
     retry: false,
@@ -150,7 +180,17 @@ export default function ResourceDetail() {
   }
 
   const canManage = user && (user.id === resource.uploader?.id || ["ADMIN", "MODERATOR"].includes(user.role));
-  const previewKind = getPreviewKind(resource);
+  const previewKind = isUsefulLinkResource ? null : getPreviewKind(resource);
+  const youtubeVideoId = isUsefulLinkResource ? getYouTubeVideoId(resource.fileUrl) : null;
+  const youtubeEmbedUrl = youtubeVideoId ? `https://www.youtube.com/embed/${youtubeVideoId}` : null;
+
+  const handleOpenLink = () => {
+    setFileActionError("");
+    const openedWindow = window.open(resource.fileUrl, "_blank", "noopener,noreferrer");
+    if (!openedWindow) {
+      setFileActionError("Could not open this link. Please allow pop-ups for this site and try again.");
+    }
+  };
 
   const handleOpenFile = async () => {
     if (!user) return;
@@ -262,20 +302,22 @@ export default function ResourceDetail() {
             </p>
           )}
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {metaItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={`${item.label}-${item.value}`} className="rounded-lg border border-line bg-white p-4">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
-                    <Icon size={15} className="text-highland" />
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-ink">{item.value}</p>
-                </div>
-              );
-            })}
-          </div>
+          {metaItems.length > 0 && (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {metaItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={`${item.label}-${item.value}`} className="rounded-lg border border-line bg-white p-4">
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+                      <Icon size={15} className="text-highland" />
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-ink">{item.value}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {resource.tags?.length > 0 && (
             <div className="mt-8">
@@ -289,6 +331,27 @@ export default function ResourceDetail() {
                 ))}
               </div>
             </div>
+          )}
+
+          {youtubeEmbedUrl && (
+            <section className="mt-10 border-t border-line pt-8">
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <h2 className="font-display text-2xl font-semibold text-ink">Video</h2>
+                <button type="button" onClick={handleOpenLink} className="btn-secondary">
+                  <ExternalLink size={16} />
+                  Open Link
+                </button>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-line bg-black">
+                <iframe
+                  src={youtubeEmbedUrl}
+                  title={`${resource.title} YouTube video`}
+                  className="aspect-video w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            </section>
           )}
 
           {user && previewKind && (
@@ -388,7 +451,12 @@ export default function ResourceDetail() {
 
         <aside className="h-fit space-y-4 lg:sticky lg:top-24">
           <div className="section-panel rounded-xl p-5">
-            {user ? (
+            {isUsefulLinkResource ? (
+              <button type="button" onClick={handleOpenLink} className="btn-dark w-full">
+                <ExternalLink size={18} />
+                Open Link
+              </button>
+            ) : user ? (
               <div className="space-y-3">
                 <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary w-full">
                   <ExternalLink size={18} />
@@ -424,10 +492,12 @@ export default function ResourceDetail() {
           <div className="section-panel rounded-xl p-5">
             <p className="font-semibold text-ink">Resource activity</p>
             <dl className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-2 text-muted"><Download size={15} /> Downloads</dt>
-                <dd className="font-semibold text-ink">{resource.downloadCount ?? 0}</dd>
-              </div>
+              {!isUsefulLinkResource && (
+                <div className="flex items-center justify-between">
+                  <dt className="flex items-center gap-2 text-muted"><Download size={15} /> Downloads</dt>
+                  <dd className="font-semibold text-ink">{resource.downloadCount ?? 0}</dd>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <dt className="flex items-center gap-2 text-muted"><Eye size={15} /> Views</dt>
                 <dd className="font-semibold text-ink">{resource.viewCount ?? 0}</dd>
@@ -442,7 +512,9 @@ export default function ResourceDetail() {
           <div className="rounded-xl border border-highland/20 bg-highland-light p-5">
             <p className="font-semibold text-highland-dark">Keep the library useful</p>
             <p className="mt-2 text-sm leading-6 text-highland-dark/75">
-              Download only what you need, add context in comments, and upload better copies when you have them.
+              {isUsefulLinkResource
+                ? "Open links with care, add context in comments, and submit better references when you have them."
+                : "Download only what you need, add context in comments, and upload better copies when you have them."}
             </p>
           </div>
         </aside>

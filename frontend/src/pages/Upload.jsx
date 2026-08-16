@@ -17,8 +17,11 @@ const TYPES = [
   "CHEAT_SHEET",
   "CODE",
   "VIDEO",
+  "USEFUL_LINK",
   "OTHER",
 ];
+
+const USEFUL_LINK_TYPE = "USEFUL_LINK";
 
 const EXAM_TYPES = ["MID", "FINAL", "QUIZ", "LAB", "PRACTICAL"];
 
@@ -54,6 +57,7 @@ const emptyForm = {
   level: "",
   semester: "",
   academicYear: "",
+  url: "",
 };
 
 export default function Upload() {
@@ -94,24 +98,44 @@ export default function Upload() {
     setForm((f) => ({ ...f, departmentId: "" }));
   }, [form.collegeId]);
 
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const isUsefulLink = form.type === USEFUL_LINK_TYPE;
+
+  const isValidHttpUrl = (value) => {
+    try {
+      const url = new URL(value.trim());
+      return ["http:", "https:"].includes(url.protocol) && Boolean(url.hostname);
+    } catch {
+      return false;
+    }
+  };
+
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((current) => ({ ...current, [name]: value }));
+    if (name === "type" && value === USEFUL_LINK_TYPE) setFile(null);
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return setError("Please choose a file to upload.");
 
-    const required = ["title", "type", "universityId", "departmentId", "courseCode", "level", "semester", "academicYear"];
+    const required = isUsefulLink
+      ? ["title", "type", "url"]
+      : ["title", "type", "universityId", "departmentId", "courseCode", "level", "semester", "academicYear"];
     const missing = required.filter((field) => !form[field]);
     if (missing.length > 0) {
       return setError(`Please fill in: ${missing.join(", ")}`);
     }
+    if (isUsefulLink && !isValidHttpUrl(form.url)) {
+      return setError("Please enter a valid http or https URL.");
+    }
+    if (!isUsefulLink && !file) return setError("Please choose a file to upload.");
 
     setError("");
     setSubmitting(true);
     try {
       const data = new FormData();
       Object.entries(form).forEach(([key, value]) => value && data.append(key, value));
-      data.append("file", file);
+      if (!isUsefulLink) data.append("file", file);
 
       const res = await api.post("/resources", data, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -124,6 +148,20 @@ export default function Upload() {
     }
   };
 
+  const checklistItems = isUsefulLink
+    ? [
+        "Use a clear, searchable title.",
+        "Paste a direct http or https URL.",
+        "Describe why the link is useful for students.",
+        "Avoid duplicates, expired pages, or unsafe destinations.",
+      ]
+    : [
+        "Use a clear, searchable title.",
+        "Choose the correct university and department.",
+        "Add course code, year, semester, and academic year.",
+        "Avoid duplicate or unreadable files.",
+      ];
+
   return (
     <div className="page-shell py-10">
       <div className="mb-8 max-w-3xl">
@@ -131,10 +169,10 @@ export default function Upload() {
           <UploadCloud size={16} />
           Contributor workflow
         </div>
-        <h1 className="font-display text-4xl font-semibold text-ink">Upload a resource</h1>
+        <h1 className="font-display text-4xl font-semibold text-ink">Submit a resource</h1>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Add clean metadata so students can discover this material by university, department,
-          course, level, semester, and academic year. New uploads go to moderation first.
+          Add clean metadata so students can discover useful files and links. File resources use
+          university, department, course, level, semester, and academic year. New submissions go to moderation first.
         </p>
       </div>
 
@@ -147,7 +185,9 @@ export default function Upload() {
               </span>
               <div>
                 <h2 className="text-lg font-semibold text-ink">Material details</h2>
-                <p className="text-sm text-muted">Describe the file clearly before classifying it.</p>
+                <p className="text-sm text-muted">
+                  {isUsefulLink ? "Describe the link clearly before submitting it." : "Describe the file clearly before classifying it."}
+                </p>
               </div>
             </div>
 
@@ -159,7 +199,7 @@ export default function Upload() {
                   value={form.title}
                   onChange={onChange}
                   required
-                  placeholder="e.g. Data Structures Final Exam 2024"
+                  placeholder={isUsefulLink ? "e.g. Free programming textbook collection" : "e.g. Data Structures Final Exam 2024"}
                   className="input-field"
                 />
               </div>
@@ -171,7 +211,11 @@ export default function Upload() {
                   value={form.description}
                   onChange={onChange}
                   rows={4}
-                  placeholder="Add edition, lecturer, chapter range, exam session, or any context students should know."
+                  placeholder={
+                    isUsefulLink
+                      ? "Add what students will find there, who it helps, and any usage context."
+                      : "Add edition, lecturer, chapter range, exam session, or any context students should know."
+                  }
                   className="input-field resize-none"
                 />
               </div>
@@ -186,7 +230,21 @@ export default function Upload() {
                   </select>
                 </div>
 
-                {form.type === "PREVIOUS_EXAM" || form.type === "MODEL_EXAM" ? (
+                {isUsefulLink ? (
+                  <div>
+                    <label className="field-label">URL *</label>
+                    <input
+                      name="url"
+                      type="url"
+                      inputMode="url"
+                      value={form.url}
+                      onChange={onChange}
+                      required
+                      placeholder="https://example.com/resource"
+                      className="input-field"
+                    />
+                  </div>
+                ) : form.type === "PREVIOUS_EXAM" || form.type === "MODEL_EXAM" ? (
                   <div>
                     <label className="field-label">Exam type</label>
                     <select name="examType" value={form.examType} onChange={onChange} className="select-field">
@@ -212,6 +270,7 @@ export default function Upload() {
             </div>
           </section>
 
+          {!isUsefulLink && (
           <section className="section-panel rounded-xl p-6">
             <div className="mb-5 flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
@@ -331,7 +390,9 @@ export default function Upload() {
               </div>
             </div>
           </section>
+          )}
 
+          {!isUsefulLink && (
           <section className="section-panel rounded-xl p-6">
             <div className="mb-5 flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
@@ -352,6 +413,7 @@ export default function Upload() {
               <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} required className="sr-only" />
             </label>
           </section>
+          )}
 
           {error && (
             <div className="rounded-lg border border-ember/30 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember">
@@ -362,21 +424,16 @@ export default function Upload() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted">Submitted resources are reviewed before public listing.</p>
             <button disabled={submitting} className="btn-dark">
-              {submitting ? "Uploading..." : "Submit for review"}
+              {submitting ? "Submitting..." : "Submit for review"}
             </button>
           </div>
         </form>
 
         <aside className="space-y-4">
           <div className="section-panel rounded-xl p-5">
-            <p className="font-semibold text-ink">Upload checklist</p>
+            <p className="font-semibold text-ink">Submission checklist</p>
             <ul className="mt-4 space-y-3 text-sm text-muted">
-              {[
-                "Use a clear, searchable title.",
-                "Choose the correct university and department.",
-                "Add course code, year, semester, and academic year.",
-                "Avoid duplicate or unreadable files.",
-              ].map((item) => (
+              {checklistItems.map((item) => (
                 <li key={item} className="flex gap-2">
                   <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-highland" />
                   <span>{item}</span>

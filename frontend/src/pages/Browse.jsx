@@ -14,6 +14,7 @@ const TYPES = [
   { value: "LAB_MANUAL", label: "Lab manuals" },
   { value: "RESEARCH_PAPER", label: "Research papers" },
   { value: "MODEL_EXAM", label: "Model exams" },
+  { value: "USEFUL_LINK", label: "Useful links" },
   { value: "OTHER", label: "Other" },
 ];
 

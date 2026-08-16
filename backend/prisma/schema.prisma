@@ -39,6 +39,7 @@ enum ResourceType {
   CHEAT_SHEET
   CODE
   VIDEO
+  USEFUL_LINK
   OTHER
 }
 
