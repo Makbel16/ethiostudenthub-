@@ -1,0 +1,3 @@
+-- No-op migration.
+-- Course/program academic details are stored on Department, ProgramBatch, and Course
+-- by 20260818020000_add_program_catalog_info.

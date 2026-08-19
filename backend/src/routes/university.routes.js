@@ -11,6 +11,14 @@ const INSTITUTION_TYPES = ["UNIVERSITY", "COLLEGE", "INSTITUTE", "OTHER"];
 const OWNERSHIPS = ["PUBLIC", "PRIVATE"];
 const VERIFICATION_STATUSES = ["VERIFIED", "UNVERIFIED"];
 const STATUS_ACTIONS = ["VERIFIED", "UNVERIFIED", "ACTIVE", "INACTIVE"];
+const CALENDAR_EVENT_TYPES = [
+  "SEMESTER_START",
+  "SEMESTER_END",
+  "REGISTRATION_DEADLINE",
+  "EXAM_PERIOD",
+  "HOLIDAY",
+  "GRADUATION",
+];
 
 const URL_FIELDS = [
   "logoUrl",
@@ -110,6 +118,103 @@ const universityCreateSchema = universityBaseSchema.extend({
 const universityUpdateSchema = universityBaseSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const optionalDate = z.preprocess(
+  (value) => (value === "" || value === null ? null : value),
+  z.coerce.date().nullable().optional()
+);
+
+const calendarBaseSchema = z.object({
+  type: z.enum(CALENDAR_EVENT_TYPES),
+  title: optionalString(160),
+  startDate: z.coerce.date(),
+  endDate: optionalDate,
+});
+
+const calendarCreateSchema = calendarBaseSchema
+  .refine((value) => !value.endDate || value.endDate >= value.startDate, {
+    message: "endDate cannot be before startDate",
+    path: ["endDate"],
+  });
+
+const calendarUpdateSchema = calendarBaseSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const announcementCreateSchema = z.object({
+  title: z.string().trim().min(2).max(180),
+  body: optionalString(4000),
+});
+
+const announcementUpdateSchema = announcementCreateSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const optionalAcademicNumber = (max) =>
+  z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().int().min(1).max(max).optional()
+  );
+
+const requiredAcademicNumber = (max) =>
+  z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().int().min(1).max(max)
+  );
+
+const optionalNullableAcademicNumber = (max) =>
+  z.preprocess(
+    (value) => {
+      if (value === "" || value === undefined) return undefined;
+      if (value === null) return null;
+      return value;
+    },
+    z.coerce.number().int().min(1).max(max).nullable().optional()
+  );
+
+const optionalId = z.preprocess(
+  (value) => (value === "" || value === null || value === undefined ? null : value),
+  z.string().uuid().nullable().optional()
+);
+
+const departmentCreateSchema = z.object({
+  name: z.string().trim().min(2).max(180),
+  collegeId: optionalId,
+  durationYears: optionalNullableAcademicNumber(12),
+  degreeAwarded: optionalString(120),
+  programOverview: optionalString(3000),
+  admissionRequirements: optionalString(3000),
+});
+
+const departmentUpdateSchema = departmentCreateSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const programBatchCreateSchema = z.object({
+  admissionYear: z.string().trim().min(2).max(40),
+  capacity: optionalNullableAcademicNumber(10000),
+  notes: optionalString(2000),
+});
+
+const programBatchUpdateSchema = programBatchCreateSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const courseCreateSchema = z.object({
+  title: z.string().trim().min(2).max(180),
+  code: optionalString(40),
+  year: requiredAcademicNumber(12),
+  semester: requiredAcademicNumber(3),
+});
+
+const courseUpdateSchema = courseCreateSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: "At least one field is required" });
+
+const courseFilterSchema = z.object({
+  year: optionalAcademicNumber(12),
+  semester: optionalAcademicNumber(3),
+});
 
 const statusSchema = z
   .object({
@@ -216,6 +321,289 @@ const handlePrismaError = (res, err) => {
 };
 
 const canManageUniversities = (user) => user && MANAGE_UNIVERSITY_ROLES.includes(user.role);
+
+const getManagerUniversity = async (req, res) => {
+  const manager = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    select: {
+      id: true,
+      universityId: true,
+      university: { select: { id: true, name: true, slug: true, shortName: true, isActive: true } },
+    },
+  });
+
+  if (!manager?.universityId || !manager.university?.isActive) {
+    res.status(403).json({ error: "This manager account is not assigned to an active university" });
+    return null;
+  }
+
+  return manager;
+};
+
+const canManageUniversityId = async (req, res, universityId) => {
+  if (canManageUniversities(req.user)) return true;
+
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return false;
+
+  if (manager.universityId !== universityId) {
+    res.status(403).json({ error: "University managers can only manage their own university" });
+    return false;
+  }
+
+  return true;
+};
+
+const getScopedCollege = async (req, res, id) => {
+  const college = await prisma.college.findUnique({
+    where: { id },
+    select: { id: true, universityId: true },
+  });
+  if (!college) {
+    res.status(404).json({ error: "College not found" });
+    return null;
+  }
+
+  return (await canManageUniversityId(req, res, college.universityId)) ? college : null;
+};
+
+const getScopedDepartment = async (req, res, id) => {
+  const department = await prisma.department.findUnique({
+    where: { id },
+    select: { id: true, universityId: true, collegeId: true, durationYears: true },
+  });
+  if (!department) {
+    res.status(404).json({ error: "Department not found" });
+    return null;
+  }
+
+  return (await canManageUniversityId(req, res, department.universityId)) ? department : null;
+};
+
+const getScopedCourse = async (req, res, id) => {
+  const course = await prisma.course.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      year: true,
+      departmentId: true,
+      department: { select: { universityId: true, durationYears: true } },
+    },
+  });
+  if (!course) {
+    res.status(404).json({ error: "Course not found" });
+    return null;
+  }
+
+  return (await canManageUniversityId(req, res, course.department.universityId)) ? course : null;
+};
+
+const validateCourseYearWithinDuration = (res, department, year) => {
+  if (department.durationYears && year && year > department.durationYears) {
+    res.status(400).json({ error: "Course year cannot exceed the program duration" });
+    return false;
+  }
+
+  return true;
+};
+
+const getScopedBatch = async (req, res, id) => {
+  const batch = await prisma.programBatch.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      departmentId: true,
+      department: { select: { universityId: true } },
+    },
+  });
+  if (!batch) {
+    res.status(404).json({ error: "Batch not found" });
+    return null;
+  }
+
+  return (await canManageUniversityId(req, res, batch.department.universityId)) ? batch : null;
+};
+
+const assertCollegeBelongsToUniversity = async (res, collegeId, universityId) => {
+  if (!collegeId) return true;
+
+  const college = await prisma.college.findFirst({
+    where: { id: collegeId, universityId },
+    select: { id: true },
+  });
+  if (!college) {
+    res.status(400).json({ error: "Selected college does not belong to this university" });
+    return false;
+  }
+
+  return true;
+};
+
+const toCalendarData = (values) => ({
+  ...(values.type !== undefined && { type: values.type }),
+  ...(values.title !== undefined && { title: normalizeText(values.title) }),
+  ...(values.startDate !== undefined && { startDate: values.startDate }),
+  ...(Object.prototype.hasOwnProperty.call(values, "endDate") && { endDate: values.endDate ?? null }),
+});
+
+const toAnnouncementData = (values) => ({
+  ...(values.title !== undefined && { title: values.title }),
+  ...(values.body !== undefined && { body: normalizeText(values.body) }),
+});
+
+const toDepartmentData = (values) => ({
+  ...(values.name !== undefined && { name: values.name }),
+  ...(Object.prototype.hasOwnProperty.call(values, "collegeId") && { collegeId: values.collegeId ?? null }),
+  ...(Object.prototype.hasOwnProperty.call(values, "durationYears") && { durationYears: values.durationYears ?? null }),
+  ...(values.degreeAwarded !== undefined && { degreeAwarded: normalizeText(values.degreeAwarded) }),
+  ...(values.programOverview !== undefined && { programOverview: normalizeText(values.programOverview) }),
+  ...(values.admissionRequirements !== undefined && {
+    admissionRequirements: normalizeText(values.admissionRequirements),
+  }),
+});
+
+const toProgramBatchData = (values) => ({
+  ...(values.admissionYear !== undefined && { admissionYear: values.admissionYear }),
+  ...(Object.prototype.hasOwnProperty.call(values, "capacity") && { capacity: values.capacity ?? null }),
+  ...(values.notes !== undefined && { notes: normalizeText(values.notes) }),
+});
+
+const toCourseData = (values) => ({
+  ...(values.title !== undefined && { title: values.title }),
+  ...(values.code !== undefined && { code: normalizeText(values.code) }),
+  ...(Object.prototype.hasOwnProperty.call(values, "year") && { year: values.year ?? null }),
+  ...(Object.prototype.hasOwnProperty.call(values, "semester") && { semester: values.semester ?? null }),
+});
+
+// GET /api/universities/manager/official-info - current university manager's own official info
+router.get("/manager/official-info", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const [calendarEvents, announcements, colleges, departments] = await Promise.all([
+    prisma.universityCalendarEvent.findMany({
+      where: { universityId: manager.universityId },
+      orderBy: [{ startDate: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.universityAnnouncement.findMany({
+      where: { universityId: manager.universityId },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.college.findMany({
+      where: { universityId: manager.universityId },
+      orderBy: { name: "asc" },
+    }),
+    prisma.department.findMany({
+      where: { universityId: manager.universityId },
+      include: {
+        batches: { orderBy: { admissionYear: "desc" } },
+        courses: { orderBy: [{ year: "asc" }, { semester: "asc" }, { title: "asc" }] },
+      },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  res.json({ university: manager.university, calendarEvents, announcements, colleges, departments });
+});
+
+router.post("/manager/calendar", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const parsed = calendarCreateSchema.safeParse(req.body);
+  if (!parsed.success) return sendZodError(res, parsed);
+
+  const event = await prisma.universityCalendarEvent.create({
+    data: {
+      ...toCalendarData(parsed.data),
+      universityId: manager.universityId,
+    },
+  });
+  res.status(201).json(event);
+});
+
+router.patch("/manager/calendar/:id", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const existing = await prisma.universityCalendarEvent.findFirst({
+    where: { id: req.params.id, universityId: manager.universityId },
+  });
+  if (!existing) return res.status(404).json({ error: "Calendar item not found" });
+
+  const parsed = calendarUpdateSchema.safeParse(req.body);
+  if (!parsed.success) return sendZodError(res, parsed);
+
+  const nextStartDate = parsed.data.startDate ?? existing.startDate;
+  const nextEndDate = Object.prototype.hasOwnProperty.call(parsed.data, "endDate") ? parsed.data.endDate : existing.endDate;
+  if (nextEndDate && nextEndDate < nextStartDate) {
+    return res.status(400).json({ error: "endDate cannot be before startDate" });
+  }
+
+  const event = await prisma.universityCalendarEvent.update({
+    where: { id: existing.id },
+    data: toCalendarData(parsed.data),
+  });
+  res.json(event);
+});
+
+router.delete("/manager/calendar/:id", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const deleted = await prisma.universityCalendarEvent.deleteMany({
+    where: { id: req.params.id, universityId: manager.universityId },
+  });
+  if (!deleted.count) return res.status(404).json({ error: "Calendar item not found" });
+  res.json({ success: true });
+});
+
+router.post("/manager/announcements", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const parsed = announcementCreateSchema.safeParse(req.body);
+  if (!parsed.success) return sendZodError(res, parsed);
+
+  const announcement = await prisma.universityAnnouncement.create({
+    data: {
+      ...toAnnouncementData(parsed.data),
+      universityId: manager.universityId,
+      authorId: manager.id,
+    },
+  });
+  res.status(201).json(announcement);
+});
+
+router.patch("/manager/announcements/:id", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const existing = await prisma.universityAnnouncement.findFirst({
+    where: { id: req.params.id, universityId: manager.universityId },
+  });
+  if (!existing) return res.status(404).json({ error: "Announcement not found" });
+
+  const parsed = announcementUpdateSchema.safeParse(req.body);
+  if (!parsed.success) return sendZodError(res, parsed);
+
+  const announcement = await prisma.universityAnnouncement.update({
+    where: { id: existing.id },
+    data: toAnnouncementData(parsed.data),
+  });
+  res.json(announcement);
+});
+
+router.delete("/manager/announcements/:id", requireAuth, requireRole("UNIVERSITY_REP"), async (req, res) => {
+  const manager = await getManagerUniversity(req, res);
+  if (!manager) return;
+
+  const deleted = await prisma.universityAnnouncement.deleteMany({
+    where: { id: req.params.id, universityId: manager.universityId },
+  });
+  if (!deleted.count) return res.status(404).json({ error: "Announcement not found" });
+  res.json({ success: true });
+});
 
 // GET /api/universities/options - lightweight active list for dropdowns
 router.get("/options", async (_req, res) => {
@@ -361,7 +749,15 @@ router.get("/:idOrSlug", async (req, res) => {
     },
     include: {
       colleges: { orderBy: { name: "asc" } },
-      departments: { include: { courses: { orderBy: { title: "asc" } } }, orderBy: { name: "asc" } },
+      departments: {
+        include: {
+          batches: { orderBy: { admissionYear: "desc" } },
+          courses: { orderBy: [{ year: "asc" }, { semester: "asc" }, { title: "asc" }] },
+        },
+        orderBy: { name: "asc" },
+      },
+      calendarEvents: { orderBy: [{ startDate: "asc" }, { createdAt: "asc" }] },
+      announcements: { orderBy: { createdAt: "desc" }, take: 20 },
       _count: { select: { departments: true, resources: true, users: true } },
     },
   });
@@ -487,7 +883,9 @@ router.post(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { name } = req.body;
+    if (!(await canManageUniversityId(req, res, req.params.id))) return;
+
+    const name = String(req.body.name || "").trim();
     if (!name) return res.status(400).json({ error: "name is required" });
     const college = await prisma.college.create({
       data: { name, universityId: req.params.id },
@@ -502,12 +900,16 @@ router.patch(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { name } = req.body;
-    const college = await prisma.college.update({
+    const existingCollege = await getScopedCollege(req, res, req.params.id);
+    if (!existingCollege) return;
+
+    const name = String(req.body.name || "").trim();
+    if (!name) return res.status(400).json({ error: "name is required" });
+    const updatedCollege = await prisma.college.update({
       where: { id: req.params.id },
       data: { name },
     });
-    res.json(college);
+    res.json(updatedCollege);
   }
 );
 
@@ -517,6 +919,9 @@ router.delete(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
+    const college = await getScopedCollege(req, res, req.params.id);
+    if (!college) return;
+
     await prisma.college.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   }
@@ -530,10 +935,14 @@ router.post(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { name, collegeId } = req.body;
-    if (!name) return res.status(400).json({ error: "name is required" });
+    if (!(await canManageUniversityId(req, res, req.params.id))) return;
+
+    const parsed = departmentCreateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+    if (!(await assertCollegeBelongsToUniversity(res, parsed.data.collegeId, req.params.id))) return;
+
     const department = await prisma.department.create({
-      data: { name, universityId: req.params.id, collegeId: collegeId || undefined },
+      data: { ...toDepartmentData(parsed.data), universityId: req.params.id },
     });
     res.status(201).json(department);
   }
@@ -545,12 +954,35 @@ router.patch(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { name, collegeId } = req.body;
-    const department = await prisma.department.update({
+    const existingDepartment = await getScopedDepartment(req, res, req.params.id);
+    if (!existingDepartment) return;
+
+    const parsed = departmentUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+    if (
+      Object.prototype.hasOwnProperty.call(parsed.data, "collegeId") &&
+      !(await assertCollegeBelongsToUniversity(res, parsed.data.collegeId, existingDepartment.universityId))
+    ) {
+      return;
+    }
+
+    if (parsed.data.durationYears) {
+      const outOfRangeCourse = await prisma.course.findFirst({
+        where: { departmentId: existingDepartment.id, year: { gt: parsed.data.durationYears } },
+        select: { id: true },
+      });
+      if (outOfRangeCourse) {
+        return res.status(400).json({
+          error: "Program duration cannot be shorter than the highest academic year already used by a course",
+        });
+      }
+    }
+
+    const updatedDepartment = await prisma.department.update({
       where: { id: req.params.id },
-      data: { name, collegeId: collegeId || undefined },
+      data: toDepartmentData(parsed.data),
     });
-    res.json(department);
+    res.json(updatedDepartment);
   }
 );
 
@@ -560,12 +992,94 @@ router.delete(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
+    const department = await getScopedDepartment(req, res, req.params.id);
+    if (!department) return;
+
     await prisma.department.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   }
 );
 
+// --- Program batches ---
+
+// POST /api/universities/departments/:id/batches - admin or university rep
+router.post(
+  "/departments/:id/batches",
+  requireAuth,
+  requireRole("ADMIN", "UNIVERSITY_REP"),
+  async (req, res) => {
+    const department = await getScopedDepartment(req, res, req.params.id);
+    if (!department) return;
+
+    const parsed = programBatchCreateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+
+    const batch = await prisma.programBatch.create({
+      data: { ...toProgramBatchData(parsed.data), departmentId: department.id },
+    });
+    res.status(201).json(batch);
+  }
+);
+
+// PATCH /api/universities/batches/:id - admin or university rep
+router.patch(
+  "/batches/:id",
+  requireAuth,
+  requireRole("ADMIN", "UNIVERSITY_REP"),
+  async (req, res) => {
+    const batch = await getScopedBatch(req, res, req.params.id);
+    if (!batch) return;
+
+    const parsed = programBatchUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+
+    const updatedBatch = await prisma.programBatch.update({
+      where: { id: batch.id },
+      data: toProgramBatchData(parsed.data),
+    });
+    res.json(updatedBatch);
+  }
+);
+
+// DELETE /api/universities/batches/:id - admin or university rep
+router.delete(
+  "/batches/:id",
+  requireAuth,
+  requireRole("ADMIN", "UNIVERSITY_REP"),
+  async (req, res) => {
+    const batch = await getScopedBatch(req, res, req.params.id);
+    if (!batch) return;
+
+    await prisma.programBatch.delete({ where: { id: batch.id } });
+    res.json({ success: true });
+  }
+);
+
 // --- Courses ---
+
+// GET /api/universities/departments/:id/courses - list courses, optionally by year and semester
+router.get("/departments/:id/courses", async (req, res) => {
+  const parsed = courseFilterSchema.safeParse(req.query);
+  if (!parsed.success) return sendZodError(res, parsed);
+
+  const department = await prisma.department.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, university: { select: { isActive: true } } },
+  });
+  if (!department?.university?.isActive) return res.status(404).json({ error: "Department not found" });
+
+  const { year, semester } = parsed.data;
+  const courses = await prisma.course.findMany({
+    where: {
+      departmentId: department.id,
+      ...(year && { year }),
+      ...(semester && { semester }),
+    },
+    orderBy: [{ year: "asc" }, { semester: "asc" }, { title: "asc" }],
+  });
+
+  res.json(courses);
+});
 
 // POST /api/universities/departments/:id/courses - admin or university rep
 router.post(
@@ -573,10 +1087,15 @@ router.post(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { title, code, year, semester } = req.body;
-    if (!title) return res.status(400).json({ error: "title is required" });
+    const department = await getScopedDepartment(req, res, req.params.id);
+    if (!department) return;
+
+    const parsed = courseCreateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+    if (!validateCourseYearWithinDuration(res, department, parsed.data.year)) return;
+
     const course = await prisma.course.create({
-      data: { title, code, year, semester, departmentId: req.params.id },
+      data: { ...toCourseData(parsed.data), departmentId: req.params.id },
     });
     res.status(201).json(course);
   }
@@ -588,12 +1107,18 @@ router.patch(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
-    const { title, code, year, semester } = req.body;
-    const course = await prisma.course.update({
+    const existingCourse = await getScopedCourse(req, res, req.params.id);
+    if (!existingCourse) return;
+
+    const parsed = courseUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return sendZodError(res, parsed);
+    if (!validateCourseYearWithinDuration(res, existingCourse.department, parsed.data.year ?? existingCourse.year)) return;
+
+    const updatedCourse = await prisma.course.update({
       where: { id: req.params.id },
-      data: { title, code, year, semester },
+      data: toCourseData(parsed.data),
     });
-    res.json(course);
+    res.json(updatedCourse);
   }
 );
 
@@ -603,6 +1128,9 @@ router.delete(
   requireAuth,
   requireRole("ADMIN", "UNIVERSITY_REP"),
   async (req, res) => {
+    const course = await getScopedCourse(req, res, req.params.id);
+    if (!course) return;
+
     await prisma.course.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   }

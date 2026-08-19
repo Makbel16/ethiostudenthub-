@@ -1,16 +1,21 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
   Building2,
+  CalendarDays,
   CheckCircle2,
   ExternalLink,
+  GraduationCap,
   Globe2,
   Library,
   Mail,
   MapPin,
+  Megaphone,
   Phone,
   School,
+  UsersRound,
 } from "lucide-react";
 import api from "../api/client.js";
 
@@ -30,13 +35,146 @@ const externalLinkProps = {
   rel: "noreferrer",
 };
 
+const CALENDAR_LABELS = {
+  SEMESTER_START: "Semester Start",
+  SEMESTER_END: "Semester End",
+  REGISTRATION_DEADLINE: "Registration Deadline",
+  EXAM_PERIOD: "Exam Period",
+  HOLIDAY: "Holiday",
+  GRADUATION: "Graduation Date",
+};
+
+const formatDate = (value) =>
+  new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
+
+const formatCalendarDate = (event) => {
+  if (!event.endDate || event.endDate === event.startDate) return formatDate(event.startDate);
+  return `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
+};
+
+const SEMESTERS = [
+  { value: "1", label: "Semester 1" },
+  { value: "2", label: "Semester 2" },
+  { value: "3", label: "Summer" },
+];
+
+const UNASSIGNED_COLLEGE_ID = "__unassigned__";
+
+const ordinal = (value) => {
+  const number = Number(value);
+  if (!number) return "Year not set";
+  const mod10 = number % 10;
+  const mod100 = number % 100;
+  const suffix = mod10 === 1 && mod100 !== 11 ? "st" : mod10 === 2 && mod100 !== 12 ? "nd" : mod10 === 3 && mod100 !== 13 ? "rd" : "th";
+  return `${number}${suffix} Year`;
+};
+
+const semesterLabel = (value) => SEMESTERS.find((semester) => semester.value === String(value))?.label || "Semester not set";
+
+const yearOptions = (department) => {
+  if (department?.durationYears) {
+    return Array.from({ length: department.durationYears }, (_, index) => String(index + 1));
+  }
+
+  const years = Array.from(new Set((department?.courses ?? []).map((course) => course.year).filter(Boolean))).sort((a, b) => a - b);
+  return years.map(String);
+};
+
 export default function UniversityDetail() {
   const { idOrSlug } = useParams();
+  const [selectedCollegeId, setSelectedCollegeId] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState("");
 
   const university = useQuery({
     queryKey: ["university-detail", idOrSlug],
     queryFn: () => api.get(`/universities/${idOrSlug}`).then((r) => r.data),
   });
+
+  const item = university.data || {};
+  const colleges = useMemo(() => item.colleges ?? [], [item.colleges]);
+  const departments = useMemo(() => item.departments ?? [], [item.departments]);
+  const hasUnassignedDepartments = useMemo(
+    () => departments.some((department) => !department.collegeId),
+    [departments]
+  );
+  const collegeOptions = useMemo(
+    () =>
+      hasUnassignedDepartments
+        ? [...colleges, { id: UNASSIGNED_COLLEGE_ID, name: "Programs not assigned to a college", isVirtual: true }]
+        : colleges,
+    [colleges, hasUnassignedDepartments]
+  );
+  const departmentsForCollege = useMemo(
+    () =>
+      departments.filter((department) =>
+        selectedCollegeId === UNASSIGNED_COLLEGE_ID
+          ? !department.collegeId
+          : department.collegeId === selectedCollegeId
+      ),
+    [departments, selectedCollegeId]
+  );
+  const selectedCollege = collegeOptions.find((college) => college.id === selectedCollegeId);
+  const selectedDepartment = departments.find((department) => department.id === selectedDepartmentId);
+  const years = useMemo(() => yearOptions(selectedDepartment), [selectedDepartment]);
+  const semesters = useMemo(() => {
+    if (!selectedDepartment) return [];
+    const values = Array.from(
+      new Set(
+        (selectedDepartment.courses ?? [])
+          .filter((course) => !selectedYear || String(course.year) === selectedYear)
+          .map((course) => course.semester)
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a - b);
+    return values.length ? values.map(String) : SEMESTERS.map((semester) => semester.value);
+  }, [selectedDepartment, selectedYear]);
+  const filteredCourses = useMemo(
+    () =>
+      (selectedDepartment?.courses ?? []).filter(
+        (course) =>
+          (!selectedYear || String(course.year) === selectedYear) &&
+          (!selectedSemester || String(course.semester) === selectedSemester)
+      ),
+    [selectedDepartment, selectedYear, selectedSemester]
+  );
+
+  useEffect(() => {
+    if (!collegeOptions.length) {
+      setSelectedCollegeId("");
+      return;
+    }
+    if (!selectedCollegeId || !collegeOptions.some((college) => college.id === selectedCollegeId)) {
+      setSelectedCollegeId(collegeOptions[0].id);
+    }
+  }, [collegeOptions, selectedCollegeId]);
+
+  useEffect(() => {
+    if (!departmentsForCollege.length) {
+      setSelectedDepartmentId("");
+      return;
+    }
+    if (!selectedDepartmentId || !departmentsForCollege.some((department) => department.id === selectedDepartmentId)) {
+      setSelectedDepartmentId(departmentsForCollege[0].id);
+    }
+  }, [departmentsForCollege, selectedDepartmentId]);
+
+  useEffect(() => {
+    if (!years.length) {
+      setSelectedYear("");
+      return;
+    }
+    if (!selectedYear || !years.includes(selectedYear)) setSelectedYear(years[0]);
+  }, [years, selectedYear]);
+
+  useEffect(() => {
+    if (!semesters.length) {
+      setSelectedSemester("");
+      return;
+    }
+    if (!selectedSemester || !semesters.includes(selectedSemester)) setSelectedSemester(semesters[0]);
+  }, [semesters, selectedSemester]);
 
   if (university.isLoading) return <p className="page-shell py-12 text-sm text-muted">Loading university...</p>;
   if (university.isError || !university.data) {
@@ -46,8 +184,6 @@ export default function UniversityDetail() {
       </div>
     );
   }
-
-  const item = university.data;
   const primaryLibraryUrl =
     item.libraryUrl || item.digitalLibraryUrl || item.libraryCatalogUrl || item.institutionalRepositoryUrl;
   const libraryLinks = [
@@ -134,6 +270,224 @@ export default function UniversityDetail() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         <main className="space-y-6">
+          <section className="section-panel rounded-xl p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+                <GraduationCap size={20} />
+              </span>
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Programs and Courses</h2>
+                <p className="mt-1 text-sm text-muted">Explore colleges, departments, admission batches, capacity, and course plans.</p>
+              </div>
+            </div>
+
+            {collegeOptions.length === 0 ? (
+              <div className="empty-state">No program catalog has been published yet.</div>
+            ) : (
+              <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
+                <div className="space-y-4">
+                  <div>
+                    <label className="field-label">College</label>
+                    <select
+                      value={selectedCollegeId}
+                      onChange={(e) => setSelectedCollegeId(e.target.value)}
+                      className="select-field"
+                    >
+                      {collegeOptions.map((college) => (
+                        <option key={college.id} value={college.id}>{college.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label">Department / Program</label>
+                    <select
+                      value={selectedDepartmentId}
+                      onChange={(e) => setSelectedDepartmentId(e.target.value)}
+                      className="select-field"
+                      disabled={departmentsForCollege.length === 0}
+                    >
+                      {departmentsForCollege.length === 0 ? (
+                        <option value="">No programs in this college</option>
+                      ) : (
+                        departmentsForCollege.map((department) => (
+                          <option key={department.id} value={department.id}>{department.name}</option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="field-label">Year</label>
+                      <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                        className="select-field"
+                        disabled={!selectedDepartment || years.length === 0}
+                      >
+                        {years.length === 0 ? (
+                          <option value="">No years</option>
+                        ) : (
+                          years.map((year) => (
+                            <option key={year} value={year}>{ordinal(year)}</option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="field-label">Semester</label>
+                      <select
+                        value={selectedSemester}
+                        onChange={(e) => setSelectedSemester(e.target.value)}
+                        className="select-field"
+                        disabled={!selectedDepartment || semesters.length === 0}
+                      >
+                        {semesters.length === 0 ? (
+                          <option value="">No semesters</option>
+                        ) : (
+                          semesters.map((semester) => (
+                            <option key={semester} value={semester}>{semesterLabel(semester)}</option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {!selectedDepartment ? (
+                  <div className="empty-state">No department or program is available for the selected college.</div>
+                ) : (
+                  <div>
+                    <div className="mb-4 grid gap-3 sm:grid-cols-3">
+                      <ProgramInfoTile
+                        icon={Building2}
+                        label="College"
+                        value={selectedCollege?.name || "Not assigned"}
+                      />
+                      <ProgramInfoTile
+                        icon={CalendarDays}
+                        label="Duration"
+                        value={selectedDepartment.durationYears ? `${selectedDepartment.durationYears} years` : "Not set"}
+                      />
+                      <ProgramInfoTile
+                        icon={UsersRound}
+                        label="Seats"
+                        value={
+                          selectedDepartment.batches?.some((batch) => batch.capacity)
+                            ? `${selectedDepartment.batches.reduce((sum, batch) => sum + (batch.capacity || 0), 0)} listed`
+                            : "Not set"
+                        }
+                      />
+                    </div>
+
+                    <div className="rounded-lg border border-line bg-paper p-5">
+                      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold text-ink">{selectedDepartment.name}</h3>
+                          {selectedDepartment.degreeAwarded && (
+                            <p className="mt-1 text-sm font-semibold text-highland">{selectedDepartment.degreeAwarded}</p>
+                          )}
+                        </div>
+                        {selectedDepartment.batches?.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {selectedDepartment.batches.map((batch) => (
+                              <span key={batch.id} className="badge">
+                                Batch {batch.admissionYear}
+                                {batch.capacity ? ` - ${batch.capacity} seats` : ""}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedDepartment.programOverview && (
+                        <p className="mt-4 text-sm leading-6 text-ink/80">{selectedDepartment.programOverview}</p>
+                      )}
+                      {selectedDepartment.admissionRequirements && (
+                        <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                          <p className="text-xs font-semibold uppercase text-muted">Admission Requirements</p>
+                          <p className="mt-2 text-sm leading-6 text-ink/80">{selectedDepartment.admissionRequirements}</p>
+                        </div>
+                      )}
+
+                      <div className="mt-5">
+                        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+                          <BookOpen size={16} className="text-highland" />
+                          {selectedYear ? ordinal(selectedYear) : "Academic Year"} - {selectedSemester ? semesterLabel(selectedSemester) : "Semester"}
+                        </p>
+                        {filteredCourses.length === 0 ? (
+                          <div className="empty-state py-6">No courses have been listed for this year and semester.</div>
+                        ) : (
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {filteredCourses.map((course) => (
+                              <div key={course.id} className="rounded-lg border border-line bg-white p-3">
+                                <p className="font-semibold text-ink">{course.title}</p>
+                                {course.code && <p className="mt-1 text-xs font-semibold text-muted">{course.code}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="section-panel rounded-xl p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+                <CalendarDays size={20} />
+              </span>
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Academic Calendar</h2>
+                <p className="mt-1 text-sm text-muted">Official dates published by this university.</p>
+              </div>
+            </div>
+
+            {item.calendarEvents?.length === 0 && (
+              <div className="empty-state">No academic calendar information has been published yet.</div>
+            )}
+
+            <dl className="grid gap-3 sm:grid-cols-2">
+              {item.calendarEvents?.map((event) => (
+                <div key={event.id} className="rounded-lg border border-line bg-paper p-4">
+                  <dt className="text-xs font-semibold uppercase text-muted">
+                    {CALENDAR_LABELS[event.type] || labelFromEnum(event.type)}
+                  </dt>
+                  <dd className="mt-2 text-sm font-semibold text-ink">{formatCalendarDate(event)}</dd>
+                  {event.title && <p className="mt-2 text-sm leading-6 text-muted">{event.title}</p>}
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section className="section-panel rounded-xl p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+                <Megaphone size={20} />
+              </span>
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-ink">Important Announcements</h2>
+                <p className="mt-1 text-sm text-muted">Official student-related notices from this university.</p>
+              </div>
+            </div>
+
+            {item.announcements?.length === 0 && (
+              <div className="empty-state">No announcements have been published yet.</div>
+            )}
+
+            <div className="space-y-3">
+              {item.announcements?.map((announcement) => (
+                <article key={announcement.id} className="rounded-lg border border-line bg-paper p-4">
+                  <h3 className="font-semibold text-ink">{announcement.title}</h3>
+                  {announcement.body && <p className="mt-2 text-sm leading-6 text-muted">{announcement.body}</p>}
+                  <p className="mt-3 text-xs font-semibold text-muted">{formatDate(announcement.createdAt)}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <section className="section-panel rounded-xl p-6">
             <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
@@ -300,6 +654,18 @@ function ContactRow({ icon: Icon, label, children }) {
         {label}
       </dt>
       <dd>{children}</dd>
+    </div>
+  );
+}
+
+function ProgramInfoTile({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-lg border border-line bg-white p-3">
+      <dt className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+        <Icon size={14} className="text-highland" />
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm font-semibold text-ink">{value}</dd>
     </div>
   );
 }

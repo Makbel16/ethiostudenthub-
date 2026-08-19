@@ -183,6 +183,7 @@ export default function ResourceDetail() {
   const previewKind = isUsefulLinkResource ? null : getPreviewKind(resource);
   const youtubeVideoId = isUsefulLinkResource ? getYouTubeVideoId(resource.fileUrl) : null;
   const youtubeEmbedUrl = youtubeVideoId ? `https://www.youtube.com/embed/${youtubeVideoId}` : null;
+  const relatedUsefulLinkUrl = !isUsefulLinkResource ? resource.usefulLinkUrl : null;
 
   const handleOpenLink = () => {
     setFileActionError("");
@@ -331,6 +332,35 @@ export default function ResourceDetail() {
                 ))}
               </div>
             </div>
+          )}
+
+          {relatedUsefulLinkUrl && (
+            <section className="mt-10 border-t border-line pt-8">
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div>
+                  <h2 className="font-display text-2xl font-semibold text-ink">Useful Link</h2>
+                  <p className="mt-1 text-sm text-muted">Related to this material.</p>
+                </div>
+                <a
+                  href={relatedUsefulLinkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary"
+                >
+                  <ExternalLink size={16} />
+                  Open Link
+                </a>
+              </div>
+              <a
+                href={relatedUsefulLinkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-w-0 items-center gap-3 rounded-lg border border-line bg-paper p-4 text-sm font-semibold text-highland hover:border-highland"
+              >
+                <ExternalLink size={16} className="shrink-0" />
+                <span className="min-w-0 truncate">{relatedUsefulLinkUrl}</span>
+              </a>
+            </section>
           )}
 
           {youtubeEmbedUrl && (

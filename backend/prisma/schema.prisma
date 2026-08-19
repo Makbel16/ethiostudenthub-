@@ -86,6 +86,15 @@ enum Semester {
   SUMMER
 }
 
+enum UniversityCalendarEventType {
+  SEMESTER_START
+  SEMESTER_END
+  REGISTRATION_DEADLINE
+  EXAM_PERIOD
+  HOLIDAY
+  GRADUATION
+}
+
 model User {
   id                 String      @id @default(uuid())
   fullName           String
@@ -112,6 +121,7 @@ model User {
   likes         Like[]
   bookmarks     Bookmark[]
   reports       Report[]
+  officialAnnouncements UniversityAnnouncement[]
   notifications Notification[]
   questions     Question[]
   answers       Answer[]
@@ -151,6 +161,8 @@ model University {
   departments Department[]
   users       User[]
   resources   Resource[]
+  calendarEvents UniversityCalendarEvent[]
+  announcements  UniversityAnnouncement[]
 
   @@index([region])
   @@index([city])
@@ -183,10 +195,15 @@ model Department {
   universityId String
   college      College?   @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   collegeId    String?
+  durationYears Int?
+  degreeAwarded String?
+  programOverview String?
+  admissionRequirements String?
   createdAt    DateTime   @default(now())
 
   courses   Course[]
   resources Resource[]
+  batches  ProgramBatch[]
 
   @@unique([universityId, name])
 }
@@ -206,6 +223,49 @@ model Course {
   @@index([departmentId])
 }
 
+model UniversityCalendarEvent {
+  id           String                      @id @default(uuid())
+  university   University                  @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId String
+  type         UniversityCalendarEventType
+  title        String?
+  startDate    DateTime
+  endDate      DateTime?
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+
+  @@index([universityId, type])
+  @@index([startDate])
+}
+
+model UniversityAnnouncement {
+  id           String     @id @default(uuid())
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  universityId String
+  title        String
+  body         String?
+  author       User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([universityId, createdAt])
+}
+
+model ProgramBatch {
+  id            String     @id @default(uuid())
+  department    Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId  String
+  admissionYear String
+  capacity      Int?
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([departmentId, admissionYear])
+  @@index([departmentId])
+}
+
 model Resource {
   id            String         @id @default(uuid())
   title         String
@@ -213,6 +273,7 @@ model Resource {
   type          ResourceType
   fileUrl       String
   thumbnailUrl  String?
+  usefulLinkUrl String?
   instructor    String?
   examType      ExamType?
   tags          String[]

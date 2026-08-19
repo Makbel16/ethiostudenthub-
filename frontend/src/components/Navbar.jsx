@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { BookOpen, Building2, LayoutDashboard, Menu, Search, ShieldCheck, UploadCloud, X } from "lucide-react";
+import { BookOpen, Building2, LayoutDashboard, Megaphone, Menu, Search, ShieldCheck, UploadCloud, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Navbar() {
@@ -24,7 +24,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 shadow-sm backdrop-blur">
       <div className="page-shell">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-16 items-center justify-between gap-6">
           <Link to="/" onClick={close} className="flex min-w-0 items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland text-white shadow-sm">
               <BookOpen size={22} />
@@ -35,15 +35,12 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-3 lg:flex">
             <NavLink to="/universities" className={linkClass}>
               Universities
             </NavLink>
             <NavLink to="/browse" className={linkClass}>
               Browse
-            </NavLink>
-            <NavLink to="/browse?type=PREVIOUS_EXAM" className={linkClass}>
-              Previous exams
             </NavLink>
             {user && (
               <NavLink to="/upload" className={linkClass}>
@@ -55,6 +52,11 @@ export default function Navbar() {
                 Dashboard
               </NavLink>
             )}
+            {user?.role === "UNIVERSITY_REP" && (
+              <NavLink to="/university-manager" className={linkClass}>
+                Manage University
+              </NavLink>
+            )}
             {user && (user.role === "ADMIN" || user.role === "MODERATOR") && (
               <NavLink to="/admin" className={linkClass}>
                 Admin
@@ -62,21 +64,15 @@ export default function Navbar() {
             )}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden items-center gap-3 lg:flex">
             <Link to="/browse" className="btn-secondary">
               <Search size={16} />
               Search
             </Link>
             {user ? (
-              <>
-                <Link to="/upload" className="btn-primary">
-                  <UploadCloud size={16} />
-                  Add material
-                </Link>
-                <button onClick={onLogout} className="btn-ghost">
-                  Log out
-                </button>
-              </>
+              <button onClick={onLogout} className="btn-ghost">
+                Log out
+              </button>
             ) : (
               <>
                 <Link to="/login" className="btn-ghost">
@@ -102,7 +98,7 @@ export default function Navbar() {
 
         {open && (
           <div className="border-t border-line py-3 lg:hidden">
-            <nav className="grid gap-1">
+            <nav className="grid gap-2">
               <NavLink to="/universities" onClick={close} className={linkClass}>
                 <Building2 size={16} />
                 Universities
@@ -110,10 +106,6 @@ export default function Navbar() {
               <NavLink to="/browse" onClick={close} className={linkClass}>
                 <Search size={16} />
                 Browse resources
-              </NavLink>
-              <NavLink to="/browse?type=PREVIOUS_EXAM" onClick={close} className={linkClass}>
-                <BookOpen size={16} />
-                Previous exams
               </NavLink>
               {user && (
                 <NavLink to="/upload" onClick={close} className={linkClass}>
@@ -127,6 +119,12 @@ export default function Navbar() {
                   Dashboard
                 </NavLink>
               )}
+              {user?.role === "UNIVERSITY_REP" && (
+                <NavLink to="/university-manager" onClick={close} className={linkClass}>
+                  <Megaphone size={16} />
+                  Manage University
+                </NavLink>
+              )}
               {user && (user.role === "ADMIN" || user.role === "MODERATOR") && (
                 <NavLink to="/admin" onClick={close} className={linkClass}>
                   <ShieldCheck size={16} />
@@ -134,7 +132,7 @@ export default function Navbar() {
                 </NavLink>
               )}
             </nav>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-3">
               {user ? (
                 <button onClick={onLogout} className="btn-secondary flex-1">
                   Log out

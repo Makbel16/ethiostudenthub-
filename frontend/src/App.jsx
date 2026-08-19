@@ -12,6 +12,7 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Upload from "./pages/Upload.jsx";
 import Admin from "./pages/Admin.jsx";
+import UniversityManager from "./pages/UniversityManager.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
@@ -53,6 +54,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["ADMIN", "MODERATOR"]}>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/university-manager"
+            element={
+              <ProtectedRoute roles={["UNIVERSITY_REP"]}>
+                <UniversityManager />
               </ProtectedRoute>
             }
           />

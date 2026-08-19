@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
@@ -18,6 +18,7 @@ import {
   XCircle,
 } from "lucide-react";
 import api from "../api/client.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const TABS = [
   { value: "Moderation", icon: ShieldCheck },
@@ -68,6 +69,13 @@ const EMPTY_UNIVERSITY_FORM = {
   verificationStatus: "UNVERIFIED",
   isActive: true,
   logoFile: null,
+};
+
+const EMPTY_MANAGER_FORM = {
+  fullName: "",
+  email: "",
+  password: "",
+  universityId: "",
 };
 
 const formFromUniversity = (university) => ({
@@ -133,14 +141,25 @@ const labelFromEnum = (value) =>
 const universityItemsFrom = (data) => data?.items ?? [];
 
 export default function Admin() {
+  const { user: currentUser } = useAuth();
   const [tab, setTab] = useState("Moderation");
   const [universitySearch, setUniversitySearch] = useState("");
   const [universityActiveFilter, setUniversityActiveFilter] = useState("all");
   const [universityForm, setUniversityForm] = useState(EMPTY_UNIVERSITY_FORM);
+  const [managerForm, setManagerForm] = useState(EMPTY_MANAGER_FORM);
+  const [managerError, setManagerError] = useState("");
   const [editingUniversityId, setEditingUniversityId] = useState("");
   const [viewingUniversityId, setViewingUniversityId] = useState("");
   const [universityError, setUniversityError] = useState("");
   const queryClient = useQueryClient();
+  const visibleTabs = useMemo(
+    () => (currentUser?.role === "ADMIN" ? TABS : TABS.filter((item) => item.value !== "Users")),
+    [currentUser?.role]
+  );
+
+  useEffect(() => {
+    if (currentUser?.role !== "ADMIN" && tab === "Users") setTab("Moderation");
+  }, [currentUser?.role, tab]);
 
   const queue = useQuery({
     queryKey: ["moderation-queue"],
@@ -151,7 +170,7 @@ export default function Admin() {
   const users = useQuery({
     queryKey: ["admin-users"],
     queryFn: () => api.get("/users").then((r) => r.data),
-    enabled: tab === "Users",
+    enabled: tab === "Users" && currentUser?.role === "ADMIN",
   });
 
   const universities = useQuery({
@@ -167,7 +186,7 @@ export default function Admin() {
           },
         })
         .then((r) => r.data),
-    enabled: tab === "Universities" || tab === "Structure",
+    enabled: (tab === "Users" && currentUser?.role === "ADMIN") || tab === "Universities" || tab === "Structure",
   });
 
   const universityItems = useMemo(() => universityItemsFrom(universities.data), [universities.data]);
@@ -231,6 +250,16 @@ export default function Admin() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
   });
 
+  const createManager = useMutation({
+    mutationFn: (form) => api.post("/users/university-managers", form),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setManagerForm(EMPTY_MANAGER_FORM);
+      setManagerError("");
+    },
+    onError: (err) => setManagerError(getErrorMessage(err, "Could not create university manager")),
+  });
+
   const [structureUniId, setStructureUniId] = useState("");
   const [newCollegeName, setNewCollegeName] = useState("");
   const [newDept, setNewDept] = useState({ name: "", collegeId: "" });
@@ -286,6 +315,12 @@ export default function Admin() {
     }
   };
 
+  const onManagerSubmit = (e) => {
+    e.preventDefault();
+    setManagerError("");
+    createManager.mutate(managerForm);
+  };
+
   return (
     <div className="page-shell py-10">
       <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
@@ -303,7 +338,7 @@ export default function Admin() {
 
       <div className="mb-6 overflow-x-auto rounded-xl border border-line bg-white p-2 shadow-sm">
         <div className="flex min-w-max gap-2">
-          {TABS.map((item) => {
+          {visibleTabs.map((item) => {
             const Icon = item.icon;
             const active = tab === item.value;
             return (
@@ -363,40 +398,107 @@ export default function Admin() {
       )}
 
       {tab === "Users" && (
-        <section className="table-shell">
-          {users.isLoading && <div className="p-4 text-sm text-muted">Loading users...</div>}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
-              <thead className="bg-mist text-xs uppercase text-muted">
-                <tr>
-                  <th className="p-4 text-left">Name</th>
-                  <th className="p-4 text-left">Email</th>
-                  <th className="p-4 text-left">Role</th>
-                  <th className="p-4 text-left">Verification</th>
-                  <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {users.data?.items?.map((user) => (
-                  <tr key={user.id}>
-                    <td className="p-4 font-semibold text-ink">{user.fullName}</td>
-                    <td className="p-4 text-muted">{user.email}</td>
-                    <td className="p-4"><span className="badge">{user.role}</span></td>
-                    <td className="p-4">{user.isVerified ? <span className="badge-green">Verified</span> : <span className="badge-gold">Unverified</span>}</td>
-                    <td className="p-4">{user.isBanned ? <span className="badge-gold">Banned</span> : <span className="badge-green">Active</span>}</td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => banUser.mutate({ id: user.id, banned: !user.isBanned })}
-                        className="btn-secondary min-h-9 px-3 py-1.5"
-                      >
-                        {user.isBanned ? "Unban" : "Ban"}
-                      </button>
-                    </td>
+        <section className="space-y-6">
+          {currentUser?.role === "ADMIN" && (
+            <form onSubmit={onManagerSubmit} className="section-panel rounded-xl p-5">
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-ink">Create University Manager</h2>
+                <p className="mt-1 text-sm text-muted">Managers can publish official calendar information and announcements for one university.</p>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-4">
+                <div>
+                  <label className="field-label">Full name *</label>
+                  <input
+                    value={managerForm.fullName}
+                    onChange={(e) => setManagerForm((form) => ({ ...form, fullName: e.target.value }))}
+                    required
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Email *</label>
+                  <input
+                    type="email"
+                    value={managerForm.email}
+                    onChange={(e) => setManagerForm((form) => ({ ...form, email: e.target.value }))}
+                    required
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Temporary password *</label>
+                  <input
+                    type="password"
+                    value={managerForm.password}
+                    onChange={(e) => setManagerForm((form) => ({ ...form, password: e.target.value }))}
+                    minLength={8}
+                    required
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="field-label">University *</label>
+                  <select
+                    value={managerForm.universityId}
+                    onChange={(e) => setManagerForm((form) => ({ ...form, universityId: e.target.value }))}
+                    required
+                    className="select-field"
+                  >
+                    <option value="">Select university</option>
+                    {universityItems.filter((university) => university.isActive !== false).map((university) => (
+                      <option key={university.id} value={university.id}>{university.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {managerError && (
+                <div className="mt-4 rounded-lg border border-ember/30 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember">
+                  {managerError}
+                </div>
+              )}
+              <button disabled={createManager.isPending} className="btn-dark mt-5">
+                {createManager.isPending ? "Creating..." : "Create manager account"}
+              </button>
+            </form>
+          )}
+
+          <div className="table-shell">
+            {users.isLoading && <div className="p-4 text-sm text-muted">Loading users...</div>}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px] text-sm">
+                <thead className="bg-mist text-xs uppercase text-muted">
+                  <tr>
+                    <th className="p-4 text-left">Name</th>
+                    <th className="p-4 text-left">Email</th>
+                    <th className="p-4 text-left">Role</th>
+                    <th className="p-4 text-left">University</th>
+                    <th className="p-4 text-left">Verification</th>
+                    <th className="p-4 text-left">Status</th>
+                    <th className="p-4 text-left">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {users.data?.items?.map((user) => (
+                    <tr key={user.id}>
+                      <td className="p-4 font-semibold text-ink">{user.fullName}</td>
+                      <td className="p-4 text-muted">{user.email}</td>
+                      <td className="p-4"><span className="badge">{user.role}</span></td>
+                      <td className="p-4 text-muted">{user.university?.name || "-"}</td>
+                      <td className="p-4">{user.isVerified ? <span className="badge-green">Verified</span> : <span className="badge-gold">Unverified</span>}</td>
+                      <td className="p-4">{user.isBanned ? <span className="badge-gold">Banned</span> : <span className="badge-green">Active</span>}</td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => banUser.mutate({ id: user.id, banned: !user.isBanned })}
+                          className="btn-secondary min-h-9 px-3 py-1.5"
+                        >
+                          {user.isBanned ? "Unban" : "Ban"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       )}

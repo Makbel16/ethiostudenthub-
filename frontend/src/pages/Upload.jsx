@@ -58,6 +58,7 @@ const emptyForm = {
   semester: "",
   academicYear: "",
   url: "",
+  usefulLinkUrl: "",
 };
 
 export default function Upload() {
@@ -127,6 +128,9 @@ export default function Upload() {
     }
     if (isUsefulLink && !isValidHttpUrl(form.url)) {
       return setError("Please enter a valid http or https URL.");
+    }
+    if (!isUsefulLink && form.usefulLinkUrl && !isValidHttpUrl(form.usefulLinkUrl)) {
+      return setError("Please enter a valid http or https URL for the Useful Link field.");
     }
     if (!isUsefulLink && !file) return setError("Please choose a file to upload.");
 
@@ -267,6 +271,22 @@ export default function Upload() {
                   </div>
                 )}
               </div>
+
+              {!isUsefulLink && (
+                <div className="md:col-span-2">
+                  <label className="field-label">Useful Link</label>
+                  <input
+                    name="usefulLinkUrl"
+                    type="url"
+                    inputMode="url"
+                    value={form.usefulLinkUrl}
+                    onChange={onChange}
+                    placeholder="https://example.com/related-resource"
+                    className="input-field"
+                  />
+                  <p className="mt-2 text-xs text-muted">Optional related page for this specific material.</p>
+                </div>
+              )}
             </div>
           </section>
 

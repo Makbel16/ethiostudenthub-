@@ -320,6 +320,7 @@ router.post("/", requireAuth, upload.single("file"), async (req, res) => {
     tags,
     url,
     fileUrl,
+    usefulLinkUrl,
   } = req.body;
 
   if (isUsefulLink(type)) {
@@ -363,6 +364,12 @@ router.post("/", requireAuth, upload.single("file"), async (req, res) => {
     return res.status(400).json({ error: `Missing required field(s): ${missing.join(", ")}` });
   }
 
+  const usefulLinkValue = String(usefulLinkUrl || "").trim();
+  const normalizedUsefulLinkUrl = usefulLinkValue ? normalizeHttpUrl(usefulLinkValue) : null;
+  if (usefulLinkValue && !normalizedUsefulLinkUrl) {
+    return res.status(400).json({ error: "Useful Link must be a valid http/https URL" });
+  }
+
   try {
     const uploaded = await uploadToCloudinary(req.file.buffer, "ethiostudenthub", req.file.originalname);
 
@@ -374,6 +381,7 @@ router.post("/", requireAuth, upload.single("file"), async (req, res) => {
         examType: examType || undefined,
         fileUrl: uploaded.secure_url,
         thumbnailUrl: uploaded.secure_url.includes("/image/") ? uploaded.secure_url : null,
+        usefulLinkUrl: normalizedUsefulLinkUrl || undefined,
         instructor,
         courseCode,
         courseTitle,
@@ -419,7 +427,15 @@ router.patch("/:id", requireAuth, async (req, res) => {
     level,
     semester,
     academicYear,
+    usefulLinkUrl,
   } = req.body;
+
+  const hasUsefulLinkUrl = Object.prototype.hasOwnProperty.call(req.body, "usefulLinkUrl");
+  const usefulLinkValue = String(usefulLinkUrl || "").trim();
+  const normalizedUsefulLinkUrl = usefulLinkValue ? normalizeHttpUrl(usefulLinkValue) : null;
+  if (hasUsefulLinkUrl && usefulLinkValue && !normalizedUsefulLinkUrl) {
+    return res.status(400).json({ error: "Useful Link must be a valid http/https URL" });
+  }
 
   const resource = await prisma.resource.update({
     where: { id: req.params.id },
@@ -433,6 +449,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
       level: level || undefined,
       semester: semester || undefined,
       academicYear,
+      ...(hasUsefulLinkUrl && { usefulLinkUrl: normalizedUsefulLinkUrl }),
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(",").map((t) => t.trim())) : undefined,
       universityId: universityId || undefined,
       collegeId: collegeId || undefined,

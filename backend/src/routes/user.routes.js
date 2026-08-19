@@ -1,8 +1,17 @@
 import { Router } from "express";
+import { z } from "zod";
 import prisma from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { hashPassword } from "../utils/auth.js";
 
 const router = Router();
+
+const managerCreateSchema = z.object({
+  fullName: z.string().trim().min(2).max(120),
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+  universityId: z.string().uuid(),
+});
 
 // GET /api/users/me - current user's profile
 router.get("/me", requireAuth, async (req, res) => {
@@ -98,6 +107,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
         role: true,
         isVerified: true,
         isBanned: true,
+        university: { select: { id: true, name: true } },
         reputation: true,
         createdAt: true,
       },
@@ -106,6 +116,46 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
   ]);
 
   res.json({ items, total, page: Number(page), pageSize: take });
+});
+
+// POST /api/users/university-managers - admin creates a manager account for one university
+router.post("/university-managers", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const parsed = managerCreateSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { fullName, email, password, universityId } = parsed.data;
+
+  const [existingUser, university] = await Promise.all([
+    prisma.user.findUnique({ where: { email } }),
+    prisma.university.findUnique({ where: { id: universityId }, select: { id: true, name: true, isActive: true } }),
+  ]);
+
+  if (existingUser) return res.status(409).json({ error: "Email already registered" });
+  if (!university || !university.isActive) return res.status(400).json({ error: "Select an active university" });
+
+  const passwordHash = await hashPassword(password);
+  const user = await prisma.user.create({
+    data: {
+      fullName,
+      email,
+      passwordHash,
+      role: "UNIVERSITY_REP",
+      universityId,
+      isVerified: true,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      isVerified: true,
+      isBanned: true,
+      university: { select: { id: true, name: true } },
+      createdAt: true,
+    },
+  });
+
+  res.status(201).json(user);
 });
 
 // PATCH /api/users/:id/role - admin only
