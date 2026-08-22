@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate, Routes, Route } from "react-router-dom";
 import {
+  Award,
+  Bell,
   BookOpen,
+  Briefcase,
   Building2,
+  Calculator,
+  Calendar,
   Home as HomeIcon,
   LayoutDashboard,
   Layers3,
   LogOut,
+  MapPin,
   Megaphone,
   Menu,
   Search,
@@ -37,6 +43,12 @@ import VerifyEmail from "../pages/VerifyEmail.jsx";
 import ForgotPassword from "../pages/ForgotPassword.jsx";
 import ResetPassword from "../pages/ResetPassword.jsx";
 import Footer from "./Footer.jsx";
+import GpaCalculator from "../pages/GpaCalculator.jsx";
+import AcademicRoadmap from "../pages/AcademicRoadmap.jsx";
+import StudyPlanner from "../pages/StudyPlanner.jsx";
+import Scholarships from "../pages/Scholarships.jsx";
+import JobsInternships from "../pages/JobsInternships.jsx";
+import Notifications from "../pages/Notifications.jsx";
 
 const ROLE_PERMISSIONS = {
   GUEST: [],
@@ -60,6 +72,17 @@ const NAV_SECTIONS = [
     items: [
       { to: "/upload", label: "Upload", icon: UploadCloud, authOnly: true },
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authOnly: true },
+    ],
+  },
+  {
+    label: "Student Tools",
+    items: [
+      { to: "/gpa-calculator", label: "GPA Calculator", icon: Calculator, authOnly: true },
+      { to: "/academic-roadmap", label: "Academic Roadmap", icon: MapPin, authOnly: true },
+      { to: "/study-planner", label: "Study Planner", icon: Calendar, authOnly: true },
+      { to: "/scholarships", label: "Scholarships", icon: Award, authOnly: true },
+      { to: "/jobs-internships", label: "Jobs & Internships", icon: Briefcase, authOnly: true },
+      { to: "/notifications", label: "Notifications", icon: Bell, authOnly: true },
     ],
   },
   {
@@ -269,16 +292,18 @@ export default function Navbar() {
           <div className="page-shell">
             <div className="flex h-16 items-center justify-between gap-6">
               <div className="flex min-w-0 items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen((value) => !value)}
-                  className={`btn-secondary px-3 ${user ? "lg:hidden" : ""}`}
-                  aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
-                  aria-controls="mobile-sidebar"
-                  aria-expanded={mobileOpen}
-                >
-                  {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => setMobileOpen((value) => !value)}
+                    className="btn-secondary px-3 lg:hidden"
+                    aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+                    aria-controls="mobile-sidebar"
+                    aria-expanded={mobileOpen}
+                  >
+                    {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                  </button>
+                )}
 
                 <Link to="/" onClick={close} className="flex min-w-0 items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland text-white shadow-sm">
@@ -323,25 +348,26 @@ export default function Navbar() {
           </div>
         </header>
 
-        {/* Mobile Sidebar Overlay */}
-        <div className={`fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`} aria-hidden={!mobileOpen}>
-          <button
-            type="button"
-            className={`absolute inset-0 bg-ink/40 transition-opacity duration-200 ${
-              mobileOpen ? "opacity-100" : "opacity-0"
-            }`}
-            onClick={close}
-            aria-label="Close navigation"
-          />
-          <aside
-            id="mobile-sidebar"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site navigation"
-            className={`absolute left-0 top-0 flex h-screen w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-line bg-white shadow-2xl transition-transform duration-200 ${
-              mobileOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
+        {/* Mobile Sidebar Overlay - Only for logged-in users */}
+        {user && (
+          <div className={`fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`} aria-hidden={!mobileOpen}>
+            <button
+              type="button"
+              className={`absolute inset-0 bg-ink/40 transition-opacity duration-200 ${
+                mobileOpen ? "opacity-100" : "opacity-0"
+              }`}
+              onClick={close}
+              aria-label="Close navigation"
+            />
+            <aside
+              id="mobile-sidebar"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site navigation"
+              className={`absolute left-0 top-0 flex h-screen w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-line bg-white shadow-2xl transition-transform duration-200 ${
+                mobileOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
             <div className="flex min-h-16 items-center justify-between gap-3 border-b border-line px-4">
               <Link to="/" onClick={close} className="flex min-w-0 items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-highland text-white shadow-sm">
@@ -413,6 +439,7 @@ export default function Navbar() {
             </div>
           </aside>
         </div>
+        )}
 
         {/* Main Content */}
         <main className="flex-1">
@@ -440,6 +467,54 @@ export default function Navbar() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gpa-calculator"
+              element={
+                <ProtectedRoute>
+                  <GpaCalculator />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/academic-roadmap"
+              element={
+                <ProtectedRoute>
+                  <AcademicRoadmap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/study-planner"
+              element={
+                <ProtectedRoute>
+                  <StudyPlanner />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scholarships"
+              element={
+                <ProtectedRoute>
+                  <Scholarships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs-internships"
+              element={
+                <ProtectedRoute>
+                  <JobsInternships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Notifications />
                 </ProtectedRoute>
               }
             />
