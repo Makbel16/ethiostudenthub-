@@ -397,6 +397,36 @@ router.post("/", requireAuth, upload.single("file"), async (req, res) => {
         status: "PENDING", // goes to moderation queue
       },
     });
+
+    // Create notifications for all registered users about the new resource
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          id: { not: req.user.id }, // Exclude the uploader
+          isBanned: false,
+        },
+        select: { id: true },
+      });
+
+      const notifications = users.map((user) =>
+        prisma.notification.create({
+          data: {
+            userId: user.id,
+            type: "resource",
+            title: "New Resource Available",
+            message: `A new resource "${title}" has been uploaded to ${resource.type.toLowerCase()}.`,
+            link: `/resources/${resource.id}`,
+            isRead: false,
+          },
+        })
+      );
+
+      await Promise.all(notifications);
+    } catch (notificationError) {
+      // Log notification error but don't fail the upload
+      console.error("Failed to create notifications:", notificationError);
+    }
+
     res.status(201).json(resource);
   } catch (err) {
     res.status(500).json({ error: "Upload failed", details: err.message });

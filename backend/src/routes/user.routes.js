@@ -82,6 +82,31 @@ router.patch("/me/notifications/:id/read", requireAuth, async (req, res) => {
   res.json({ updated: notification.count });
 });
 
+// PATCH /api/users/me/notifications/read-all
+router.patch("/me/notifications/read-all", requireAuth, async (req, res) => {
+  const notification = await prisma.notification.updateMany({
+    where: { userId: req.user.id, isRead: false },
+    data: { isRead: true },
+  });
+  res.json({ updated: notification.count });
+});
+
+// DELETE /api/users/me/notifications/:id
+router.delete("/me/notifications/:id", requireAuth, async (req, res) => {
+  const notification = await prisma.notification.deleteMany({
+    where: { id: req.params.id, userId: req.user.id },
+  });
+  res.json({ deleted: notification.count });
+});
+
+// DELETE /api/users/me/notifications/clear-all
+router.delete("/me/notifications/clear-all", requireAuth, async (req, res) => {
+  const notification = await prisma.notification.deleteMany({
+    where: { userId: req.user.id },
+  });
+  res.json({ deleted: notification.count });
+});
+
 // --- Admin: user management ---
 
 // GET /api/users - admin only, paginated list

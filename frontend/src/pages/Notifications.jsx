@@ -1,72 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Check, Trash2, Clock, BookOpen, Award, Briefcase, Calendar } from "lucide-react";
+import api from "../api/client.js";
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "resource",
-      title: "New Resource Available",
-      message: "Advanced Calculus lecture notes have been uploaded to Mathematics department.",
-      timestamp: "2024-01-15T10:30:00",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "scholarship",
-      title: "Scholarship Deadline Approaching",
-      message: "Ethiopian Government Scholarship application deadline is in 7 days.",
-      timestamp: "2024-01-14T14:20:00",
-      read: false,
-    },
-    {
-      id: 3,
-      type: "job",
-      title: "New Internship Opportunity",
-      message: "Software Developer Intern position available at EthioTech Solutions.",
-      timestamp: "2024-01-13T09:15:00",
-      read: true,
-    },
-    {
-      id: 4,
-      type: "academic",
-      title: "Study Reminder",
-      message: "Don't forget to complete your Mathematics assignment due tomorrow.",
-      timestamp: "2024-01-12T16:45:00",
-      read: true,
-    },
-    {
-      id: 5,
-      type: "resource",
-      title: "Resource Approved",
-      message: "Your uploaded resource 'Physics Lab Report' has been approved.",
-      timestamp: "2024-01-11T11:00:00",
-      read: true,
-    },
-  ]);
-
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/users/me/notifications");
+      setNotifications(response.data);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notif) => ({ ...notif, read: true }))
-    );
+  const markAsRead = async (id) => {
+    try {
+      await api.patch(`/users/me/notifications/${id}/read`);
+      setNotifications(
+        notifications.map((notif) =>
+          notif.id === id ? { ...notif, isRead: true } : notif
+        )
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
   };
 
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter((notif) => notif.id !== id));
+  const markAllAsRead = async () => {
+    try {
+      await api.patch("/users/me/notifications/read-all");
+      setNotifications(
+        notifications.map((notif) => ({ ...notif, isRead: true }))
+      );
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+    }
   };
 
-  const clearAll = () => {
-    setNotifications([]);
+  const deleteNotification = async (id) => {
+    try {
+      await api.delete(`/users/me/notifications/${id}`);
+      setNotifications(notifications.filter((notif) => notif.id !== id));
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
+
+  const clearAll = async () => {
+    try {
+      await api.delete("/users/me/notifications/clear-all");
+      setNotifications([]);
+    } catch (error) {
+      console.error("Failed to clear all notifications:", error);
+    }
   };
 
   const getTypeIcon = (type) => {
@@ -101,12 +97,12 @@ export default function Notifications() {
 
   const filteredNotifications = notifications.filter((notif) => {
     if (filter === "all") return true;
-    if (filter === "unread") return !notif.read;
-    if (filter === "read") return notif.read;
+    if (filter === "unread") return !notif.isRead;
+    if (filter === "read") return notif.isRead;
     return true;
   });
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -177,7 +173,9 @@ export default function Notifications() {
         </div>
 
         <div className="space-y-3">
-          {filteredNotifications.length === 0 ? (
+          {loading ? (
+            <div className="empty-state py-12">Loading notifications...</div>
+          ) : filteredNotifications.length === 0 ? (
             <div className="empty-state py-12">
               {filter === "unread" ? "No unread notifications." : "No notifications."}
             </div>
@@ -186,7 +184,7 @@ export default function Notifications() {
               <div
                 key={notification.id}
                 className={`section-panel rounded-xl p-5 transition-colors ${
-                  !notification.read
+                  !notification.isRead
                     ? "border-highland/30 bg-highland/5"
                     : "border-line bg-white"
                 }`}
@@ -204,7 +202,7 @@ export default function Notifications() {
                       <div className="flex-1">
                         <h3
                           className={`font-semibold ${
-                            !notification.read ? "text-ink" : "text-muted"
+                            !notification.isRead ? "text-ink" : "text-muted"
                           }`}
                         >
                           {notification.title}
@@ -213,7 +211,7 @@ export default function Notifications() {
                           {notification.message}
                         </p>
                       </div>
-                      {!notification.read && (
+                      {!notification.isRead && (
                         <button
                           onClick={() => markAsRead(notification.id)}
                           className="btn-ghost shrink-0"
@@ -226,7 +224,7 @@ export default function Notifications() {
                     <div className="mt-3 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs text-muted">
                         <Clock size={14} />
-                        {formatTimestamp(notification.timestamp)}
+                        {formatTimestamp(notification.createdAt)}
                       </div>
                       <button
                         onClick={() => deleteNotification(notification.id)}
