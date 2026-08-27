@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.routes.js";
 import universityRoutes from "./routes/university.routes.js";
 import resourceRoutes from "./routes/resource.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import { localUploadDir } from "./config/upload.js";
 
 const DEFAULT_CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
@@ -66,6 +67,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/universities", universityRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/ai", aiRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ error: `No route for ${req.method} ${req.path}` }));
