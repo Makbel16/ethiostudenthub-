@@ -204,7 +204,7 @@ export default function UniversityDirectory() {
           </div>
         </aside>
 
-        <section>
+        <section className="max-h-[calc(100vh-200px)] overflow-y-auto">
           <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-semibold text-ink">
