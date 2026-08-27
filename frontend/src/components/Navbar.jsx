@@ -350,7 +350,7 @@ export default function Navbar() {
             }`}
           >
             {/* Hamburger Bar for Collapse/Expand */}
-            <div className="flex items-center justify-center border-b border-line px-4 py-2">
+            <div className="flex items-center justify-end border-b border-line px-4 py-2">
               <button
                 type="button"
                 onClick={() => setDesktopCollapsed(!desktopCollapsed)}
