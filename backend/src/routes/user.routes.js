@@ -3,6 +3,7 @@ import { z } from "zod";
 import prisma from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { hashPassword } from "../utils/auth.js";
+import { upload, uploadToCloudinary } from "../config/upload.js";
 
 const router = Router();
 
@@ -41,6 +42,29 @@ router.patch("/me", requireAuth, async (req, res) => {
     data: { fullName, bio, avatarUrl, universityId },
   });
   res.json({ id: user.id, fullName: user.fullName, bio: user.bio, avatarUrl: user.avatarUrl });
+});
+
+// POST /api/users/me/avatar - upload profile photo
+router.post("/me/avatar", requireAuth, upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer, "avatars", req.file.originalname);
+    const avatarUrl = result.secure_url;
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl },
+      select: { id: true, fullName: true, email: true, avatarUrl: true },
+    });
+
+    res.json({ avatarUrl: user.avatarUrl });
+  } catch (error) {
+    console.error("Avatar upload error:", error);
+    res.status(500).json({ error: "Failed to upload avatar" });
+  }
 });
 
 // GET /api/users/me/uploads
