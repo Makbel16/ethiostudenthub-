@@ -15,6 +15,7 @@ services:
     env_file: ./backend/.env
     environment:
       DATABASE_URL: postgresql://esh:esh_password@postgres:5432/ethiostudenthub?schema=public
+      OLLAMA_URL: http://host.docker.internal:11434
     ports:
       - "5000:5000"
     volumes:
@@ -22,6 +23,8 @@ services:
       - /app/node_modules
     depends_on:
       - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build: ./frontend
