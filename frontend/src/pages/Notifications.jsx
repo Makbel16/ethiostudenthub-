@@ -85,13 +85,13 @@ export default function Notifications() {
       case "resource":
         return "bg-highland/10 border-highland/20";
       case "scholarship":
-        return "bg-amber-50 border-amber-200";
+        return "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800";
       case "job":
-        return "bg-green-50 border-green-200";
+        return "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
       case "academic":
-        return "bg-blue-50 border-blue-200";
+        return "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800";
       default:
-        return "bg-mist border-line";
+        return "bg-mist border-line dark:bg-dark-border dark:border-dark-border";
     }
   };
 
@@ -122,7 +122,7 @@ export default function Notifications() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Bell size={16} />
           Student Resources
         </div>
@@ -186,7 +186,7 @@ export default function Notifications() {
                 className={`section-panel rounded-xl p-5 transition-colors ${
                   !notification.isRead
                     ? "border-highland/30 bg-highland/5"
-                    : "border-line bg-white"
+                    : "border-line bg-white dark:bg-dark-surface"
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -245,19 +245,19 @@ export default function Notifications() {
           <div className="section-panel rounded-xl p-6">
             <h2 className="mb-4 text-lg font-semibold text-ink">Notification Settings</h2>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink">
+              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
                 <input type="checkbox" defaultChecked />
                 Email notifications for new resources
               </label>
-              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink">
+              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
                 <input type="checkbox" defaultChecked />
                 Scholarship deadline reminders
               </label>
-              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink">
+              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
                 <input type="checkbox" defaultChecked />
                 Job and internship alerts
               </label>
-              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink">
+              <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
                 <input type="checkbox" defaultChecked />
                 Study reminders and academic updates
               </label>

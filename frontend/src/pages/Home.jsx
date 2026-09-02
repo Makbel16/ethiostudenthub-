@@ -11,8 +11,15 @@ import {
   Search,
   ShieldCheck,
   UploadCloud,
+  TrendingUp,
+  Users,
+  Zap,
+  Sparkles,
+  Globe,
 } from "lucide-react";
 import api from "../api/client.js";
+import WalkingStudent from "../components/3d/WalkingStudent.jsx";
+import "../components/3d/WalkingStudent.css";
 
 const pathways = [
   { icon: Building2, label: "University", value: "Addis Ababa University" },
@@ -74,140 +81,187 @@ export default function Home() {
   const examCount = resources.data?.items?.filter((item) => item.type === "PREVIOUS_EXAM").length;
 
   return (
-    <div>
-      <section className="page-shell py-10 sm:py-16 lg:py-20">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland shadow-sm">
-              <ShieldCheck size={16} />
-              Moderated academic resources for Ethiopian universities
-            </div>
-            <h1 className="max-w-4xl font-display text-4xl font-semibold leading-tight text-ink sm:text-5xl lg:text-6xl">
-              Find the right notes, exams, and course materials without the confusion.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              EthioStudentHub organizes student resources by university, department, course, year,
-              semester, and material type so students can get to the useful file quickly.
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-highland/10 blur-3xl animate-pulse" />
+          <div className="absolute top-1/2 -left-20 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-0 right-1/4 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
 
-            <form onSubmit={onSearch} className="mt-8 max-w-2xl rounded-lg border border-line bg-white p-2 shadow-md">
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <label className="sr-only" htmlFor="home-search">Search resources</label>
-                <input
-                  id="home-search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder='Search "CoSc2012 final exam" or "thermodynamics notes"'
-                  className="min-h-12 flex-1 rounded-md border-0 px-4 text-sm text-ink placeholder:text-muted/70 focus:outline-none"
-                />
-                <button type="submit" className="btn-dark">
-                  <Search size={18} />
-                  Search
-                </button>
+        <div className="page-shell relative py-16 sm:py-20 lg:py-28">
+          <div className="grid items-center gap-12 lg:grid-cols-[1fr_1fr]">
+            {/* Left Content */}
+            <div className="space-y-8">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-highland/30 bg-white/80 px-4 py-2 text-sm font-semibold text-highland shadow-lg backdrop-blur-sm dark:bg-dark-surface/80 dark:border-highland/40">
+                <Sparkles size={16} className="animate-pulse" />
+                Your Academic Resource Hub
               </div>
-            </form>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link to="/universities" className="btn-primary">
-                University Directory
-                <ArrowRight size={16} />
-              </Link>
-              <Link to="/browse" className="btn-primary">
-                Browse library
-                <ArrowRight size={16} />
-              </Link>
-              <Link to="/browse?type=PREVIOUS_EXAM" className="btn-secondary">
-                Previous exams
-              </Link>
-              <Link to="/upload" className="btn-secondary">
-                Upload material
-              </Link>
-            </div>
+              {/* Main Heading */}
+              <h1 className="font-display text-5xl font-bold leading-tight text-ink sm:text-6xl lg:text-7xl dark:text-dark-text">
+                Find the right
+                <span className="block bg-gradient-to-r from-highland to-blue-600 bg-clip-text text-transparent">
+                  academic materials
+                </span>
+                without the confusion
+              </h1>
 
-            <dl className="mt-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-3">
-              <div className="stat-tile">
-                <dt className="eyebrow">Universities</dt>
-                <dd className="mt-2 font-display text-3xl font-semibold text-ink">{universityCount}</dd>
-              </div>
-              <div className="stat-tile">
-                <dt className="eyebrow">Resources</dt>
-                <dd className="mt-2 font-display text-3xl font-semibold text-ink">{resourceCount}</dd>
-              </div>
-              <div className="stat-tile col-span-2 sm:col-span-1">
-                <dt className="eyebrow">Exam focus</dt>
-                <dd className="mt-2 font-display text-3xl font-semibold text-ink">
-                  {examCount ? `${examCount}+` : "Ready"}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              {/* Subheading */}
+              <p className="max-w-2xl text-lg leading-relaxed text-muted dark:text-dark-muted">
+                EthioStudentHub organizes student resources by university, department, course, year, semester, and material type so students can get to the useful file quickly.
+              </p>
 
-          <div className="section-panel rounded-xl p-5 sm:p-6">
-            <div className="rounded-lg bg-ink p-5 text-white">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase text-white/55">Academic path</p>
-                  <p className="mt-1 font-display text-2xl font-semibold">Search by structure</p>
+              {/* Search Form */}
+              <form onSubmit={onSearch} className="max-w-2xl">
+                <div className="relative overflow-hidden rounded-2xl border-2 border-line bg-white p-2 shadow-xl transition-all focus-within:border-highland focus-within:ring-4 focus-within:ring-highland/20 dark:border-dark-border dark:bg-dark-surface">
+                  <div className="flex items-center gap-2">
+                    <Search size={20} className="ml-3 text-muted dark:text-dark-muted" />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder='Search "CoSc2012 final exam" or "thermodynamics notes"'
+                      className="flex-1 border-0 bg-transparent px-3 py-4 text-base focus:ring-0 dark:text-dark-text"
+                    />
+                    <button type="submit" className="btn-primary rounded-xl px-6 py-3">
+                      Search
+                    </button>
+                  </div>
                 </div>
-                <div className="rounded-full bg-white/10 p-3">
-                  <BookOpen size={24} />
+              </form>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <Link to="/universities" className="btn-primary inline-flex items-center gap-2">
+                  <Globe size={18} />
+                  University Directory
+                  <ArrowRight size={16} />
+                </Link>
+                <Link to="/browse" className="btn-secondary inline-flex items-center gap-2">
+                  <BookOpen size={18} />
+                  Browse Library
+                </Link>
+                <Link to="/upload" className="btn-secondary inline-flex items-center gap-2">
+                  <UploadCloud size={18} />
+                  Upload
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 pt-8">
+                <StatItem icon={Building2} label="Universities" value={universityCount} color="blue" />
+                <StatItem icon={FileText} label="Resources" value={resourceCount} color="green" />
+                <StatItem icon={GraduationCap} label="Exams" value={examCount ? `${examCount}+` : "Ready"} color="purple" />
+              </div>
+            </div>
+
+            {/* Right Content - Academic Path Card */}
+            <div className="relative">
+              {/* Walking Student Character - Positioned in top-right area above the card */}
+              <div className="absolute -top-48 -right-8 z-10 hidden lg:block">
+                <div className="w-64 h-48">
+                  <WalkingStudent />
                 </div>
               </div>
-              <div className="mt-6 grid gap-3">
-                {pathways.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label} className="flex items-center gap-3 rounded-lg bg-white/8 p-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white text-highland">
-                        <Icon size={19} />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold uppercase text-white/50">{item.label}</p>
-                        <p className="truncate text-sm font-semibold text-white">{item.value}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-gold">0{index + 1}</span>
+
+              <div className="relative overflow-hidden rounded-3xl border border-line bg-white p-6 shadow-2xl dark:border-dark-border dark:bg-dark-surface">
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-highland/5 to-blue-500/5 dark:from-highland/10 dark:to-blue-500/10" />
+                
+                <div className="relative">
+                  <div className="mb-6 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-dark-muted">Academic Path</p>
+                      <h3 className="font-display text-2xl font-bold text-ink dark:text-dark-text">Search by Structure</h3>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                      <BookOpen size={28} />
+                    </div>
+                  </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border border-line bg-paper p-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <CheckCircle2 size={17} className="text-highland" />
-                  Moderation queue
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted">New uploads are reviewed before becoming public.</p>
+                  <div className="space-y-3">
+                    {pathways.map((item, index) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.label} className="group flex items-center gap-4 rounded-2xl border border-line bg-white/50 p-4 transition-all hover:border-highland/50 hover:bg-highland/5 dark:border-dark-border dark:bg-dark-border dark:hover:border-highland/30 dark:hover:bg-highland/10">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/20 text-highland dark:from-highland/20 dark:to-highland/30">
+                            <Icon size={22} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-semibold uppercase text-muted dark:text-dark-muted">{item.label}</p>
+                            <p className="font-semibold text-ink dark:text-dark-text">{item.value}</p>
+                          </div>
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-highland/10 text-sm font-bold text-highland">
+                            0{index + 1}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-              <div className="rounded-lg border border-line bg-paper p-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <GraduationCap size={17} className="text-gold" />
-                  Course discovery
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted">Filters mirror how students think about classes.</p>
+
+              {/* Floating info cards */}
+              <div className="absolute -right-4 top-1/2 -translate-y-1/2 space-y-3">
+                <div className="rounded-2xl border border-line bg-white p-4 shadow-xl dark:border-dark-border dark:bg-dark-surface">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
+                      <CheckCircle2 size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-ink dark:text-dark-text">Moderated</p>
+                      <p className="text-xs text-muted dark:text-dark-muted">Quality assured</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-line bg-white p-4 shadow-xl dark:border-dark-border dark:bg-dark-surface">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                      <Zap size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-ink dark:text-dark-text">Fast Search</p>
+                      <p className="text-xs text-muted dark:text-dark-muted">Instant results</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-line bg-white">
-        <div className="page-shell py-12">
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      {/* Features Section */}
+      <section className="border-y border-line bg-white/50 dark:border-dark-border dark:bg-dark-surface/50">
+        <div className="page-shell py-16">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-3xl font-bold text-ink dark:text-dark-text">Everything you need</h2>
+            <p className="mt-3 text-muted dark:text-dark-muted">Powerful features designed for Ethiopian students</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {featureCards.map((card) => {
               const Icon = card.icon;
               return (
-                <Link key={card.title} to={card.to} className="surface-card rounded-lg p-6">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-highland-light text-highland">
-                    <Icon size={22} />
-                  </span>
-                  <h2 className="mt-5 text-lg font-semibold text-ink">{card.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-muted">{card.text}</p>
-                  <p className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-highland">
-                    Open
-                    <ArrowRight size={15} />
-                  </p>
+                <Link
+                  key={card.title}
+                  to={card.to}
+                  className="group relative overflow-hidden rounded-2xl border border-line bg-white p-6 transition-all hover:shadow-xl hover:-translate-y-1 dark:border-dark-border dark:bg-dark-surface"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/20 text-highland transition-all group-hover:scale-110 dark:from-highland/20 dark:to-highland/30">
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-ink dark:text-dark-text group-hover:text-highland transition-colors">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted dark:text-dark-muted">{card.text}</p>
+                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-highland">
+                    Explore
+                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  </div>
                 </Link>
               );
             })}
@@ -215,43 +269,94 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="page-shell py-14">
-        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      {/* Popular Resources Section */}
+      <section className="page-shell py-16">
+        <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">Library</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold text-ink">Popular resources</h2>
-            <p className="mt-2 text-sm text-muted">A quick view of materials already approved in the library.</p>
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-highland">
+              <TrendingUp size={16} />
+              Library
+            </div>
+            <h2 className="font-display text-3xl font-bold text-ink dark:text-dark-text">Popular Resources</h2>
+            <p className="mt-2 text-muted dark:text-dark-muted">A quick view of materials already approved in the library</p>
           </div>
-          <Link to="/browse" className="btn-secondary">
+          <Link to="/browse" className="btn-secondary inline-flex items-center gap-2">
             View all
             <ArrowRight size={16} />
           </Link>
         </div>
 
         {resources.isError && (
-          <div className="empty-state">Start the backend API to load live resources here.</div>
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-line bg-white py-16 dark:border-dark-border dark:bg-dark-surface">
+            <Globe size={48} className="mb-4 text-muted dark:text-dark-muted" />
+            <p className="font-semibold text-ink dark:text-dark-text">Start the backend API</p>
+            <p className="text-muted dark:text-dark-muted">to load live resources here</p>
+          </div>
         )}
 
         {!resources.isError && resources.data?.items?.length === 0 && (
-          <div className="empty-state">No approved resources yet. Approved uploads will appear here.</div>
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-line bg-white py-16 dark:border-dark-border dark:bg-dark-surface">
+            <FileText size={48} className="mb-4 text-muted dark:text-dark-muted" />
+            <p className="font-semibold text-ink dark:text-dark-text">No approved resources yet</p>
+            <p className="text-muted dark:text-dark-muted">Approved uploads will appear here</p>
+          </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {resources.data?.items?.map((resource) => (
-            <Link key={resource.id} to={`/resources/${resource.id}`} className="surface-card rounded-lg p-5">
-              <div className="flex items-start justify-between gap-3">
+            <Link
+              key={resource.id}
+              to={`/resources/${resource.id}`}
+              className="group relative overflow-hidden rounded-2xl border border-line bg-white p-6 transition-all hover:shadow-xl hover:-translate-y-1 dark:border-dark-border dark:bg-dark-surface"
+            >
+              <div className="mb-4 flex items-start justify-between gap-3">
                 <span className="badge-green">{resource.type?.replaceAll("_", " ")}</span>
-                <span className="text-xs font-semibold text-muted">{resource.downloadCount ?? 0} downloads</span>
+                <div className="flex items-center gap-1 text-xs font-semibold text-muted dark:text-dark-muted">
+                  <TrendingUp size={12} />
+                  {resource.downloadCount ?? 0}
+                </div>
               </div>
-              <h3 className="mt-4 line-clamp-2 text-lg font-semibold text-ink">{resource.title}</h3>
-              <p className="mt-2 text-sm text-muted">{resource.university?.name || "General resource"}</p>
-              <p className="mt-4 text-xs font-semibold text-muted">
-                {resource._count?.likes ?? 0} likes - {resource._count?.comments ?? 0} comments
-              </p>
+              <h3 className="line-clamp-2 text-lg font-semibold text-ink dark:text-dark-text group-hover:text-highland transition-colors">
+                {resource.title}
+              </h3>
+              <div className="mt-3 flex items-center gap-2 text-sm text-muted dark:text-dark-muted">
+                <Building2 size={14} />
+                {resource.university?.name || "General resource"}
+              </div>
+              <div className="mt-4 flex items-center gap-4 text-xs text-muted dark:text-dark-muted">
+                <span className="flex items-center gap-1">
+                  <Users size={12} />
+                  {resource._count?.likes ?? 0} likes
+                </span>
+                <span className="flex items-center gap-1">
+                  <FileText size={12} />
+                  {resource._count?.comments ?? 0} comments
+                </span>
+              </div>
             </Link>
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+function StatItem({ icon: Icon, label, value, color }) {
+  const colorClasses = {
+    blue: { bg: "bg-blue-50", icon: "text-blue-600", darkBg: "dark:bg-blue-900/20", darkIcon: "dark:text-blue-400" },
+    green: { bg: "bg-green-50", icon: "text-green-600", darkBg: "dark:bg-green-900/20", darkIcon: "dark:text-green-400" },
+    purple: { bg: "bg-purple-50", icon: "text-purple-600", darkBg: "dark:bg-purple-900/20", darkIcon: "dark:text-purple-400" },
+  };
+
+  const colors = colorClasses[color] || colorClasses.blue;
+
+  return (
+    <div className="rounded-2xl border border-line bg-white p-4 shadow-sm dark:border-dark-border dark:bg-dark-surface">
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colors.bg} ${colors.darkBg}`}>
+        <Icon size={20} className={colors.icon + " " + colors.darkIcon} />
+      </div>
+      <p className="mt-3 text-xs font-semibold uppercase text-muted dark:text-dark-muted">{label}</p>
+      <p className="mt-1 font-display text-2xl font-bold text-ink dark:text-dark-text">{value}</p>
     </div>
   );
 }

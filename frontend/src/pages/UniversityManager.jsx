@@ -468,7 +468,7 @@ export default function UniversityManager() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8 max-w-3xl">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Megaphone size={16} />
           University Manager
         </div>
@@ -487,7 +487,7 @@ export default function UniversityManager() {
       <section className="section-panel rounded-xl p-6">
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland dark:bg-highland/20">
               <Layers3 size={20} />
             </span>
             <div>
@@ -573,8 +573,8 @@ export default function UniversityManager() {
                     onClick={() => setSelectedDepartmentId(department.id)}
                     className={`w-full rounded-lg border px-3 py-3 text-left text-sm transition-colors ${
                       selectedDepartmentId === department.id
-                        ? "border-highland bg-white text-highland"
-                        : "border-line bg-white text-ink hover:border-highland/50"
+                        ? "border-highland bg-white text-highland dark:bg-dark-surface"
+                        : "border-line bg-white text-ink hover:border-highland/50 dark:bg-dark-surface dark:text-dark-text"
                     }`}
                   >
                     <span className="block font-semibold">{department.name}</span>
@@ -599,7 +599,7 @@ export default function UniversityManager() {
                   <SummaryTile label="Courses" value={selectedDepartment.courses?.length || 0} />
                 </div>
 
-                <form onSubmit={onProgramSubmit} className="rounded-lg border border-line bg-white p-5">
+                <form onSubmit={onProgramSubmit} className="rounded-lg border border-line bg-white p-5 dark:bg-dark-surface dark:border-dark-border">
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-semibold text-ink">Program Details</h3>
@@ -688,9 +688,9 @@ export default function UniversityManager() {
                 </form>
 
                 <div className="grid gap-6 xl:grid-cols-2">
-                  <section className="rounded-lg border border-line bg-white p-5">
+                  <section className="rounded-lg border border-line bg-white p-5 dark:bg-dark-surface dark:border-dark-border">
                     <div className="mb-4 flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-highland-light text-highland">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-highland-light text-highland dark:bg-highland/20">
                         <UsersRound size={18} />
                       </span>
                       <div>
@@ -789,9 +789,9 @@ export default function UniversityManager() {
                     </div>
                   </section>
 
-                  <section className="rounded-lg border border-line bg-white p-5">
+                  <section className="rounded-lg border border-line bg-white p-5 dark:bg-dark-surface dark:border-dark-border">
                     <div className="mb-4 flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-highland-light text-highland">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-highland-light text-highland dark:bg-highland/20">
                         <BookOpen size={18} />
                       </span>
                       <div>
@@ -873,10 +873,10 @@ export default function UniversityManager() {
                           </p>
                           <div className="space-y-2">
                             {group.courses.map((course) => (
-                              <div key={course.id} className="flex items-center justify-between gap-3 rounded-md bg-white px-3 py-2 text-sm">
+                              <div key={course.id} className="flex items-center justify-between gap-3 rounded-md bg-white px-3 py-2 text-sm dark:bg-dark-surface">
                                 <div>
-                                  <p className="font-semibold text-ink">{course.title}</p>
-                                  {course.code && <p className="text-xs text-muted">{course.code}</p>}
+                                  <p className="font-semibold text-ink dark:text-dark-text">{course.title}</p>
+                                  {course.code && <p className="text-xs text-muted dark:text-dark-muted">{course.code}</p>}
                                 </div>
                                 <div className="flex gap-2">
                                   <button
@@ -919,7 +919,7 @@ export default function UniversityManager() {
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <section className="section-panel rounded-xl p-6">
           <div className="mb-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland dark:bg-highland/20">
               <CalendarDays size={20} />
             </span>
             <div>
@@ -1034,7 +1034,7 @@ export default function UniversityManager() {
 
         <section className="section-panel rounded-xl p-6">
           <div className="mb-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland dark:bg-highland/20">
               <Megaphone size={20} />
             </span>
             <div>

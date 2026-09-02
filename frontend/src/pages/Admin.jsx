@@ -325,7 +325,7 @@ export default function Admin() {
     <div className="page-shell py-10">
       <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
             <ShieldCheck size={16} />
             Admin workspace
           </div>
@@ -336,7 +336,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="mb-6 overflow-x-auto rounded-xl border border-line bg-white p-2 shadow-sm">
+      <div className="mb-6 overflow-x-auto rounded-xl border border-line bg-white p-2 shadow-sm dark:bg-dark-surface dark:border-dark-border">
         <div className="flex min-w-max gap-2">
           {visibleTabs.map((item) => {
             const Icon = item.icon;
@@ -346,7 +346,7 @@ export default function Admin() {
                 key={item.value}
                 onClick={() => setTab(item.value)}
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
-                  active ? "bg-highland text-white" : "text-muted hover:bg-mist hover:text-ink"
+                  active ? "bg-highland text-white" : "text-muted dark:text-dark-muted hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
                 }`}
               >
                 <Icon size={16} />
@@ -466,24 +466,23 @@ export default function Admin() {
             {users.isLoading && <div className="p-4 text-sm text-muted">Loading users...</div>}
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-sm">
-                <thead className="bg-mist text-xs uppercase text-muted">
+                <thead className="bg-mist text-xs uppercase text-muted dark:bg-dark-border dark:text-dark-muted">
                   <tr>
-                    <th className="p-4 text-left">Name</th>
-                    <th className="p-4 text-left">Email</th>
-                    <th className="p-4 text-left">Role</th>
-                    <th className="p-4 text-left">University</th>
-                    <th className="p-4 text-left">Verification</th>
-                    <th className="p-4 text-left">Status</th>
-                    <th className="p-4 text-left">Action</th>
+                    <th className="p-4 text-left dark:text-dark-text">Name</th>
+                    <th className="p-4 text-left dark:text-dark-text">Email</th>
+                    <th className="p-4 text-left dark:text-dark-text">Role</th>
+                    <th className="p-4 text-left dark:text-dark-text">University</th>
+                    <th className="p-4 text-left dark:text-dark-text">Status</th>
+                    <th className="p-4 text-left dark:text-dark-text">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-line">
+                <tbody className="divide-y divide-line dark:divide-dark-border">
                   {users.data?.items?.map((user) => (
                     <tr key={user.id}>
-                      <td className="p-4 font-semibold text-ink">{user.fullName}</td>
-                      <td className="p-4 text-muted">{user.email}</td>
+                      <td className="p-4 font-semibold text-ink dark:text-dark-text">{user.fullName}</td>
+                      <td className="p-4 text-muted dark:text-dark-muted">{user.email}</td>
                       <td className="p-4"><span className="badge">{user.role}</span></td>
-                      <td className="p-4 text-muted">{user.university?.name || "-"}</td>
+                      <td className="p-4 text-muted dark:text-dark-muted">{user.university?.name || "-"}</td>
                       <td className="p-4">{user.isVerified ? <span className="badge-green">Verified</span> : <span className="badge-gold">Unverified</span>}</td>
                       <td className="p-4">{user.isBanned ? <span className="badge-gold">Banned</span> : <span className="badge-green">Active</span>}</td>
                       <td className="p-4">
@@ -554,7 +553,7 @@ export default function Admin() {
                 <div key={university.id} className="surface-card rounded-xl p-5">
                   <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                     <div className="flex min-w-0 gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-mist text-highland">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-mist text-highland dark:bg-dark-border dark:border-dark-border">
                         {university.logoUrl ? (
                           <img src={university.logoUrl} alt={`${university.name} logo`} className="h-full w-full object-cover" />
                         ) : (
@@ -710,8 +709,8 @@ export default function Admin() {
                   {departments.isLoading && <p className="text-sm text-muted">Loading departments...</p>}
                   {departments.data?.length === 0 && <div className="empty-state py-6">No departments yet.</div>}
                   {departments.data?.map((department) => (
-                    <div key={department.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
-                      <span className="font-semibold text-ink">{department.name}</span>
+                    <div key={department.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm dark:bg-dark-surface dark:border-dark-border">
+                      <span className="font-semibold text-ink dark:text-dark-text">{department.name}</span>
                       <button
                         onClick={() => {
                           if (confirm(`Delete "${department.name}"?`)) deleteDepartment.mutate(department.id);
@@ -813,7 +812,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           <textarea name="description" value={form.description} onChange={onChange} rows={4} className="input-field resize-none" />
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <UploadCloud size={16} className="text-highland" />
             Logo
@@ -824,7 +823,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <Globe2 size={16} className="text-highland" />
             Official links
@@ -839,7 +838,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <Phone size={16} className="text-highland" />
             Contact
@@ -858,7 +857,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <MapPin size={16} className="text-highland" />
             Optional coordinates
@@ -878,7 +877,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
               ))}
             </select>
           </div>
-          <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-semibold text-ink">
+          <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
             <input name="isActive" type="checkbox" checked={form.isActive} onChange={onChange} />
             Active
           </label>
@@ -947,9 +946,9 @@ function UniversityViewPanel({ university, onClose }) {
 
 function InfoTile({ label, value }) {
   return (
-    <div className="rounded-lg border border-line bg-paper p-3">
-      <dt className="text-xs font-semibold uppercase text-muted">{label}</dt>
-      <dd className="mt-1 text-sm font-semibold text-ink">{value}</dd>
+    <div className="rounded-lg border border-line bg-paper p-3 dark:bg-dark-surface dark:border-dark-border">
+      <dt className="text-xs font-semibold uppercase text-muted dark:text-dark-muted">{label}</dt>
+      <dd className="mt-1 text-sm font-semibold text-ink dark:text-dark-text">{value}</dd>
     </div>
   );
 }
@@ -989,8 +988,8 @@ function StructurePanel({
         {isLoading && <p className="text-sm text-muted">Loading...</p>}
         {items?.length === 0 && <div className="empty-state py-6">{emptyText}</div>}
         {items?.map((item) => (
-          <div key={item.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
-            <span className="font-semibold text-ink">{item.name}</span>
+          <div key={item.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm dark:bg-dark-surface dark:border-dark-border">
+            <span className="font-semibold text-ink dark:text-dark-text">{item.name}</span>
             <button onClick={() => onDelete(item)} className="text-ember hover:underline">Delete</button>
           </div>
         ))}

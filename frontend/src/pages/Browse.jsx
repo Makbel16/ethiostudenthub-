@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Filter, Search, SlidersHorizontal, X, UploadCloud, Building2, UserCircle } from "lucide-react";
+import { BookOpen, Filter, Search, SlidersHorizontal, X, UploadCloud, Building2, UserCircle, ArrowRight, ExternalLink } from "lucide-react";
 import api from "../api/client.js";
 
 const TYPES = [
@@ -111,40 +111,51 @@ export default function Browse() {
   return (
     <div className="page-shell py-10">
       {/* Hero Section */}
-      <div className="mb-10 relative overflow-hidden rounded-2xl bg-gradient-to-br from-highland via-highland-dark to-ember p-8 lg:p-12">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-30"></div>
-        <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-          <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-4 py-2 text-sm font-semibold text-white">
-              <BookOpen size={18} className="text-amber-300" />
-              Resource Library
-            </div>
-            <h1 className="font-display text-4xl font-bold text-white lg:text-5xl">
-              Browse Academic Materials
-            </h1>
-            <p className="mt-4 text-lg leading-relaxed text-white/90">
-              Access thousands of approved educational resources. Filter by university, department, course, level, and material type to find exactly what you need.
-            </p>
+      <div className="mb-10 relative">
+        {/* Background decorative elements */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0F7A52]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-[#0F7A52]/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="relative z-10">
+          {/* Badge with 3D effect */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0F7A52]/10 to-[#0F7A52]/5 px-5 py-2.5 text-sm font-semibold text-[#0F7A52] shadow-lg backdrop-blur-sm border border-[#0F7A52]/20 transform hover:scale-105 transition-all duration-300 animate-fade-in-up dark:bg-[#0F7A52]/20 dark:border-[#0F7A52]/30" style={{ animationDelay: '0.1s' }}>
+            <BookOpen size={18} className="animate-bounce" style={{ animationDuration: '2s' }} />
+            Resource Library
           </div>
-          <Link to="/upload" className="btn-primary bg-white text-highland hover:bg-amber-50 self-start lg:self-auto shadow-xl">
-            <UploadCloud size={18} />
-            Upload Material
+          
+          {/* Title with 3D effect */}
+          <h1 className="font-display text-5xl font-bold text-ink mb-4 animate-fade-in-up transform hover:perspective-1000 hover:rotate-x-2 transition-all duration-500 dark:text-dark-text" style={{ animationDelay: '0.2s', textShadow: '2px 2px 4px rgba(15, 122, 82, 0.1)' }}>
+            <span className="inline-block animate-float" style={{ animationDelay: '0.3s' }}>Browse</span>
+            <span className="inline-block mx-2 text-[#0F7A52] animate-float" style={{ animationDelay: '0.4s' }}>Academic</span>
+            <span className="inline-block animate-float" style={{ animationDelay: '0.5s' }}>Materials</span>
+          </h1>
+          
+          {/* Description with animated appearance */}
+          <p className="text-lg leading-relaxed text-muted max-w-2xl mb-8 animate-fade-in-up dark:text-dark-muted" style={{ animationDelay: '0.7s' }}>
+            Access thousands of approved educational resources. Filter by university, department, course, level, and material type to find exactly what you need.
+          </p>
+          
+          {/* CTA Button with 3D hover effect */}
+          <Link to="/upload" className="btn-primary bg-gradient-to-r from-[#0F7A52] to-[#0F7A52]/90 hover:from-[#0F7A52]/90 hover:to-[#0F7A52] text-white px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-3 transform hover:scale-105 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <UploadCloud size={20} className="animate-pulse" />
+            <span className="font-semibold">Upload Material</span>
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="mb-8 rounded-2xl border-2 border-highland/20 bg-white p-2 shadow-lg">
+      <form onSubmit={onSubmit} className="mb-8 rounded-2xl border-2 border-[#0F7A52]/30 bg-white p-2 shadow-lg dark:bg-dark-surface dark:border-dark-border">
         <div className="flex flex-col gap-2 md:flex-row">
           <div className="relative flex-1">
-            <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-highland" />
+            <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#0F7A52]" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by title, course code, tag, or description"
-              className="min-h-14 w-full rounded-xl border-0 bg-mist/50 pl-12 pr-4 text-base focus:bg-white focus:ring-2 focus:ring-highland/50 transition-all"
+              className="min-h-14 w-full rounded-xl border-0 bg-[#0F7A52]/10 pl-12 pr-4 text-base focus:bg-white focus:ring-2 focus:ring-[#0F7A52]/40 transition-all dark:bg-dark-border dark:text-dark-text dark:focus:bg-dark-surface"
             />
           </div>
-          <button type="submit" className="btn-primary min-h-14 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-shadow">
+          <button type="submit" className="btn-primary min-h-14 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-shadow bg-[#0F7A52] hover:bg-[#0F7A52]/90">
             <Search size={18} className="mr-2" />
             Search
           </button>
@@ -152,9 +163,9 @@ export default function Browse() {
       </form>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <aside className="h-fit rounded-xl border border-line bg-white p-5 shadow-sm lg:sticky lg:top-24">
+        <aside className="h-fit rounded-xl border border-line bg-white p-5 shadow-sm lg:sticky lg:top-24 dark:bg-dark-surface dark:border-dark-border">
           <div className="mb-5 flex items-center justify-between">
-            <p className="flex items-center gap-2 font-semibold text-ink">
+            <p className="flex items-center gap-2 font-semibold text-ink dark:text-dark-text">
               <SlidersHorizontal size={18} className="text-highland" />
               Filters
             </p>
@@ -271,71 +282,89 @@ export default function Browse() {
 
           <div className="grid gap-6 xl:grid-cols-2">
             {resources.data?.items?.map((resource, index) => (
-              <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-white border border-line shadow-md hover:shadow-2xl transition-all duration-300 hover:border-highland/50 hover:-translate-y-1">
+              <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-white border border-line shadow-md hover:shadow-2xl transition-all duration-300 hover:border-[#0F7A52]/50 hover:-translate-y-1 dark:bg-dark-surface dark:border-dark-border">
                 {/* Animated gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-ember/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0F7A52]/5 via-transparent to-[#0F7A52]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 {/* Decorative background pattern */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-highland/5 rounded-full blur-3xl group-hover:bg-highland/10 transition-colors duration-500"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#0F7A52]/5 rounded-full blur-3xl group-hover:bg-[#0F7A52]/10 transition-colors duration-500"></div>
                 
                 <div className="relative p-6">
-                  {/* Header with type badge and downloads */}
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 group-hover:scale-105 transition-transform duration-300">
-                      <BookOpen size={12} />
-                      {typeLabel(resource.type)}
-                    </span>
-                    <div className="flex items-center gap-1 text-sm font-semibold text-muted group-hover:scale-105 transition-transform duration-300">
-                      <Filter size={14} className="text-highland" />
-                      {resource.downloadCount ?? 0}
+                  {/* Header with icon and badges */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-[#0F7A52]/20 bg-gradient-to-br from-[#0F7A52]/10 to-[#0F7A52]/10 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                      <img src="/books.jpg" alt="Resource" className="h-full w-full object-cover" />
+                      {/* Shine effect on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          {typeLabel(resource.type)}
+                        </span>
+                        {resource.university?.name && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#0F7A52]/10 px-2.5 py-1 text-xs font-semibold text-[#0F7A52] dark:bg-[#0F7A52]/20">
+                            {resource.university.name}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-xl font-bold text-ink group-hover:text-[#0F7A52] transition-colors duration-300 line-clamp-2 dark:text-dark-text">{resource.title}</h2>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h2 className="text-xl font-bold text-ink group-hover:text-highland transition-colors duration-300 mb-3 line-clamp-2">{resource.title}</h2>
-                  
+                  {/* Metadata */}
+                  <div className="flex items-center gap-2 text-sm text-muted mb-4 dark:text-dark-muted">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0F7A52]/10 group-hover:bg-[#0F7A52]/20 transition-colors duration-300">
+                      <Filter size={16} className="text-[#0F7A52]" />
+                    </div>
+                    <span className="font-medium">{resource.downloadCount ?? 0} downloads</span>
+                    {resource.department?.name && (
+                      <>
+                        <span className="text-muted">•</span>
+                        <span className="font-medium">{resource.department.name}</span>
+                      </>
+                    )}
+                  </div>
+
                   {/* Description */}
-                  <p className="text-sm leading-relaxed text-muted mb-4 line-clamp-2">
+                  <p className="text-sm leading-relaxed text-muted mb-5 line-clamp-2 dark:text-dark-muted">
                     {resource.description || "No description provided."}
                   </p>
 
                   {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {resource.university?.name && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-highland/10 px-2.5 py-1 text-xs font-semibold text-highland group-hover:bg-highland/20 transition-colors duration-300">
-                        <Building2 size={12} />
-                        {resource.university.name}
-                      </span>
-                    )}
-                    {resource.department?.name && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 group-hover:bg-blue-100 transition-colors duration-300">
-                        {resource.department.name}
-                      </span>
-                    )}
+                  <div className="flex flex-wrap gap-2 mb-5">
                     {resource.courseCode && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 group-hover:bg-amber-200 transition-colors duration-300">
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-[#0F7A52]/20 px-2.5 py-1 text-xs font-semibold text-[#0F7A52] dark:bg-[#0F7A52]/30">
                         {resource.courseCode}
                       </span>
                     )}
                   </div>
 
-                  {/* Footer with stats */}
-                  <div className="flex items-center justify-between pt-4 border-t border-line">
-                    <div className="flex items-center gap-2 text-sm text-muted group-hover:scale-105 transition-transform duration-300">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-highland/10 group-hover:bg-highland/20 transition-colors duration-300">
-                        <UserCircle size={14} className="text-highland" />
+                  {/* Stats and CTA */}
+                  <div className="flex items-center justify-between pt-4 border-t border-line dark:border-dark-border">
+                    <div className="flex gap-4">
+                      <div className="flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mist group-hover:bg-[#0F7A52]/10 transition-colors duration-300 dark:bg-dark-border dark:group-hover:bg-[#0F7A52]/20">
+                          <span className="text-[#0F7A52] text-sm">♥</span>
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-ink dark:text-dark-text">{resource._count?.likes ?? 0}</p>
+                          <p className="text-xs text-muted dark:text-dark-muted">Likes</p>
+                        </div>
                       </div>
-                      <span className="font-medium">{resource.uploader?.fullName || "Student upload"}</span>
+                      <div className="flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-mist group-hover:bg-[#0F7A52]/10 transition-colors duration-300 dark:bg-dark-border dark:group-hover:bg-[#0F7A52]/20">
+                          <span className="text-[#0F7A52] text-sm">💬</span>
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-ink dark:text-dark-text">{resource._count?.comments ?? 0}</p>
+                          <p className="text-xs text-muted dark:text-dark-muted">Comments</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex gap-4 group-hover:scale-105 transition-transform duration-300">
-                      <div className="flex items-center gap-1 text-sm font-semibold text-muted">
-                        <span className="text-highland group-hover:scale-110 transition-transform duration-300">♥</span>
-                        {resource._count?.likes ?? 0}
-                      </div>
-                      <div className="flex items-center gap-1 text-sm font-semibold text-muted">
-                        <span className="group-hover:scale-110 transition-transform duration-300">💬</span>
-                        {resource._count?.comments ?? 0}
-                      </div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-[#0F7A52] hover:text-[#0F7A52]/80 transition-colors duration-300 group-hover:scale-105">
+                      View Details
+                      <ExternalLink size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </div>
                 </div>
@@ -344,7 +373,7 @@ export default function Browse() {
           </div>
 
           {total > pageSize && (
-            <div className="mt-8 flex items-center justify-between rounded-lg border border-line bg-white p-3 shadow-sm">
+            <div className="mt-8 flex items-center justify-between rounded-lg border border-line bg-white p-3 shadow-sm dark:bg-dark-surface dark:border-dark-border">
               <button disabled={page <= 1} onClick={() => goToPage(page - 1)} className="btn-secondary">
                 Previous
               </button>

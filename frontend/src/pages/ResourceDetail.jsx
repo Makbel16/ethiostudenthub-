@@ -276,8 +276,8 @@ export default function ResourceDetail() {
                 {resource.status && resource.status !== "APPROVED" && <span className="badge-gold">{resource.status}</span>}
                 {resource.examType && <span className="badge">{resource.examType}</span>}
               </div>
-              <h1 className="font-display text-4xl font-semibold leading-tight text-ink">{resource.title}</h1>
-              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+              <h1 className="font-display text-4xl font-semibold leading-tight text-ink dark:text-dark-text">{resource.title}</h1>
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted dark:text-dark-muted">
                 <UserRound size={16} />
                 Uploaded by {resource.uploader?.fullName || "Student contributor"}
                 {resource.college?.name && <span>- {resource.college.name}</span>}
@@ -298,7 +298,7 @@ export default function ResourceDetail() {
           </div>
 
           {resource.description && (
-            <p className="mt-8 rounded-lg border border-line bg-paper p-5 text-sm leading-7 text-ink/80">
+            <p className="mt-8 rounded-lg border border-line bg-paper p-5 text-sm leading-7 text-ink/80 dark:bg-dark-surface dark:border-dark-border dark:text-dark-text/80">
               {resource.description}
             </p>
           )}
@@ -308,12 +308,12 @@ export default function ResourceDetail() {
               {metaItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={`${item.label}-${item.value}`} className="rounded-lg border border-line bg-white p-4">
-                    <p className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+                  <div key={`${item.label}-${item.value}`} className="rounded-lg border border-line bg-white p-4 dark:bg-dark-surface dark:border-dark-border">
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase text-muted dark:text-dark-muted">
                       <Icon size={15} className="text-highland" />
                       {item.label}
                     </p>
-                    <p className="mt-2 text-sm font-semibold text-ink">{item.value}</p>
+                    <p className="mt-2 text-sm font-semibold text-ink dark:text-dark-text">{item.value}</p>
                   </div>
                 );
               })}
@@ -322,7 +322,7 @@ export default function ResourceDetail() {
 
           {resource.tags?.length > 0 && (
             <div className="mt-8">
-              <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+              <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink dark:text-dark-text">
                 <Tag size={16} className="text-highland" />
                 Tags
               </p>
@@ -338,8 +338,8 @@ export default function ResourceDetail() {
             <section className="mt-10 border-t border-line pt-8">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <h2 className="font-display text-2xl font-semibold text-ink">Useful Link</h2>
-                  <p className="mt-1 text-sm text-muted">Related to this material.</p>
+                  <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">Useful Link</h2>
+                  <p className="mt-1 text-sm text-muted dark:text-dark-muted">Related to this material.</p>
                 </div>
                 <a
                   href={relatedUsefulLinkUrl}
@@ -355,7 +355,7 @@ export default function ResourceDetail() {
                 href={relatedUsefulLinkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-w-0 items-center gap-3 rounded-lg border border-line bg-paper p-4 text-sm font-semibold text-highland hover:border-highland"
+                className="flex min-w-0 items-center gap-3 rounded-lg border border-line bg-paper p-4 text-sm font-semibold text-highland hover:border-highland dark:bg-dark-surface dark:border-dark-border"
               >
                 <ExternalLink size={16} className="shrink-0" />
                 <span className="min-w-0 truncate">{relatedUsefulLinkUrl}</span>
@@ -366,7 +366,7 @@ export default function ResourceDetail() {
           {youtubeEmbedUrl && (
             <section className="mt-10 border-t border-line pt-8">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <h2 className="font-display text-2xl font-semibold text-ink">Video</h2>
+                <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">Video</h2>
                 <button type="button" onClick={handleOpenLink} className="btn-secondary">
                   <ExternalLink size={16} />
                   Open Link
@@ -387,7 +387,7 @@ export default function ResourceDetail() {
           {user && previewKind && (
             <section className="mt-10 border-t border-line pt-8">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <h2 className="font-display text-2xl font-semibold text-ink">File preview</h2>
+                <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">File preview</h2>
                 <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary">
                   <ExternalLink size={16} />
                   {isOpeningFile ? "Opening..." : "Open in new tab"}
@@ -397,9 +397,9 @@ export default function ResourceDetail() {
               {preview.isLoading && <div className="empty-state">Loading file preview...</div>}
               {preview.isError && <div className="empty-state">Could not load the file preview.</div>}
               {preview.data && (
-                <div className="overflow-hidden rounded-lg border border-line bg-paper">
+                <div className="overflow-hidden rounded-lg border border-line bg-paper dark:bg-dark-surface dark:border-dark-border">
                   {previewKind === "image" && (
-                    <img src={preview.data} alt={resource.title} className="max-h-[70vh] w-full bg-white object-contain" />
+                    <img src={preview.data} alt={resource.title} className="max-h-[70vh] w-full bg-white object-contain dark:bg-dark-surface" />
                   )}
                   {previewKind === "video" && (
                     <video src={preview.data} controls preload="metadata" className="aspect-video w-full bg-black" />
@@ -408,7 +408,7 @@ export default function ResourceDetail() {
                     <iframe
                       src={preview.data}
                       title={`${resource.title} file preview`}
-                      className="h-[70vh] min-h-[420px] w-full bg-white"
+                      className="h-[70vh] min-h-[420px] w-full bg-white dark:bg-dark-surface"
                     />
                   )}
                 </div>
@@ -419,8 +419,8 @@ export default function ResourceDetail() {
           <section className="mt-10 border-t border-line pt-8">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Discussion</h2>
-                <p className="mt-1 text-sm text-muted">Ask for context, corrections, or missing details.</p>
+                <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">Discussion</h2>
+                <p className="mt-1 text-sm text-muted dark:text-dark-muted">Ask for context, corrections, or missing details.</p>
               </div>
               <span className="badge">{resource.comments?.length ?? 0} comments</span>
             </div>
@@ -431,7 +431,7 @@ export default function ResourceDetail() {
                   e.preventDefault();
                   if (comment.trim()) postComment.mutate(comment.trim());
                 }}
-                className="mb-6 rounded-lg border border-line bg-paper p-3"
+                className="mb-6 rounded-lg border border-line bg-paper p-3 dark:bg-dark-surface dark:border-dark-border"
               >
                 <label className="sr-only" htmlFor="comment">Add a comment</label>
                 <textarea
@@ -450,7 +450,7 @@ export default function ResourceDetail() {
                 </div>
               </form>
             ) : (
-              <div className="mb-6 rounded-lg border border-line bg-paper p-4 text-sm text-muted">
+              <div className="mb-6 rounded-lg border border-line bg-paper p-4 text-sm text-muted dark:bg-dark-surface dark:border-dark-border dark:text-dark-muted">
                 <Link to="/login" className="font-semibold text-highland">Log in</Link> to comment, like, or bookmark this resource.
               </div>
             )}
@@ -458,11 +458,11 @@ export default function ResourceDetail() {
             {resource.comments?.length === 0 && <div className="empty-state">No comments yet.</div>}
             <ul className="space-y-3">
               {resource.comments?.map((c) => (
-                <li key={c.id} className="rounded-lg border border-line bg-white p-4">
+                <li key={c.id} className="rounded-lg border border-line bg-white p-4 dark:bg-dark-surface dark:border-dark-border">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-ink">{c.user?.fullName || "Student"}</p>
-                      <p className="mt-1 text-sm leading-6 text-muted">{c.content}</p>
+                      <p className="font-semibold text-ink dark:text-dark-text">{c.user?.fullName || "Student"}</p>
+                      <p className="mt-1 text-sm leading-6 text-muted dark:text-dark-muted">{c.content}</p>
                     </div>
                     {user && (user.id === c.user?.id || ["ADMIN", "MODERATOR"].includes(user.role)) && (
                       <button
@@ -499,7 +499,7 @@ export default function ResourceDetail() {
               </div>
             ) : (
               <div className="rounded-lg border border-line bg-paper p-4 text-center">
-                <p className="text-sm leading-6 text-muted">Log in to open or download this file.</p>
+                <p className="text-sm leading-6 text-muted dark:text-dark-muted">Log in to open or download this file.</p>
                 <Link to="/login" className="btn-dark mt-3 w-full">
                   Log in
                 </Link>
@@ -516,30 +516,30 @@ export default function ResourceDetail() {
                 Save
               </button>
             </div>
-            {!user && <p className="mt-3 text-center text-xs text-muted">Log in to like or save resources.</p>}
+            {!user && <p className="mt-3 text-center text-xs text-muted dark:text-dark-muted">Log in to like or save resources.</p>}
           </div>
 
           <div className="section-panel rounded-xl p-5">
-            <p className="font-semibold text-ink">Resource activity</p>
+            <p className="font-semibold text-ink dark:text-dark-text">Resource activity</p>
             <dl className="mt-4 space-y-3 text-sm">
               {!isUsefulLinkResource && (
                 <div className="flex items-center justify-between">
-                  <dt className="flex items-center gap-2 text-muted"><Download size={15} /> Downloads</dt>
-                  <dd className="font-semibold text-ink">{resource.downloadCount ?? 0}</dd>
+                  <dt className="flex items-center gap-2 text-muted dark:text-dark-muted"><Download size={15} /> Downloads</dt>
+                  <dd className="font-semibold text-ink dark:text-dark-text">{resource.downloadCount ?? 0}</dd>
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-2 text-muted"><Eye size={15} /> Views</dt>
-                <dd className="font-semibold text-ink">{resource.viewCount ?? 0}</dd>
+                <dt className="flex items-center gap-2 text-muted dark:text-dark-muted"><Eye size={15} /> Views</dt>
+                <dd className="font-semibold text-ink dark:text-dark-text">{resource.viewCount ?? 0}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="flex items-center gap-2 text-muted"><Bookmark size={15} /> Bookmarks</dt>
-                <dd className="font-semibold text-ink">{resource._count?.bookmarks ?? 0}</dd>
+                <dt className="flex items-center gap-2 text-muted dark:text-dark-muted"><Bookmark size={15} /> Bookmarks</dt>
+                <dd className="font-semibold text-ink dark:text-dark-text">{resource._count?.bookmarks ?? 0}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-xl border border-highland/20 bg-highland-light p-5">
+          <div className="rounded-xl border border-highland/20 bg-highland-light p-5 dark:bg-highland/20 dark:border-highland/30">
             <p className="font-semibold text-highland-dark">Keep the library useful</p>
             <p className="mt-2 text-sm leading-6 text-highland-dark/75">
               {isUsefulLinkResource

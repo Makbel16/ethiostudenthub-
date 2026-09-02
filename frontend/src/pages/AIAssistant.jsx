@@ -109,7 +109,7 @@ export default function AIAssistant() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Sparkles size={16} />
           AI Study Assistant
         </div>
@@ -124,7 +124,7 @@ export default function AIAssistant() {
           <div className="flex border-b border-line">
             <button
               onClick={() => setShowConversationList(!showConversationList)}
-              className="flex items-center gap-2 px-4 py-3 border-r border-line hover:bg-mist transition-colors"
+              className="flex items-center gap-2 px-4 py-3 border-r border-line hover:bg-mist transition-colors dark:border-dark-border dark:hover:bg-dark-border"
             >
               <MessageSquare size={18} />
               <span className="font-semibold">Conversations</span>
@@ -132,7 +132,7 @@ export default function AIAssistant() {
             </button>
             <button
               onClick={startNewConversation}
-              className="flex items-center gap-2 px-4 py-3 hover:bg-mist transition-colors"
+              className="flex items-center gap-2 px-4 py-3 hover:bg-mist transition-colors dark:hover:bg-dark-border"
             >
               <Plus size={18} />
               <span className="font-semibold">New Chat</span>
@@ -140,7 +140,7 @@ export default function AIAssistant() {
           </div>
 
           {showConversationList && (
-            <div className="border-b border-line p-4 bg-mist/30">
+            <div className="border-b border-line p-4 bg-mist/30 dark:border-dark-border dark:bg-dark-border/30">
               <h3 className="font-semibold text-ink mb-3">Your Conversations</h3>
               {loadingConversations ? (
                 <div className="text-sm text-muted">Loading conversations...</div>
@@ -151,7 +151,7 @@ export default function AIAssistant() {
                   {conversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className="flex items-center justify-between p-2 bg-white rounded-lg border border-line hover:border-highland/50 cursor-pointer"
+                      className="flex items-center justify-between p-2 bg-white rounded-lg border border-line hover:border-highland/50 cursor-pointer dark:bg-dark-surface dark:border-dark-border"
                     >
                       <button
                         onClick={() => fetchConversation(conv.id)}
@@ -197,7 +197,7 @@ export default function AIAssistant() {
                       className={`max-w-2xl rounded-2xl px-4 py-3 ${
                         message.role === "user"
                           ? "bg-highland text-white"
-                          : "bg-mist text-ink"
+                          : "bg-mist text-ink dark:bg-dark-surface dark:text-dark-text"
                       }`}
                     >
                       <div className="flex items-start gap-2">
@@ -214,7 +214,7 @@ export default function AIAssistant() {
               )}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-mist rounded-2xl px-4 py-3">
+                  <div className="bg-mist rounded-2xl px-4 py-3 dark:bg-dark-surface">
                     <div className="flex items-center gap-2">
                       <Bot size={18} className="text-muted" />
                       <div className="flex gap-1">

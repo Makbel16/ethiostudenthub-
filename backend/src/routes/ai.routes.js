@@ -20,7 +20,7 @@ router.post("/chat", requireAuth, async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.OLLAMA_MODEL || 'llama2',
+        model: process.env.OLLAMA_MODEL || 'llama3.2',
         messages: [
           {
             role: 'user',

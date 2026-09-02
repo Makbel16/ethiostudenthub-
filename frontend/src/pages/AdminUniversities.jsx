@@ -207,7 +207,7 @@ export default function AdminUniversities() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Building2 size={16} />
           University Management
         </div>
@@ -267,7 +267,7 @@ export default function AdminUniversities() {
               <div key={university.id} className="surface-card rounded-xl p-5">
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                   <div className="flex min-w-0 gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-mist text-highland">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-mist text-highland dark:bg-dark-border dark:border-dark-border">
                       {university.logoUrl ? (
                         <img src={university.logoUrl} alt={`${university.name} logo`} className="h-full w-full object-cover" />
                       ) : (
@@ -440,7 +440,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           <textarea name="description" value={form.description} onChange={onChange} rows={4} className="input-field resize-none" />
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <UploadCloud size={16} className="text-highland" />
             Logo
@@ -451,7 +451,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <Globe2 size={16} className="text-highland" />
             Official links
@@ -466,7 +466,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <Phone size={16} className="text-highland" />
             Contact
@@ -485,7 +485,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-paper p-4">
+        <div className="rounded-lg border border-line bg-paper p-4 dark:bg-dark-surface dark:border-dark-border">
           <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
             <MapPin size={16} className="text-highland" />
             Optional coordinates
@@ -505,7 +505,7 @@ function UniversityForm({ form, setForm, onSubmit, isEditing, onCancel, isPendin
               ))}
             </select>
           </div>
-          <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-semibold text-ink">
+          <label className="flex items-center gap-3 rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-semibold text-ink dark:bg-dark-surface dark:border-dark-border dark:text-dark-text">
             <input name="isActive" type="checkbox" checked={form.isActive} onChange={onChange} />
             Active
           </label>
@@ -574,9 +574,9 @@ function UniversityViewPanel({ university, onClose }) {
 
 function InfoTile({ label, value }) {
   return (
-    <div className="rounded-lg border border-line bg-paper p-3">
-      <dt className="text-xs font-semibold uppercase text-muted">{label}</dt>
-      <dd className="mt-1 text-sm font-semibold text-ink">{value}</dd>
+    <div className="rounded-lg border border-line bg-paper p-3 dark:bg-dark-surface dark:border-dark-border">
+      <dt className="text-xs font-semibold uppercase text-muted dark:text-dark-muted">{label}</dt>
+      <dd className="mt-1 text-sm font-semibold text-ink dark:text-dark-text">{value}</dd>
     </div>
   );
 }

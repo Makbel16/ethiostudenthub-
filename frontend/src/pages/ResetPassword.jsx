@@ -22,8 +22,8 @@ export default function ResetPassword() {
 
   return (
     <div className="page-shell py-16">
-      <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 shadow-lg">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland">
+      <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 shadow-lg dark:bg-dark-surface dark:border-dark-border">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland dark:bg-highland/20">
           <KeyRound size={24} />
         </div>
         <h1 className="mt-6 font-display text-3xl font-semibold text-ink">Set a new password</h1>

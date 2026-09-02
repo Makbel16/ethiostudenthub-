@@ -24,7 +24,7 @@ export default function VerifyEmail() {
       <div className="mx-auto max-w-md rounded-2xl border border-line bg-white p-8 text-center shadow-lg">
         {status === "verifying" && (
           <>
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland dark:bg-highland/20">
               <MailWarning size={24} />
             </div>
             <h1 className="mt-6 font-display text-3xl font-semibold text-ink">Verifying email</h1>
@@ -34,7 +34,7 @@ export default function VerifyEmail() {
 
         {status === "success" && (
           <>
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-highland-light text-highland dark:bg-highland/20">
               <CheckCircle2 size={24} />
             </div>
             <h1 className="mt-6 font-display text-3xl font-semibold text-ink">Email verified</h1>

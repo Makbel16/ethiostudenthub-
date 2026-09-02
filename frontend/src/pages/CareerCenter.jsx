@@ -52,15 +52,15 @@ export default function CareerCenter() {
       case "JOB":
         return "bg-highland/10 border-highland/20";
       case "INTERNSHIP":
-        return "bg-amber-50 border-amber-200";
+        return "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800";
       case "SCHOLARSHIP":
-        return "bg-green-50 border-green-200";
+        return "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
       case "COMPETITION":
-        return "bg-purple-50 border-purple-200";
+        return "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800";
       case "CERTIFICATION":
-        return "bg-blue-50 border-blue-200";
+        return "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800";
       default:
-        return "bg-mist border-line";
+        return "bg-mist border-line dark:bg-dark-border dark:border-dark-border";
     }
   };
 
@@ -73,7 +73,7 @@ export default function CareerCenter() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Briefcase size={16} />
           Career Center
         </div>
@@ -175,7 +175,7 @@ export default function CareerCenter() {
                 {opportunity.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {opportunity.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="px-2 py-1 bg-white/50 rounded-full text-xs text-muted">
+                      <span key={tag} className="px-2 py-1 bg-white/50 rounded-full text-xs text-muted dark:bg-dark-border dark:text-dark-muted">
                         {tag}
                       </span>
                     ))}

@@ -73,7 +73,7 @@ export default function AdminStructure() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Layers3 size={16} />
           Structure Management
         </div>
@@ -148,8 +148,8 @@ export default function AdminStructure() {
                 {departments.isLoading && <p className="text-sm text-muted">Loading departments...</p>}
                 {departments.data?.length === 0 && <div className="empty-state py-6">No departments yet.</div>}
                 {departments.data?.map((department) => (
-                  <div key={department.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
-                    <span className="font-semibold text-ink">{department.name}</span>
+                  <div key={department.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm dark:bg-dark-surface dark:border-dark-border">
+                    <span className="font-semibold text-ink dark:text-dark-text">{department.name}</span>
                     <button
                       onClick={() => {
                         if (confirm(`Delete "${department.name}"?`)) deleteDepartment.mutate(department.id);
@@ -204,8 +204,8 @@ function StructurePanel({
         {isLoading && <p className="text-sm text-muted">Loading...</p>}
         {items?.length === 0 && <div className="empty-state py-6">{emptyText}</div>}
         {items?.map((item) => (
-          <div key={item.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm">
-            <span className="font-semibold text-ink">{item.name}</span>
+          <div key={item.id} className="flex items-center justify-between rounded-lg border border-line bg-white p-3 text-sm dark:bg-dark-surface dark:border-dark-border">
+            <span className="font-semibold text-ink dark:text-dark-text">{item.name}</span>
             <button onClick={() => onDelete(item)} className="text-ember hover:underline">Delete</button>
           </div>
         ))}

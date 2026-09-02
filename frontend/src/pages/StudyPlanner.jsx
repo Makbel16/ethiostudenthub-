@@ -73,7 +73,7 @@ export default function StudyPlanner() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Calendar size={16} />
           Academic Tools
         </div>
@@ -165,7 +165,7 @@ export default function StudyPlanner() {
                   className={`flex items-center justify-between rounded-lg border p-4 transition-colors ${
                     task.completed
                       ? "border-line bg-muted/30"
-                      : "border-line bg-white"
+                      : "border-line bg-white dark:bg-dark-surface"
                   }`}
                 >
                   <div className="flex items-center gap-4">

@@ -20,15 +20,18 @@ import {
   Megaphone,
   Menu,
   MessageSquare,
+  Moon,
   Search,
   ShieldCheck,
   Sparkles,
+  Sun,
   UploadCloud,
   UserCircle,
   UsersRound,
   X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useDarkMode } from "../context/DarkModeContext.jsx";
 import api from "../api/client.js";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import Home from "../pages/Home.jsx";
@@ -175,7 +178,8 @@ const canViewItem = (item, user) => {
 };
 
 export default function Navbar() {
-  const { user, logout, setUser } = useAuth();
+  const { user, logout } = useAuth();
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -269,18 +273,18 @@ export default function Navbar() {
 
   const linkClass = ({ isActive }) =>
     `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-      isActive ? "bg-highland-light text-highland-dark" : "text-ink/75 hover:bg-mist hover:text-ink"
+      isActive ? "bg-highland-light text-highland-dark" : "text-ink/75 dark:text-dark-text/75 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
     }`;
 
   const sidebarLinkClass = ({ isActive }) =>
     `flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors ${
-      isActive ? "bg-highland text-white shadow-sm" : "text-ink/80 hover:bg-mist hover:text-ink"
+      isActive ? "bg-highland text-white shadow-sm" : "text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
     } ${desktopCollapsed ? "justify-center px-2" : ""}`;
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header - Full width at top */}
-      <header className="sticky top-0 z-40 border-b border-line bg-white/95 shadow-sm backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 shadow-sm backdrop-blur dark:bg-dark-surface/95 dark:border-dark-border">
         <div className="page-shell">
           <div className="flex h-16 items-center justify-between gap-6">
             <div className="flex min-w-0 items-center gap-3">
@@ -302,7 +306,7 @@ export default function Navbar() {
                   <BookOpen size={22} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-display text-xl font-semibold leading-5 text-ink">EthioStudentHub</span>
+                  <span className="block font-display text-xl font-semibold leading-5 text-ink dark:text-dark-text">EthioStudentHub</span>
                   <span className="hidden text-xs font-medium text-muted sm:block">Ethiopian academic resources</span>
                 </span>
               </Link>
@@ -317,6 +321,13 @@ export default function Navbar() {
             </nav>
 
             <div className="hidden items-center gap-3 lg:flex">
+              <button
+                onClick={toggleDarkMode}
+                className="btn-secondary"
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
               <Link to="/browse" className="btn-secondary">
                 <Search size={16} />
                 Search
@@ -345,12 +356,12 @@ export default function Navbar() {
         {/* Desktop Sidebar - Below header, fixed position */}
         {user && (
           <aside
-            className={`hidden lg:flex flex-col border-r border-line bg-white transition-all duration-200 fixed top-16 bottom-0 left-0 ${
+            className={`hidden lg:flex flex-col border-r border-line bg-white transition-all duration-200 fixed top-16 bottom-0 left-0 dark:bg-dark-surface dark:border-dark-border ${
               desktopCollapsed ? "w-16" : "w-64"
             }`}
           >
             {/* User Profile Header */}
-            <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4">
+            <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 dark:border-dark-border">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="relative group">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-highland text-white overflow-hidden">
@@ -378,8 +389,8 @@ export default function Navbar() {
                 </div>
                 {!desktopCollapsed && (
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ink text-sm">{user.fullName || user.email}</p>
-                    <p className="truncate text-xs font-medium text-muted">{user.role?.replaceAll("_", " ")}</p>
+                    <p className="truncate font-semibold text-ink text-sm dark:text-dark-text">{user.fullName || user.email}</p>
+                    <p className="truncate text-xs font-medium text-muted dark:text-dark-muted">{user.role?.replaceAll("_", " ")}</p>
                   </div>
                 )}
               </div>
@@ -393,6 +404,20 @@ export default function Navbar() {
               </button>
             </div>
 
+            {/* Always visible collapse/expand button for collapsed state */}
+            {desktopCollapsed && (
+              <div className="flex items-center justify-center px-2 py-2">
+                <button
+                  type="button"
+                  onClick={() => setDesktopCollapsed(!desktopCollapsed)}
+                  className="btn-ghost h-8 w-8 px-0 shrink-0"
+                  aria-label="Expand sidebar"
+                >
+                  <Menu size={20} />
+                </button>
+              </div>
+            )}
+
             <nav className="flex-1 overflow-y-auto px-3 py-4">
               <div className="grid gap-2">
                 {visibleSections.map((section) => {
@@ -403,7 +428,7 @@ export default function Navbar() {
                       <button
                         onClick={() => !desktopCollapsed && toggleSection(section.label)}
                         className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors ${
-                          isExpanded ? "bg-mist text-ink" : "text-ink/80 hover:bg-mist hover:text-ink"
+                          isExpanded ? "bg-mist dark:bg-dark-border text-ink dark:text-dark-text" : "text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
                         } ${desktopCollapsed ? "justify-center px-2" : ""}`}
                         title={desktopCollapsed ? section.label : undefined}
                       >
@@ -413,9 +438,9 @@ export default function Navbar() {
                             <span className="flex-1 truncate">{section.label}</span>
                             {!desktopCollapsed && (
                               isExpanded ? (
-                                <ChevronDown size={16} className="shrink-0 text-muted" />
+                                <ChevronDown size={16} className="shrink-0 text-muted dark:text-dark-muted" />
                               ) : (
-                                <ChevronRight size={16} className="shrink-0 text-muted" />
+                                <ChevronRight size={16} className="shrink-0 text-muted dark:text-dark-muted" />
                               )
                             )}
                           </>
@@ -440,10 +465,10 @@ export default function Navbar() {
               </div>
             </nav>
 
-            <div className="border-t border-line p-4">
+            <div className="border-t border-line p-4 dark:border-dark-border">
               <button onClick={onLogout} className="btn-secondary w-full" title={desktopCollapsed ? "Log out" : undefined}>
                 <LogOut size={16} />
-                {!desktopCollapsed && "Log out"}
+                {!desktopCollapsed && <span>Log out</span>}
               </button>
             </div>
           </aside>
@@ -467,20 +492,20 @@ export default function Navbar() {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Site navigation"
-                className={`absolute left-0 top-0 flex h-screen w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-line bg-white shadow-2xl transition-transform duration-200 ${
+                className={`absolute left-0 top-0 flex h-screen w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-line bg-white shadow-2xl transition-transform duration-200 dark:bg-dark-surface dark:border-dark-border ${
                   mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
               >
-                <div className="flex min-h-16 items-center justify-between gap-3 border-b border-line px-4">
+                <div className="flex min-h-16 items-center justify-between gap-3 border-b border-line px-4 dark:border-dark-border">
                   <Link to="/" onClick={close} className="flex min-w-0 items-center gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-highland text-white shadow-sm">
                       <BookOpen size={20} />
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate font-display text-lg font-semibold leading-5 text-ink">
+                      <span className="block truncate font-display text-lg font-semibold leading-5 text-ink dark:text-dark-text">
                         EthioStudentHub
                       </span>
-                      <span className="block truncate text-xs font-medium text-muted">Navigation</span>
+                      <span className="block truncate text-xs font-medium text-muted dark:text-dark-muted">Navigation</span>
                     </span>
                   </Link>
                   <button type="button" onClick={close} className="btn-ghost h-10 w-10 px-0" aria-label="Close navigation">
@@ -489,14 +514,14 @@ export default function Navbar() {
                 </div>
 
                 {user && (
-                  <div className="border-b border-line px-4 py-4">
+                  <div className="border-b border-line px-4 py-4 dark:border-dark-border">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-mist text-highland">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-mist dark:bg-dark-border text-highland">
                         <UserCircle size={22} />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold text-ink">{user.fullName || user.email}</span>
-                        <span className="block truncate text-xs font-medium text-muted">{user.role?.replaceAll("_", " ")}</span>
+                        <span className="block truncate text-sm font-semibold text-ink dark:text-dark-text">{user.fullName || user.email}</span>
+                        <span className="block truncate text-xs font-medium text-muted dark:text-dark-muted">{user.role?.replaceAll("_", " ")}</span>
                       </span>
                     </div>
                   </div>
@@ -512,15 +537,15 @@ export default function Navbar() {
                           <button
                             onClick={() => toggleSection(section.label)}
                             className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors ${
-                              isExpanded ? "bg-mist text-ink" : "text-ink/80 hover:bg-mist hover:text-ink"
+                              isExpanded ? "bg-mist dark:bg-dark-border text-ink dark:text-dark-text" : "text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
                             }`}
                           >
                             {Icon && <Icon size={18} className="shrink-0" />}
                             <span className="flex-1 truncate">{section.label}</span>
                             {isExpanded ? (
-                              <ChevronDown size={16} className="shrink-0 text-muted" />
+                              <ChevronDown size={16} className="shrink-0 text-muted dark:text-dark-muted" />
                             ) : (
-                              <ChevronRight size={16} className="shrink-0 text-muted" />
+                              <ChevronRight size={16} className="shrink-0 text-muted dark:text-dark-muted" />
                             )}
                           </button>
                           {isExpanded && (
@@ -528,7 +553,7 @@ export default function Navbar() {
                               {section.items.map((item) => {
                                 const ItemIcon = item.icon;
                                 return (
-                                  <NavLink key={item.to} to={item.to} onClick={close} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors text-ink/80 hover:bg-mist hover:text-ink">
+                                  <NavLink key={item.to} to={item.to} onClick={close} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text">
                                     <ItemIcon size={16} className="shrink-0" />
                                     <span className="truncate">{item.label}</span>
                                   </NavLink>
@@ -542,7 +567,7 @@ export default function Navbar() {
                   </div>
                 </nav>
 
-                <div className="border-t border-line p-4">
+                <div className="border-t border-line p-4 dark:border-dark-border">
                   {user ? (
                     <button onClick={onLogout} className="btn-secondary w-full">
                       <LogOut size={16} />
@@ -554,7 +579,7 @@ export default function Navbar() {
                         Log in
                       </Link>
                       <Link to="/register" onClick={close} className="btn-primary w-full">
-                        Join free
+                        Sign up
                       </Link>
                     </div>
                   )}

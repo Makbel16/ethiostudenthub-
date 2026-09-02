@@ -108,7 +108,7 @@ export default function AcademicRoadmap() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <MapPin size={16} />
           Academic Tools
         </div>
@@ -127,7 +127,7 @@ export default function AcademicRoadmap() {
               <p className="text-sm text-muted">Completed</p>
             </div>
           </div>
-          <div className="h-4 w-full overflow-hidden rounded-full bg-mist">
+          <div className="h-4 w-full overflow-hidden rounded-full bg-mist dark:bg-dark-border">
             <div
               className="h-full bg-highland transition-all duration-300"
               style={{ width: `${calculateProgress()}%` }}
@@ -170,7 +170,7 @@ export default function AcademicRoadmap() {
                 {semester.courses.map((course) => (
                   <div
                     key={course.id}
-                    className="flex items-center justify-between rounded-lg border border-line bg-white p-3"
+                    className="flex items-center justify-between rounded-lg border border-line bg-white p-3 dark:bg-dark-surface dark:border-dark-border"
                   >
                     <div className="flex items-center gap-3">
                       <button

@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <div className="page-shell py-12">
-      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-line bg-white shadow-lg lg:grid-cols-[1fr_420px]">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-line bg-white shadow-lg lg:grid-cols-[1fr_420px] dark:bg-dark-surface dark:border-dark-border">
         <section className="bg-ink p-8 text-white sm:p-10">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-highland">
             <BookOpen size={25} />
@@ -61,27 +61,27 @@ export default function Login() {
 
         <section className="p-8 sm:p-10">
           <p className="eyebrow">Welcome back</p>
-          <h2 className="mt-2 font-display text-3xl font-semibold text-ink">Log in</h2>
-          <p className="mt-2 text-sm text-muted">Use your EthioStudentHub account to continue.</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold text-ink dark:text-dark-text">Log in</h2>
+          <p className="mt-2 text-sm text-muted dark:text-dark-muted">Use your EthioStudentHub account to continue.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
             <div>
               <label className="field-label">Email</label>
-              <input {...register("email")} type="email" className="input-field" />
+              <input {...register("email")} type="email" className="input-field dark:bg-dark-border dark:text-dark-text dark:focus:bg-dark-surface" />
               {errors.email && <p className="mt-1 text-xs font-semibold text-ember">{errors.email.message}</p>}
             </div>
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-sm font-semibold text-ink">Password</label>
+                <label className="text-sm font-semibold text-ink dark:text-dark-text">Password</label>
                 <Link to="/forgot-password" className="text-xs font-semibold text-highland hover:underline">
                   Forgot password?
                 </Link>
               </div>
-              <input type="password" {...register("password")} className="input-field" />
+              <input type="password" {...register("password")} className="input-field dark:bg-dark-border dark:text-dark-text dark:focus:bg-dark-surface" />
               {errors.password && <p className="mt-1 text-xs font-semibold text-ember">{errors.password.message}</p>}
             </div>
             {errors.root && (
-              <div className="rounded-lg border border-ember/25 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember">
+              <div className="rounded-lg border border-ember/25 bg-ember/5 px-4 py-3 text-sm font-semibold text-ember dark:bg-ember/10 dark:border-ember/50">
                 {errors.root.message}
               </div>
             )}
@@ -91,7 +91,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted">
+          <p className="mt-6 text-center text-sm text-muted dark:text-dark-muted">
             New to EthioStudentHub?{" "}
             <Link to="/register" className="font-semibold text-highland hover:underline">
               Create an account

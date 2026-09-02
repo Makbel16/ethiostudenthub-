@@ -53,7 +53,7 @@ export default function QA() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <MessageSquare size={16} />
           Student Q&A
         </div>
@@ -126,7 +126,7 @@ export default function QA() {
                     {question.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-3">
                         {question.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="px-2 py-1 bg-mist rounded-full text-xs text-muted">
+                          <span key={tag} className="px-2 py-1 bg-mist rounded-full text-xs text-muted dark:bg-dark-border dark:text-dark-muted">
                             {tag}
                           </span>
                         ))}
@@ -215,7 +215,7 @@ function QuestionDetail({ questionId }) {
               {question.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {question.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-1 bg-mist rounded-full text-xs text-muted">
+                    <span key={tag} className="px-2 py-1 bg-mist rounded-full text-xs text-muted dark:bg-dark-border dark:text-dark-muted">
                       {tag}
                     </span>
                   ))}
@@ -311,8 +311,8 @@ function CreateQuestionModal({ onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h2 className="font-display text-2xl font-semibold text-ink mb-4">Ask a Question</h2>
+      <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto dark:bg-dark-surface">
+        <h2 className="font-display text-2xl font-semibold text-ink mb-4 dark:text-dark-text">Ask a Question</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="field-label">Title</label>

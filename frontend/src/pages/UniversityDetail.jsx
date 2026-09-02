@@ -16,6 +16,39 @@ import {
   Phone,
   School,
   UsersRound,
+  Sparkles,
+  Star,
+  Award,
+  TrendingUp,
+  ArrowRight,
+  Clock,
+  FileText,
+  Link as LinkIcon,
+  Info,
+  ChevronRight,
+  Menu,
+  X,
+  Search,
+  Filter,
+  Grid,
+  List,
+  Heart,
+  Share2,
+  Bookmark,
+  Eye,
+  Download,
+  Layers,
+  Target,
+  Compass,
+  Zap,
+  Crown,
+  Shield,
+  Globe,
+  Instagram,
+  Twitter,
+  Youtube,
+  Linkedin,
+  Facebook,
 } from "lucide-react";
 import api from "../api/client.js";
 
@@ -86,6 +119,7 @@ export default function UniversityDetail() {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const university = useQuery({
     queryKey: ["university-detail", idOrSlug],
@@ -176,134 +210,259 @@ export default function UniversityDetail() {
     if (!selectedSemester || !semesters.includes(selectedSemester)) setSelectedSemester(semesters[0]);
   }, [semesters, selectedSemester]);
 
-  if (university.isLoading) return <p className="page-shell py-12 text-sm text-muted">Loading university...</p>;
+  if (university.isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-bg dark:to-dark-surface">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-highland border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="mt-4 text-slate-600 dark:text-dark-muted font-medium">Loading...</p>
+      </div>
+    </div>
+  );
+  
   if (university.isError || !university.data) {
     return (
-      <div className="page-shell py-12">
-        <div className="empty-state">University not found or inactive.</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-bg dark:to-dark-surface">
+        <div className="text-center p-12 bg-white dark:bg-dark-surface rounded-3xl shadow-2xl max-w-md">
+          <Building2 size={80} className="text-slate-300 dark:text-dark-muted mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-dark-text">University Not Found</h2>
+          <p className="text-slate-500 dark:text-dark-muted mt-3">The institution you're looking for doesn't exist or is inactive.</p>
+          <Link to="/universities" className="mt-8 inline-flex items-center gap-2 bg-highland text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-highland-dark transition shadow-lg hover:shadow-xl">
+            <ArrowRight size={20} className="rotate-180" />
+            Back to Directory
+          </Link>
+        </div>
       </div>
     );
   }
-  const primaryLibraryUrl =
-    item.libraryUrl || item.digitalLibraryUrl || item.libraryCatalogUrl || item.institutionalRepositoryUrl;
-  const libraryLinks = [
-    { label: "Library website", url: item.libraryUrl },
-    { label: "Digital library", url: item.digitalLibraryUrl },
-    { label: "Library catalog", url: item.libraryCatalogUrl },
-    { label: "Institutional repository", url: item.institutionalRepositoryUrl },
-  ].filter((link) => link.url);
+
+  const primaryLibraryUrl = item.libraryUrl || item.digitalLibraryUrl || item.libraryCatalogUrl || item.institutionalRepositoryUrl;
   const locationLine = [item.region, item.city].filter(Boolean).join(" - ");
-  const mapUrl =
-    item.latitude && item.longitude
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.latitude},${item.longitude}`)}`
-      : null;
+  const mapUrl = item.latitude && item.longitude
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.latitude},${item.longitude}`)}`
+    : null;
 
   return (
-    <div className="page-shell py-10">
-      <div className="mb-6">
-        <Link to="/universities" className="text-sm font-semibold text-highland hover:underline">
-          Back to University Directory
-        </Link>
-      </div>
-
-      <section className="section-panel rounded-xl p-6 sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex flex-col gap-5 sm:flex-row">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-mist text-highland">
-              {item.logoUrl ? (
-                <img src={item.logoUrl} alt={`${item.name} logo`} className="h-full w-full object-cover" />
-              ) : (
-                <Building2 size={38} />
-              )}
-            </div>
-            <div>
-              <div className="mb-3 flex flex-wrap gap-2">
-                {item.verificationStatus === "VERIFIED" && (
-                  <span className="badge-green">
-                    <CheckCircle2 size={13} />
-                    Verified
-                  </span>
-                )}
-                <span className="badge">{labelFromEnum(item.ownership)}</span>
-                <span className="badge">{labelFromEnum(item.institutionType)}</span>
-              </div>
-              <h1 className="font-display text-4xl font-semibold leading-tight text-ink">{item.name}</h1>
-              {item.shortName && <p className="mt-2 text-lg font-semibold text-muted">{item.shortName}</p>}
-              <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
-                <MapPin size={16} />
-                {locationLine || "Location not set"}
-                {item.address && <span>- {item.address}</span>}
-              </p>
-            </div>
-          </div>
-
-          <Link to={`/browse?universityId=${item.id}`} className="btn-primary self-start">
-            <BookOpen size={16} />
-            Browse resources
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/50 dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Navigation */}
+        <div className="mb-8">
+          <Link to="/universities" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-dark-surface/80 backdrop-blur-md border border-slate-200/50 dark:border-dark-border/50 text-sm font-medium text-slate-700 dark:text-dark-text hover:text-highland hover:border-highland/50 transition-all shadow-sm">
+            <ArrowRight size={16} className="rotate-180" />
+            Back to Universities
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
-          <div>
-            <h2 className="font-display text-2xl font-semibold text-ink">Description</h2>
-            <p className="mt-3 rounded-lg border border-line bg-paper p-5 text-sm leading-7 text-ink/80">
-              {item.description || "No description has been added for this institution yet."}
-            </p>
-          </div>
-
-          <aside className="section-panel rounded-xl p-5">
-            <p className="font-semibold text-ink">Quick links</p>
-            <div className="mt-4 space-y-3">
-              <QuickLink icon={Globe2} title="Official Website" label="Visit Website" url={item.website} />
-              <QuickLink
-                icon={School}
-                title="Student Portal"
-                label="Open Student Portal"
-                url={item.studentPortalUrl}
-                missingText="Student portal not available"
-              />
-              <QuickLink icon={Library} title="University Library" label="Open Library" url={primaryLibraryUrl} />
+        {/* Hero Section - Premium Design with Green */}
+        <section className="relative mb-12">
+          <div className="relative bg-gradient-to-br from-highland via-highland-dark to-emerald-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-white dark:bg-dark-border rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-400 dark:bg-amber-600 rounded-full blur-3xl"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-300 dark:bg-emerald-700 rounded-full blur-3xl"></div>
             </div>
-          </aside>
-        </div>
-      </section>
+            
+            <div className="relative p-8 md:p-10 lg:p-12">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+                {/* Logo */}
+                <div className="relative group">
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 dark:bg-dark-border/20 backdrop-blur-xl border-2 border-white/30 dark:border-dark-border/30 overflow-hidden shadow-2xl flex items-center justify-center">
+                    {item.logoUrl ? (
+                      <img src={item.logoUrl} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Building2 size={56} className="text-white/80" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-bg flex items-center justify-center">
+                    <CheckCircle2 size={16} className="text-white" />
+                  </div>
+                </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-        <main className="space-y-6">
-          <section className="section-panel rounded-xl p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
-                <GraduationCap size={20} />
+                <div className="flex-1 text-white">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {item.verificationStatus === "VERIFIED" && (
+                      <span className="inline-flex items-center gap-1.5 bg-emerald-500/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-emerald-100 border border-emerald-500/30">
+                        <Shield size={14} />
+                        Verified
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white">
+                      <Sparkles size={14} />
+                      {labelFromEnum(item.ownership)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white">
+                      <Award size={14} />
+                      {labelFromEnum(item.institutionType)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 bg-amber-500/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-amber-100 border border-amber-500/30">
+                      <Star size={14} />
+                      Top Institution
+                    </span>
+                  </div>
+
+                  <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                    {item.name}
+                  </h1>
+                  {item.shortName && (
+                    <p className="text-highland-light text-xl mt-1 font-medium">{item.shortName}</p>
+                  )}
+                  
+                  <div className="flex flex-wrap items-center gap-6 mt-4 text-highland-light">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={18} />
+                      <span className="text-sm font-medium">{locationLine || "Location not set"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <UsersRound size={18} />
+                      <span className="text-sm font-medium">{departments.length} Departments</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <BookOpen size={18} />
+                      <span className="text-sm font-medium">{item.relatedResources?.length || 0} Resources</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 w-full lg:w-auto">
+                  <Link 
+                    to={`/browse?universityId=${item.id}`}
+                    className="inline-flex items-center justify-center gap-2 bg-white dark:bg-dark-surface text-highland dark:text-highland-light px-8 py-4 rounded-2xl font-bold hover:bg-highland-light/10 dark:hover:bg-dark-border transition shadow-xl hover:shadow-2xl hover:scale-105 duration-300"
+                  >
+                    <BookOpen size={20} />
+                    Explore Resources
+                    <ChevronRight size={18} />
+                  </Link>
+                  <div className="flex gap-2">
+                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
+                      <Heart size={18} />
+                      Save
+                    </button>
+                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
+                      <Share2 size={18} />
+                      Share
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Overview - Premium with Green */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <GraduationCap size={22} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{colleges.length}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Colleges</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <UsersRound size={22} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{departments.length}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Departments</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <BookOpen size={22} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{item.relatedResources?.length || 0}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Resources</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <CalendarDays size={22} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{item.calendarEvents?.length || 0}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Events</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ABOUT SECTION - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+                <Info size={28} />
               </span>
               <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Programs and Courses</h2>
-                <p className="mt-1 text-sm text-muted">Explore colleges, departments, admission batches, capacity, and course plans.</p>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">About This Institution</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Discover what makes this university special</p>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-inner dark:from-slate-700 dark:to-slate-800">
+              <p className="text-base leading-8 text-slate-700 dark:text-slate-300">
+                {item.description || "No description has been added for this institution yet."}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PROGRAMS AND COURSES - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+                <GraduationCap size={28} />
+              </span>
+              <div>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Programs & Courses</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Explore academic programs and course offerings</p>
               </div>
             </div>
 
             {collegeOptions.length === 0 ? (
-              <div className="empty-state">No program catalog has been published yet.</div>
+              <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                <BookOpen size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-dark-muted">No program catalog has been published yet.</p>
+              </div>
             ) : (
-              <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
-                <div className="space-y-4">
-                  <div>
-                    <label className="field-label">College</label>
+              <div className="space-y-8">
+                {/* Selectors - Premium Design */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
+                      <Building2 size={14} className="text-highland" />
+                      College
+                    </label>
                     <select
                       value={selectedCollegeId}
                       onChange={(e) => setSelectedCollegeId(e.target.value)}
-                      className="select-field"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all focus:border-highland focus:ring-2 focus:ring-highland/20 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
                     >
                       {collegeOptions.map((college) => (
                         <option key={college.id} value={college.id}>{college.name}</option>
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="field-label">Department / Program</label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
+                      <Layers size={14} className="text-highland" />
+                      Department
+                    </label>
                     <select
                       value={selectedDepartmentId}
                       onChange={(e) => setSelectedDepartmentId(e.target.value)}
-                      className="select-field"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all focus:border-highland focus:ring-2 focus:ring-highland/20 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
                       disabled={departmentsForCollege.length === 0}
                     >
                       {departmentsForCollege.length === 0 ? (
@@ -315,366 +474,509 @@ export default function UniversityDetail() {
                       )}
                     </select>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="field-label">Year</label>
-                      <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        className="select-field"
-                        disabled={!selectedDepartment || years.length === 0}
-                      >
-                        {years.length === 0 ? (
-                          <option value="">No years</option>
-                        ) : (
-                          years.map((year) => (
-                            <option key={year} value={year}>{ordinal(year)}</option>
-                          ))
-                        )}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="field-label">Semester</label>
-                      <select
-                        value={selectedSemester}
-                        onChange={(e) => setSelectedSemester(e.target.value)}
-                        className="select-field"
-                        disabled={!selectedDepartment || semesters.length === 0}
-                      >
-                        {semesters.length === 0 ? (
-                          <option value="">No semesters</option>
-                        ) : (
-                          semesters.map((semester) => (
-                            <option key={semester} value={semester}>{semesterLabel(semester)}</option>
-                          ))
-                        )}
-                      </select>
-                    </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
+                      <CalendarDays size={14} className="text-highland" />
+                      Year
+                    </label>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all focus:border-highland focus:ring-2 focus:ring-highland/20 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
+                      disabled={!selectedDepartment || years.length === 0}
+                    >
+                      {years.length === 0 ? (
+                        <option value="">No years</option>
+                      ) : (
+                        years.map((year) => (
+                          <option key={year} value={year}>{ordinal(year)}</option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
+                      <Clock size={14} className="text-highland" />
+                      Semester
+                    </label>
+                    <select
+                      value={selectedSemester}
+                      onChange={(e) => setSelectedSemester(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all focus:border-highland focus:ring-2 focus:ring-highland/20 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text"
+                      disabled={!selectedDepartment || semesters.length === 0}
+                    >
+                      {semesters.length === 0 ? (
+                        <option value="">No semesters</option>
+                      ) : (
+                        semesters.map((semester) => (
+                          <option key={semester} value={semester}>{semesterLabel(semester)}</option>
+                        ))
+                      )}
+                    </select>
                   </div>
                 </div>
 
                 {!selectedDepartment ? (
-                  <div className="empty-state">No department or program is available for the selected college.</div>
+                  <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                    <Layers size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-dark-muted font-medium">Select a department to view courses</p>
+                  </div>
                 ) : (
-                  <div>
-                    <div className="mb-4 grid gap-3 sm:grid-cols-3">
-                      <ProgramInfoTile
-                        icon={Building2}
-                        label="College"
-                        value={selectedCollege?.name || "Not assigned"}
-                      />
-                      <ProgramInfoTile
-                        icon={CalendarDays}
-                        label="Duration"
-                        value={selectedDepartment.durationYears ? `${selectedDepartment.durationYears} years` : "Not set"}
-                      />
-                      <ProgramInfoTile
-                        icon={UsersRound}
-                        label="Seats"
-                        value={
-                          selectedDepartment.batches?.some((batch) => batch.capacity)
-                            ? `${selectedDepartment.batches.reduce((sum, batch) => sum + (batch.capacity || 0), 0)} listed`
-                            : "Not set"
-                        }
-                      />
-                    </div>
-
-                    <div className="rounded-lg border border-line bg-paper p-5">
-                      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                  <div className="space-y-6">
+                    {/* Department Info - Premium */}
+                    <div className="bg-gradient-to-r from-highland/10 via-emerald-50 dark:via-emerald-900/20 to-highland/5 rounded-2xl p-6 border border-highland/20">
+                      <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <h3 className="text-xl font-semibold text-ink">{selectedDepartment.name}</h3>
+                          <h3 className="text-2xl font-bold text-slate-800 dark:text-dark-text">{selectedDepartment.name}</h3>
                           {selectedDepartment.degreeAwarded && (
-                            <p className="mt-1 text-sm font-semibold text-highland">{selectedDepartment.degreeAwarded}</p>
+                            <p className="text-highland font-semibold mt-1 flex items-center gap-2">
+                              <Award size={18} />
+                              {selectedDepartment.degreeAwarded}
+                            </p>
                           )}
-                        </div>
-                        {selectedDepartment.batches?.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {selectedDepartment.batches.map((batch) => (
-                              <span key={batch.id} className="badge">
-                                Batch {batch.admissionYear}
-                                {batch.capacity ? ` - ${batch.capacity} seats` : ""}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {selectedDepartment.programOverview && (
-                        <p className="mt-4 text-sm leading-6 text-ink/80">{selectedDepartment.programOverview}</p>
-                      )}
-                      {selectedDepartment.admissionRequirements && (
-                        <div className="mt-4 rounded-lg border border-line bg-white p-4">
-                          <p className="text-xs font-semibold uppercase text-muted">Admission Requirements</p>
-                          <p className="mt-2 text-sm leading-6 text-ink/80">{selectedDepartment.admissionRequirements}</p>
-                        </div>
-                      )}
-
-                      <div className="mt-5">
-                        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                          <BookOpen size={16} className="text-highland" />
-                          {selectedYear ? ordinal(selectedYear) : "Academic Year"} - {selectedSemester ? semesterLabel(selectedSemester) : "Semester"}
-                        </p>
-                        {filteredCourses.length === 0 ? (
-                          <div className="empty-state py-6">No courses have been listed for this year and semester.</div>
-                        ) : (
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            {filteredCourses.map((course) => (
-                              <div key={course.id} className="rounded-lg border border-line bg-white p-3">
-                                <p className="font-semibold text-ink">{course.title}</p>
-                                {course.code && <p className="mt-1 text-xs font-semibold text-muted">{course.code}</p>}
+                          <div className="flex flex-wrap gap-6 mt-3">
+                            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-dark-muted">
+                              <CalendarDays size={16} className="text-highland" />
+                              <span className="font-medium">{selectedDepartment.durationYears ? `${selectedDepartment.durationYears} years` : "Duration not set"}</span>
+                            </div>
+                            {selectedDepartment.batches?.length > 0 && (
+                              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-dark-muted">
+                                <UsersRound size={16} className="text-highland" />
+                                <span className="font-medium">{selectedDepartment.batches.reduce((sum, b) => sum + (b.capacity || 0), 0)} seats</span>
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedDepartment.batches?.map((batch) => (
+                            <span key={batch.id} className="px-4 py-2 bg-white dark:bg-dark-surface rounded-xl text-xs font-bold text-slate-700 dark:text-dark-text border border-slate-200 dark:border-dark-border shadow-sm">
+                              {batch.admissionYear}
+                            </span>
+                          ))}
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Courses */}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <BookOpen size={18} className="text-highland" />
+                          <span className="font-bold text-slate-700 dark:text-dark-text">
+                            {selectedYear ? ordinal(selectedYear) : "All Years"} • {selectedSemester ? semesterLabel(selectedSemester) : "All Semesters"}
+                          </span>
+                          <span className="text-sm text-slate-500 dark:text-dark-muted font-medium">({filteredCourses.length} courses)</span>
+                        </div>
+                      </div>
+
+                      {filteredCourses.length === 0 ? (
+                        <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                          <BookOpen size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                          <p className="text-slate-500 dark:text-dark-muted font-medium">No courses available for this selection</p>
+                        </div>
+                      ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {filteredCourses.map((course) => (
+                            <div key={course.id} className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 dark:border-dark-border dark:bg-dark-surface">
+                              <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="relative">
+                                <div className="flex items-start justify-between">
+                                  <p className="font-bold text-slate-800 dark:text-dark-text group-hover:text-highland transition">{course.title}</p>
+                                  <ChevronRight size={16} className="text-slate-300 dark:text-dark-muted group-hover:text-highland transition-transform group-hover:translate-x-1" />
+                                </div>
+                                {course.code && (
+                                  <p className="mt-1.5 text-xs font-semibold text-slate-400 dark:text-slate-400">{course.code}</p>
+                                )}
+                                {course.credits && (
+                                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-highland bg-highland/10 px-2.5 py-1 rounded-full">
+                                    <Award size={12} />
+                                    {course.credits} credits
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </section>
+          </div>
+        </section>
 
-          <section className="section-panel rounded-xl p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
-                <CalendarDays size={20} />
+        {/* ACADEMIC CALENDAR - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+                <CalendarDays size={28} />
               </span>
               <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Academic Calendar</h2>
-                <p className="mt-1 text-sm text-muted">Official dates published by this university.</p>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Academic Calendar</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Important dates and events</p>
               </div>
             </div>
 
-            {item.calendarEvents?.length === 0 && (
-              <div className="empty-state">No academic calendar information has been published yet.</div>
-            )}
-
-            <dl className="grid gap-3 sm:grid-cols-2">
-              {item.calendarEvents?.map((event) => (
-                <div key={event.id} className="rounded-lg border border-line bg-paper p-4">
-                  <dt className="text-xs font-semibold uppercase text-muted">
-                    {CALENDAR_LABELS[event.type] || labelFromEnum(event.type)}
-                  </dt>
-                  <dd className="mt-2 text-sm font-semibold text-ink">{formatCalendarDate(event)}</dd>
-                  {event.title && <p className="mt-2 text-sm leading-6 text-muted">{event.title}</p>}
-                </div>
-              ))}
-            </dl>
-          </section>
-
-          <section className="section-panel rounded-xl p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-highland-light text-highland">
-                <Megaphone size={20} />
-              </span>
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Important Announcements</h2>
-                <p className="mt-1 text-sm text-muted">Official student-related notices from this university.</p>
+            {item.calendarEvents?.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                <CalendarDays size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-dark-muted font-medium">No academic calendar events published yet.</p>
               </div>
-            </div>
-
-            {item.announcements?.length === 0 && (
-              <div className="empty-state">No announcements have been published yet.</div>
-            )}
-
-            <div className="space-y-3">
-              {item.announcements?.map((announcement) => (
-                <article key={announcement.id} className="rounded-lg border border-line bg-paper p-4">
-                  <h3 className="font-semibold text-ink">{announcement.title}</h3>
-                  {announcement.body && <p className="mt-2 text-sm leading-6 text-muted">{announcement.body}</p>}
-                  <p className="mt-3 text-xs font-semibold text-muted">{formatDate(announcement.createdAt)}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="section-panel rounded-xl p-6">
-            <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Related resources</h2>
-                <p className="mt-1 text-sm text-muted">Materials already connected to this university.</p>
-              </div>
-              <Link to={`/browse?universityId=${item.id}`} className="btn-secondary self-start">
-                View all
-              </Link>
-            </div>
-
-            {item.relatedResources?.length === 0 && (
-              <div className="empty-state">No approved resources are associated with this university yet.</div>
-            )}
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {item.relatedResources?.map((resource) => (
-                <Link key={resource.id} to={`/resources/${resource.id}`} className="surface-card rounded-lg p-5">
-                  <span className="badge-green">{resource.type?.replaceAll("_", " ")}</span>
-                  <h3 className="mt-4 text-lg font-semibold text-ink">{resource.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-                    {resource.description || "No description provided."}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {resource.department?.name && <span className="badge">{resource.department.name}</span>}
-                    {resource.courseCode && <span className="badge-gold">{resource.courseCode}</span>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className="section-panel rounded-xl p-6">
-            <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-ink">Related useful links</h2>
-                <p className="mt-1 text-sm text-muted">Useful Links are reused from the existing resource system.</p>
-              </div>
-              <Link to={`/browse?universityId=${item.id}&type=USEFUL_LINK`} className="btn-secondary self-start">
-                View all
-              </Link>
-            </div>
-
-            {item.relatedUsefulLinks?.length === 0 && (
-              <div className="empty-state">No approved useful links are associated with this university yet.</div>
-            )}
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {item.relatedUsefulLinks?.map((resource) => (
-                <div key={resource.id} className="surface-card rounded-lg p-5">
-                  <span className="badge-green">Useful Link</span>
-                  <h3 className="mt-4 text-lg font-semibold text-ink">{resource.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
-                    {resource.description || "No description provided."}
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <a href={resource.fileUrl} className="btn-dark min-h-10 px-3 py-2" {...externalLinkProps}>
-                      <ExternalLink size={15} />
-                      Open link
-                    </a>
-                    <Link to={`/resources/${resource.id}`} className="btn-secondary min-h-10 px-3 py-2">
-                      Details
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </main>
-
-        <aside className="space-y-6">
-          <section className="section-panel rounded-xl p-5">
-            <h2 className="font-semibold text-ink">Contact information</h2>
-            <dl className="mt-4 space-y-4 text-sm">
-              <ContactRow icon={Phone} label="Phone">
-                {item.contactPhone ? (
-                  <a href={formatPhoneHref(item.contactPhone)} className="font-semibold text-highland hover:underline">
-                    {item.contactPhone}
-                  </a>
-                ) : (
-                  <span className="text-muted">Phone not available</span>
-                )}
-              </ContactRow>
-              <ContactRow icon={Mail} label="Email">
-                {item.contactEmail ? (
-                  <a href={`mailto:${item.contactEmail}`} className="font-semibold text-highland hover:underline">
-                    {item.contactEmail}
-                  </a>
-                ) : (
-                  <span className="text-muted">Email not available</span>
-                )}
-              </ContactRow>
-              <ContactRow icon={MapPin} label="Address">
-                <span className="text-ink">{item.address || "Address not available"}</span>
-              </ContactRow>
-              {item.additionalContactInfo && (
-                <ContactRow icon={Building2} label="Additional">
-                  <span className="text-ink">{item.additionalContactInfo}</span>
-                </ContactRow>
-              )}
-            </dl>
-          </section>
-
-          <section className="section-panel rounded-xl p-5">
-            <h2 className="font-semibold text-ink">Location</h2>
-            <dl className="mt-4 space-y-3 text-sm">
-              <InfoPair label="Region" value={item.region || "Not set"} />
-              <InfoPair label="City" value={item.city || "Not set"} />
-              <InfoPair label="Address" value={item.address || "Not set"} />
-            </dl>
-            {mapUrl && (
-              <a href={mapUrl} className="btn-secondary mt-5 w-full" {...externalLinkProps}>
-                <MapPin size={16} />
-                Open map location
-              </a>
-            )}
-          </section>
-
-          <section className="section-panel rounded-xl p-5">
-            <h2 className="font-semibold text-ink">Library links</h2>
-            {libraryLinks.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">University library links are not available.</p>
             ) : (
-              <div className="mt-4 space-y-3">
-                {libraryLinks.map((link) => (
-                  <a key={link.label} href={link.url} className="btn-secondary w-full justify-between" {...externalLinkProps}>
-                    <span>{link.label}</span>
-                    <ExternalLink size={15} />
-                  </a>
+              <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {item.calendarEvents?.map((event) => (
+                  <div key={event.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-5 shadow-sm transition-all hover:shadow-lg hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                    <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative">
+                      <dt className="flex items-center gap-2 text-xs font-bold uppercase text-highland tracking-wider">
+                        <Clock size={14} />
+                        {CALENDAR_LABELS[event.type] || labelFromEnum(event.type)}
+                      </dt>
+                      <dd className="mt-3 text-lg font-bold text-slate-800 dark:text-dark-text">{formatCalendarDate(event)}</dd>
+                      {event.title && <p className="mt-2 text-sm text-slate-600 dark:text-dark-muted">{event.title}</p>}
+                    </div>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+        </section>
+
+        {/* ANNOUNCEMENTS - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+                <Megaphone size={28} />
+              </span>
+              <div>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Announcements</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Latest news and updates</p>
+              </div>
+            </div>
+
+            {item.announcements?.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                <Megaphone size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-dark-muted font-medium">No announcements published yet.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {item.announcements?.map((announcement) => (
+                  <article key={announcement.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-lg hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                    <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative">
+                      <div className="flex items-start gap-4">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/5 text-highland">
+                          <FileText size={20} />
+                        </span>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-dark-text group-hover:text-highland transition">{announcement.title}</h3>
+                          {announcement.body && <p className="mt-2 text-sm text-slate-600 dark:text-dark-muted">{announcement.body}</p>}
+                          <p className="mt-3 text-xs font-semibold text-slate-400 flex items-center gap-2">
+                            <Clock size={12} />
+                            {formatDate(announcement.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* RELATED RESOURCES - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Related Resources</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Educational materials and documents</p>
+              </div>
+              <Link to={`/browse?universityId=${item.id}`} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-highland to-highland-dark px-6 py-3 font-bold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 duration-300">
+                View all
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+
+            {item.relatedResources?.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                <BookOpen size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-dark-muted font-medium">No resources available.</p>
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {item.relatedResources?.map((resource) => (
+                  <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                    <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
+                        <BookOpen size={12} />
+                        {resource.type?.replaceAll("_", " ")}
+                      </span>
+                      <h3 className="mt-4 text-xl font-bold text-slate-800 dark:text-dark-text group-hover:text-highland transition">{resource.title}</h3>
+                      <p className="mt-3 line-clamp-2 text-sm text-slate-600 dark:text-dark-muted">
+                        {resource.description || "No description provided."}
+                      </p>
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        {resource.department?.name && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-dark-border dark:text-dark-muted">
+                            <Building2 size={12} />
+                            {resource.department.name}
+                          </span>
+                        )}
+                        {resource.courseCode && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                            <BookOpen size={12} />
+                            {resource.courseCode}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* USEFUL LINKS - Premium with Green */}
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative">
+            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Useful Links</h2>
+                <p className="text-slate-500 dark:text-dark-muted">Helpful external resources</p>
+              </div>
+              <Link to={`/browse?universityId=${item.id}&type=USEFUL_LINK`} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-highland to-highland-dark px-6 py-3 font-bold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 duration-300">
+                View all
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+
+            {item.relatedUsefulLinks?.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 dark:bg-dark-surface rounded-2xl border-2 border-dashed border-slate-200 dark:border-dark-border">
+                <LinkIcon size={48} className="text-slate-300 dark:text-dark-muted mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-dark-muted font-medium">No useful links available.</p>
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {item.relatedUsefulLinks?.map((resource) => (
+                  <div key={resource.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                    <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
+                        <LinkIcon size={12} />
+                        Useful Link
+                      </span>
+                      <h3 className="mt-4 text-xl font-bold text-slate-800 dark:text-dark-text">{resource.title}</h3>
+                      <p className="mt-3 line-clamp-2 text-sm text-slate-600 dark:text-dark-muted">
+                        {resource.description || "No description provided."}
+                      </p>
+                      <div className="mt-6 flex flex-wrap gap-3">
+                        <a href={resource.fileUrl} className="inline-flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 dark:bg-dark-surface" {...externalLinkProps}>
+                          <ExternalLink size={16} />
+                          Open link
+                        </a>
+                        <Link to={`/resources/${resource.id}`} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:shadow-md dark:border-dark-border dark:bg-dark-surface dark:text-dark-text">
+                          Details
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* SIDEBAR CARDS - 3 columns with premium green design */}
+        <div className="grid gap-6 md:grid-cols-3 mt-8">
+          {/* Quick Links */}
+          <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-6 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative">
+              <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                  <LinkIcon size={18} />
+                </span>
+                Quick Links
+              </h2>
+              <div className="space-y-3">
+                <QuickLinkPremium icon={Globe2} title="Official Website" label="Visit Website" url={item.website} />
+                <QuickLinkPremium
+                  icon={School}
+                  title="Student Portal"
+                  label="Open Portal"
+                  url={item.studentPortalUrl}
+                  missingText="Student portal not available"
+                />
+                <QuickLinkPremium icon={Library} title="University Library" label="Open Library" url={primaryLibraryUrl} />
+              </div>
+            </div>
           </section>
-        </aside>
+
+          {/* Contact */}
+          <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-6 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative">
+              <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                  <Phone size={18} />
+                </span>
+                Contact
+              </h2>
+              <dl className="space-y-4 text-sm">
+                <ContactRowPremium icon={Phone} label="Phone">
+                  {item.contactPhone ? (
+                    <a href={formatPhoneHref(item.contactPhone)} className="font-bold text-highland hover:underline">
+                      {item.contactPhone}
+                    </a>
+                  ) : (
+                    <span className="text-slate-500">Not available</span>
+                  )}
+                </ContactRowPremium>
+                <ContactRowPremium icon={Mail} label="Email">
+                  {item.contactEmail ? (
+                    <a href={`mailto:${item.contactEmail}`} className="font-bold text-highland hover:underline">
+                      {item.contactEmail}
+                    </a>
+                  ) : (
+                    <span className="text-slate-500">Not available</span>
+                  )}
+                </ContactRowPremium>
+                <ContactRowPremium icon={MapPin} label="Address">
+                  <span className="text-slate-700 dark:text-dark-text">{item.address || "Not available"}</span>
+                </ContactRowPremium>
+                {item.additionalContactInfo && (
+                  <ContactRowPremium icon={Building2} label="Additional">
+                    <span className="text-slate-700 dark:text-dark-text">{item.additionalContactInfo}</span>
+                  </ContactRowPremium>
+                )}
+              </dl>
+            </div>
+          </section>
+
+          {/* Location */}
+          <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-6 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative">
+              <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                  <MapPin size={18} />
+                </span>
+                Location
+              </h2>
+              <dl className="space-y-3 text-sm">
+                <InfoPairPremium label="Region" value={item.region || "Not set"} />
+                <InfoPairPremium label="City" value={item.city || "Not set"} />
+                <InfoPairPremium label="Address" value={item.address || "Not set"} />
+              </dl>
+              {mapUrl && (
+                <a href={mapUrl} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-highland to-highland-dark px-4 py-2.5 font-bold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 text-sm" {...externalLinkProps}>
+                  <MapPin size={16} />
+                  Open Map
+                </a>
+              )}
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Premium QuickLink Component
+function QuickLinkPremium({ icon: Icon, title, label, url, missingText }) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-white p-3 shadow-sm transition-all hover:shadow-md dark:from-dark-surface dark:to-dark-bg">
+      <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative">
+        <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-dark-text">
+          <Icon size={16} className="text-highland" />
+          {title}
+        </p>
+        {url ? (
+          <a href={url} className="mt-2 inline-flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:shadow-md hover:border-highland/50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text" {...externalLinkProps}>
+            <span>{label}</span>
+            <ExternalLink size={14} className="text-slate-400 group-hover:text-highland transition-colors" />
+          </a>
+        ) : (
+          <p className="mt-2 text-xs text-slate-500 dark:text-dark-muted">{missingText || `${title} not available`}</p>
+        )}
       </div>
     </div>
   );
 }
 
-function QuickLink({ icon: Icon, title, label, url, missingText }) {
+// Premium StatCard
+function StatCard({ icon: Icon, label, value, color }) {
+  const colorClasses = {
+    highland: "from-highland to-highland-dark",
+    teal: "from-teal-500 to-cyan-500",
+    purple: "from-purple-500 to-pink-500",
+    orange: "from-orange-500 to-amber-500",
+  };
+  
   return (
-    <div className="rounded-lg border border-line bg-paper p-4">
-      <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-        <Icon size={17} className="text-highland" />
-        {title}
-      </p>
-      {url ? (
-        <a href={url} className="btn-secondary mt-3 w-full justify-between" {...externalLinkProps}>
-          <span>{label}</span>
-          <ExternalLink size={15} />
-        </a>
-      ) : (
-        <p className="mt-3 text-sm text-muted">{missingText || `${title} not available`}</p>
-      )}
+    <div className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 p-6 shadow-xl transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div className="relative flex items-center gap-4">
+        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${colorClasses[color] || colorClasses.highland} text-white shadow-xl`}>
+          <Icon size={28} />
+        </span>
+        <div>
+          <p className="text-xs font-bold uppercase text-slate-500 dark:text-dark-muted tracking-wide">{label}</p>
+          <p className="mt-1 text-3xl font-bold text-slate-800 dark:text-dark-text">{value}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function ContactRow({ icon: Icon, label, children }) {
+// Premium ContactRow
+function ContactRowPremium({ icon: Icon, label, children }) {
   return (
     <div>
-      <dt className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+      <dt className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
         <Icon size={14} className="text-highland" />
         {label}
       </dt>
-      <dd>{children}</dd>
+      <dd className="text-sm">{children}</dd>
     </div>
   );
 }
 
+// Premium ProgramInfoTile
 function ProgramInfoTile({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-3">
-      <dt className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
-        <Icon size={14} className="text-highland" />
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm font-semibold text-ink">{value}</dd>
+    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm transition-all hover:shadow-md dark:from-slate-700 dark:to-slate-800">
+      <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div className="relative">
+        <dt className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wide">
+          <Icon size={16} className="text-highland" />
+          {label}
+        </dt>
+        <dd className="mt-2 text-base font-bold text-slate-800 dark:text-white">{value}</dd>
+      </div>
     </div>
   );
 }
 
-function InfoPair({ label, value }) {
+// Premium InfoPair
+function InfoPairPremium({ label, value }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-line pb-3 last:border-b-0 last:pb-0">
-      <dt className="text-muted">{label}</dt>
-      <dd className="text-right font-semibold text-ink">{value}</dd>
+    <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-2.5 last:border-b-0 last:pb-0 dark:border-slate-600">
+      <dt className="text-sm text-slate-500 dark:text-slate-400">{label}</dt>
+      <dd className="text-right font-semibold text-slate-800 dark:text-white">{value}</dd>
     </div>
   );
 }

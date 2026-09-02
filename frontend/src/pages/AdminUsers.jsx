@@ -74,7 +74,7 @@ export default function AdminUsers() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <UsersRound size={16} />
           User Management
         </div>
@@ -150,24 +150,24 @@ export default function AdminUsers() {
           {users.isLoading && <div className="p-4 text-sm text-muted">Loading users...</div>}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-mist text-xs uppercase text-muted">
+              <thead className="bg-mist text-xs uppercase text-muted dark:bg-dark-border dark:text-dark-muted">
                 <tr>
-                  <th className="p-4 text-left">Name</th>
-                  <th className="p-4 text-left">Email</th>
-                  <th className="p-4 text-left">Role</th>
-                  <th className="p-4 text-left">University</th>
-                  <th className="p-4 text-left">Verification</th>
-                  <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-left">Action</th>
+                  <th className="p-4 text-left dark:text-dark-text">Name</th>
+                  <th className="p-4 text-left dark:text-dark-text">Email</th>
+                  <th className="p-4 text-left dark:text-dark-text">Role</th>
+                  <th className="p-4 text-left dark:text-dark-text">University</th>
+                  <th className="p-4 text-left dark:text-dark-text">Verification</th>
+                  <th className="p-4 text-left dark:text-dark-text">Status</th>
+                  <th className="p-4 text-left dark:text-dark-text">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-line dark:divide-dark-border">
                 {users.data?.items?.map((user) => (
                   <tr key={user.id}>
-                    <td className="p-4 font-semibold text-ink">{user.fullName}</td>
-                    <td className="p-4 text-muted">{user.email}</td>
+                    <td className="p-4 font-semibold text-ink dark:text-dark-text">{user.fullName}</td>
+                    <td className="p-4 text-muted dark:text-dark-muted">{user.email}</td>
                     <td className="p-4"><span className="badge">{user.role}</span></td>
-                    <td className="p-4 text-muted">{user.university?.name || "-"}</td>
+                    <td className="p-4 text-muted dark:text-dark-muted">{user.university?.name || "-"}</td>
                     <td className="p-4">{user.isVerified ? <span className="badge-green">Verified</span> : <span className="badge-gold">Unverified</span>}</td>
                     <td className="p-4">{user.isBanned ? <span className="badge-gold">Banned</span> : <span className="badge-green">Active</span>}</td>
                     <td className="p-4">

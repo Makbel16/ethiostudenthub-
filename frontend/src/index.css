@@ -19,6 +19,14 @@ body {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.dark body {
+  background:
+    linear-gradient(180deg, rgba(15, 122, 82, 0.12), rgba(13, 17, 23, 0) 340px),
+    radial-gradient(circle at top right, rgba(217, 154, 0, 0.15), transparent 320px),
+    #0D1117;
+  color: #E6EDF3;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -51,15 +59,15 @@ textarea {
   }
 
   .section-panel {
-    @apply border border-line bg-white shadow-sm;
+    @apply border border-line bg-white shadow-sm dark:border-dark-border dark:bg-dark-surface;
   }
 
   .surface-card {
-    @apply border border-line bg-white shadow-sm transition-colors;
+    @apply border border-line bg-white shadow-sm transition-colors dark:border-dark-border dark:bg-dark-surface;
   }
 
   .surface-card:hover {
-    @apply border-highland/50;
+    @apply border-highland/50 dark:border-highland/50;
   }
 
   .eyebrow {
@@ -80,46 +88,46 @@ textarea {
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-highland hover:text-highland disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-highland hover:text-highland disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:hover:border-highland dark:hover:text-highland;
   }
 
   .btn-ghost {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-mist hover:text-ink;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-mist hover:text-ink dark:text-dark-muted dark:hover:bg-dark-border dark:hover:text-dark-text;
   }
 
   .field-label {
-    @apply mb-1.5 block text-sm font-semibold text-ink;
+    @apply mb-1.5 block text-sm font-semibold text-ink dark:text-dark-text;
   }
 
   .input-field {
-    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-muted/70 focus:border-highland focus:outline-none;
+    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors placeholder:text-muted/70 focus:border-highland focus:outline-none dark:border-dark-border dark:bg-dark-border dark:text-dark-text dark:placeholder:text-dark-muted/70 dark:focus:border-highland dark:focus:bg-dark-surface;
   }
 
   .select-field {
-    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors focus:border-highland focus:outline-none;
+    @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm transition-colors focus:border-highland focus:outline-none dark:border-dark-border dark:bg-dark-border dark:text-dark-text dark:focus:border-highland dark:focus:bg-dark-surface;
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full border border-line bg-mist px-2.5 py-1 text-xs font-semibold text-ink/75;
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-mist px-2.5 py-1 text-xs font-semibold text-ink/75 dark:border-dark-border dark:bg-dark-border dark:text-dark-text/75;
   }
 
   .badge-green {
-    @apply inline-flex items-center gap-1 rounded-full border border-highland/20 bg-highland/10 px-2.5 py-1 text-xs font-semibold text-highland;
+    @apply inline-flex items-center gap-1 rounded-full border border-highland/20 bg-highland/10 px-2.5 py-1 text-xs font-semibold text-highland dark:bg-highland/20 dark:border-highland/30;
   }
 
   .badge-gold {
-    @apply inline-flex items-center gap-1 rounded-full border border-gold/25 bg-gold/10 px-2.5 py-1 text-xs font-semibold text-ink;
+    @apply inline-flex items-center gap-1 rounded-full border border-gold/25 bg-gold/10 px-2.5 py-1 text-xs font-semibold text-ink dark:bg-gold/20 dark:border-gold/40 dark:text-dark-text;
   }
 
   .stat-tile {
-    @apply border-l-4 border-highland bg-white px-5 py-4 shadow-sm;
+    @apply border-l-4 border-highland bg-white px-5 py-4 shadow-sm dark:bg-dark-surface;
   }
 
   .table-shell {
-    @apply overflow-hidden rounded-lg border border-line bg-white shadow-sm;
+    @apply overflow-hidden rounded-lg border border-line bg-white shadow-sm dark:border-dark-border dark:bg-dark-surface;
   }
 
   .empty-state {
-    @apply rounded-lg border border-dashed border-line bg-white/70 px-6 py-10 text-center text-sm text-muted;
+    @apply rounded-lg border border-dashed border-line bg-white/70 px-6 py-10 text-center text-sm text-muted dark:border-dark-border dark:bg-dark-surface/70 dark:text-dark-muted;
   }
 }

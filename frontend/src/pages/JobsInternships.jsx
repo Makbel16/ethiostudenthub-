@@ -110,7 +110,7 @@ export default function JobsInternships() {
   return (
     <div className="page-shell py-10">
       <div className="mb-8">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
           <Briefcase size={16} />
           Student Resources
         </div>
@@ -203,14 +203,14 @@ export default function JobsInternships() {
                         </div>
                       </div>
 
-                      <div className="mt-4 rounded-lg border border-line bg-paper p-3">
-                        <p className="text-xs font-semibold uppercase text-muted">Salary</p>
-                        <p className="mt-1 text-sm font-semibold text-ink">{job.salary}</p>
+                      <div className="mt-4 rounded-lg border border-line bg-paper p-3 dark:bg-dark-surface dark:border-dark-border">
+                        <p className="text-xs font-semibold uppercase text-muted dark:text-dark-muted">Salary</p>
+                        <p className="mt-1 text-sm font-semibold text-ink dark:text-dark-text">{job.salary}</p>
                       </div>
 
-                      <div className="mt-3 rounded-lg border border-line bg-paper p-3">
-                        <p className="text-xs font-semibold uppercase text-muted">Requirements</p>
-                        <p className="mt-1 text-sm text-ink">{job.requirements}</p>
+                      <div className="mt-3 rounded-lg border border-line bg-paper p-3 dark:bg-dark-surface dark:border-dark-border">
+                        <p className="text-xs font-semibold uppercase text-muted dark:text-dark-muted">Requirements</p>
+                        <p className="mt-1 text-sm text-ink dark:text-dark-text">{job.requirements}</p>
                       </div>
                     </div>
 
