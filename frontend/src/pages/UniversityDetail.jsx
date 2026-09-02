@@ -399,19 +399,26 @@ export default function UniversityDetail() {
         <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
           <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative">
-            <div className="mb-6 flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
-                <Info size={28} />
+            <div className="mb-8 flex items-center gap-4">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+                <Info size={32} />
               </span>
               <div>
-                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">About This Institution</h2>
-                <p className="text-slate-500 dark:text-dark-muted">Discover what makes this university special</p>
+                <h2 className="font-display text-4xl font-bold text-slate-800 dark:text-dark-text">About This Institution</h2>
+                <p className="mt-1 text-base font-medium text-slate-500 dark:text-dark-muted">Learn about the university's mission, vision, and unique qualities</p>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-inner dark:from-slate-700 dark:to-slate-800">
-              <p className="text-base leading-8 text-slate-700 dark:text-slate-300">
-                {item.description || "No description has been added for this institution yet."}
-              </p>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-8 shadow-inner border border-slate-100 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
+              <div className="flex items-start gap-4">
+                <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/5 text-highland">
+                  <GraduationCap size={24} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg leading-relaxed text-slate-700 dark:text-dark-text font-light">
+                    {item.description || "No description has been added for this institution yet."}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -714,7 +721,7 @@ export default function UniversityDetail() {
             ) : (
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {item.relatedResources?.map((resource) => (
-                  <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                  <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-slate-200 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
@@ -727,13 +734,13 @@ export default function UniversityDetail() {
                       </p>
                       <div className="mt-5 flex flex-wrap gap-2">
                         {resource.department?.name && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-dark-border dark:text-dark-muted">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-highland/10 px-3 py-1.5 text-xs font-semibold text-highland dark:bg-highland/20 dark:text-highland-light">
                             <Building2 size={12} />
                             {resource.department.name}
                           </span>
                         )}
                         {resource.courseCode && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                             <BookOpen size={12} />
                             {resource.courseCode}
                           </span>
@@ -770,7 +777,7 @@ export default function UniversityDetail() {
             ) : (
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {item.relatedUsefulLinks?.map((resource) => (
-                  <div key={resource.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
+                  <div key={resource.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-slate-200 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
