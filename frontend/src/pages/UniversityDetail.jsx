@@ -299,7 +299,7 @@ export default function UniversityDetail() {
                     </span>
                   </div>
 
-                  <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                  <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                     {item.name}
                   </h1>
                   {item.shortName && (
@@ -349,46 +349,46 @@ export default function UniversityDetail() {
 
         {/* Stats Overview - Premium with Green */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <GraduationCap size={22} className="text-white" />
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-4 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl group-hover:scale-110 transition-transform duration-300 dark:from-slate-700 dark:to-slate-600">
+                <GraduationCap size={18} className="text-slate-600 dark:text-slate-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{colleges.length}</p>
+                <p className="text-xl font-bold text-slate-800 dark:text-dark-text">{colleges.length}</p>
                 <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Colleges</p>
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <UsersRound size={22} className="text-white" />
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-4 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl group-hover:scale-110 transition-transform duration-300 dark:from-slate-700 dark:to-slate-600">
+                <UsersRound size={18} className="text-slate-600 dark:text-slate-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{departments.length}</p>
+                <p className="text-xl font-bold text-slate-800 dark:text-dark-text">{departments.length}</p>
                 <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Departments</p>
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <BookOpen size={22} className="text-white" />
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-4 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl group-hover:scale-110 transition-transform duration-300 dark:from-slate-700 dark:to-slate-600">
+                <BookOpen size={18} className="text-slate-600 dark:text-slate-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{item.relatedResources?.length || 0}</p>
+                <p className="text-xl font-bold text-slate-800 dark:text-dark-text">{item.relatedResources?.length || 0}</p>
                 <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Resources</p>
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-highland to-highland-dark rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <CalendarDays size={22} className="text-white" />
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-4 shadow-sm border border-slate-200/50 dark:border-dark-border/50 hover:shadow-xl hover:border-highland/50 transition-all duration-300 group">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl group-hover:scale-110 transition-transform duration-300 dark:from-slate-700 dark:to-slate-600">
+                <CalendarDays size={18} className="text-slate-600 dark:text-slate-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800 dark:text-dark-text">{item.calendarEvents?.length || 0}</p>
+                <p className="text-xl font-bold text-slate-800 dark:text-dark-text">{item.calendarEvents?.length || 0}</p>
                 <p className="text-xs font-medium text-slate-500 dark:text-dark-muted uppercase tracking-wider">Events</p>
               </div>
             </div>
@@ -396,25 +396,25 @@ export default function UniversityDetail() {
         </section>
 
         {/* ABOUT SECTION - Premium with Green */}
-        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-6 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
           <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative">
-            <div className="mb-8 flex items-center gap-4">
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
-                <Info size={32} />
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-lg dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
+                <Info size={24} />
               </span>
               <div>
-                <h2 className="font-display text-4xl font-bold text-slate-800 dark:text-dark-text">About This Institution</h2>
-                <p className="mt-1 text-base font-medium text-slate-500 dark:text-dark-muted">Learn about the university's mission, vision, and unique qualities</p>
+                <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">About This Institution</h2>
+                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-dark-muted">Learn about the university's mission, vision, and unique qualities</p>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-8 shadow-inner border border-slate-100 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
-              <div className="flex items-start gap-4">
-                <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/5 text-highland">
-                  <GraduationCap size={24} />
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-inner border border-slate-100 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
+              <div className="flex items-start gap-3">
+                <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
+                  <GraduationCap size={20} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-lg leading-relaxed text-slate-700 dark:text-dark-text font-light">
+                  <p className="text-base leading-relaxed text-slate-700 dark:text-dark-text font-light">
                     {item.description || "No description has been added for this institution yet."}
                   </p>
                 </div>
@@ -424,16 +424,16 @@ export default function UniversityDetail() {
         </section>
 
         {/* PROGRAMS AND COURSES - Premium with Green */}
-        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-8 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
+        <section className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-6 transition-all hover:shadow-2xl dark:bg-dark-surface/80 dark:border-dark-border/50 mb-8">
           <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative">
-            <div className="mb-6 flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
-                <GraduationCap size={28} />
+            <div className="mb-6 flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-lg dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
+                <GraduationCap size={24} />
               </span>
               <div>
                 <h2 className="font-display text-3xl font-bold text-slate-800 dark:text-dark-text">Programs & Courses</h2>
-                <p className="text-slate-500 dark:text-dark-muted">Explore academic programs and course offerings</p>
+                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-dark-muted">Explore the academic offerings and degree programs</p>
               </div>
             </div>
 
@@ -448,7 +448,7 @@ export default function UniversityDetail() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
-                      <Building2 size={14} className="text-highland" />
+                      <Building2 size={14} className="text-slate-600 dark:text-slate-400" />
                       College
                     </label>
                     <select
@@ -463,7 +463,7 @@ export default function UniversityDetail() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers size={14} className="text-highland" />
+                      <Layers size={14} className="text-slate-600 dark:text-slate-400" />
                       Department
                     </label>
                     <select
@@ -483,7 +483,7 @@ export default function UniversityDetail() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
-                      <CalendarDays size={14} className="text-highland" />
+                      <CalendarDays size={14} className="text-slate-600 dark:text-slate-400" />
                       Year
                     </label>
                     <select
@@ -503,7 +503,7 @@ export default function UniversityDetail() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 dark:text-dark-muted uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock size={14} className="text-highland" />
+                      <Clock size={14} className="text-slate-600 dark:text-slate-400" />
                       Semester
                     </label>
                     <select
@@ -531,24 +531,24 @@ export default function UniversityDetail() {
                 ) : (
                   <div className="space-y-6">
                     {/* Department Info - Premium */}
-                    <div className="bg-gradient-to-r from-highland/10 via-emerald-50 dark:via-emerald-900/20 to-highland/5 rounded-2xl p-6 border border-highland/20">
+                    <div className="bg-gradient-to-r from-slate-100 via-slate-50 dark:via-slate-800 to-slate-100 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <h3 className="text-2xl font-bold text-slate-800 dark:text-dark-text">{selectedDepartment.name}</h3>
                           {selectedDepartment.degreeAwarded && (
-                            <p className="text-highland font-semibold mt-1 flex items-center gap-2">
+                            <p className="text-slate-600 font-semibold mt-1 flex items-center gap-2 dark:text-slate-400">
                               <Award size={18} />
                               {selectedDepartment.degreeAwarded}
                             </p>
                           )}
                           <div className="flex flex-wrap gap-6 mt-3">
                             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-dark-muted">
-                              <CalendarDays size={16} className="text-highland" />
+                              <CalendarDays size={16} className="text-slate-600 dark:text-slate-400" />
                               <span className="font-medium">{selectedDepartment.durationYears ? `${selectedDepartment.durationYears} years` : "Duration not set"}</span>
                             </div>
                             {selectedDepartment.batches?.length > 0 && (
                               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-dark-muted">
-                                <UsersRound size={16} className="text-highland" />
+                                <UsersRound size={16} className="text-slate-600 dark:text-slate-400" />
                                 <span className="font-medium">{selectedDepartment.batches.reduce((sum, b) => sum + (b.capacity || 0), 0)} seats</span>
                               </div>
                             )}
@@ -568,7 +568,7 @@ export default function UniversityDetail() {
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <BookOpen size={18} className="text-highland" />
+                          <BookOpen size={18} className="text-slate-600 dark:text-slate-400" />
                           <span className="font-bold text-slate-700 dark:text-dark-text">
                             {selectedYear ? ordinal(selectedYear) : "All Years"} • {selectedSemester ? semesterLabel(selectedSemester) : "All Semesters"}
                           </span>
@@ -589,13 +589,13 @@ export default function UniversityDetail() {
                               <div className="relative">
                                 <div className="flex items-start justify-between">
                                   <p className="font-bold text-slate-800 dark:text-dark-text group-hover:text-highland transition">{course.title}</p>
-                                  <ChevronRight size={16} className="text-slate-300 dark:text-dark-muted group-hover:text-highland transition-transform group-hover:translate-x-1" />
+                                  <ChevronRight size={16} className="text-slate-300 dark:text-dark-muted group-hover:text-slate-600 transition-transform group-hover:translate-x-1" />
                                 </div>
                                 {course.code && (
                                   <p className="mt-1.5 text-xs font-semibold text-slate-400 dark:text-slate-400">{course.code}</p>
                                 )}
                                 {course.credits && (
-                                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-highland bg-highland/10 px-2.5 py-1 rounded-full">
+                                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full dark:text-slate-300 dark:bg-slate-700">
                                     <Award size={12} />
                                     {course.credits} credits
                                   </span>
@@ -618,7 +618,7 @@ export default function UniversityDetail() {
           <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative">
             <div className="mb-6 flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-xl dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                 <CalendarDays size={28} />
               </span>
               <div>
@@ -638,7 +638,7 @@ export default function UniversityDetail() {
                   <div key={event.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-5 shadow-sm transition-all hover:shadow-lg hover:border-highland/50 border border-transparent dark:from-dark-surface dark:to-dark-bg">
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
-                      <dt className="flex items-center gap-2 text-xs font-bold uppercase text-highland tracking-wider">
+                      <dt className="flex items-center gap-2 text-xs font-bold uppercase text-slate-600 tracking-wider dark:text-slate-400">
                         <Clock size={14} />
                         {CALENDAR_LABELS[event.type] || labelFromEnum(event.type)}
                       </dt>
@@ -657,7 +657,7 @@ export default function UniversityDetail() {
           <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative">
             <div className="mb-6 flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-xl">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-xl dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                 <Megaphone size={28} />
               </span>
               <div>
@@ -678,7 +678,7 @@ export default function UniversityDetail() {
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
                       <div className="flex items-start gap-4">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland/10 to-highland/5 text-highland">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                           <FileText size={20} />
                         </span>
                         <div className="flex-1">
@@ -724,7 +724,7 @@ export default function UniversityDetail() {
                   <Link key={resource.id} to={`/resources/${resource.id}`} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-slate-200 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-slate-100 to-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 border border-slate-300 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300 dark:border-slate-500">
                         <BookOpen size={12} />
                         {resource.type?.replaceAll("_", " ")}
                       </span>
@@ -734,7 +734,7 @@ export default function UniversityDetail() {
                       </p>
                       <div className="mt-5 flex flex-wrap gap-2">
                         {resource.department?.name && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-highland/10 px-3 py-1.5 text-xs font-semibold text-highland dark:bg-highland/20 dark:text-highland-light">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
                             <Building2 size={12} />
                             {resource.department.name}
                           </span>
@@ -780,7 +780,7 @@ export default function UniversityDetail() {
                   <div key={resource.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all hover:shadow-xl hover:border-highland/50 border border-slate-200 dark:from-dark-surface dark:to-dark-bg dark:border-dark-border">
                     <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-highland/10 to-highland/5 px-3 py-1.5 text-xs font-bold text-highland border border-highland/20">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-slate-100 to-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 border border-slate-300 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300 dark:border-slate-500">
                         <LinkIcon size={12} />
                         Useful Link
                       </span>
@@ -812,7 +812,7 @@ export default function UniversityDetail() {
             <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative">
               <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-lg dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                   <LinkIcon size={18} />
                 </span>
                 Quick Links
@@ -836,7 +836,7 @@ export default function UniversityDetail() {
             <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative">
               <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-lg dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                   <Phone size={18} />
                 </span>
                 Contact
@@ -877,7 +877,7 @@ export default function UniversityDetail() {
             <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative">
               <h2 className="mb-5 flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-dark-text">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-lg dark:from-slate-700 dark:to-slate-600 dark:text-slate-300">
                   <MapPin size={18} />
                 </span>
                 Location
@@ -908,13 +908,13 @@ function QuickLinkPremium({ icon: Icon, title, label, url, missingText }) {
       <div className="absolute inset-0 bg-gradient-to-br from-highland/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       <div className="relative">
         <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-dark-text">
-          <Icon size={16} className="text-highland" />
+          <Icon size={16} className="text-slate-600 dark:text-slate-400" />
           {title}
         </p>
         {url ? (
           <a href={url} className="mt-2 inline-flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:shadow-md hover:border-highland/50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text" {...externalLinkProps}>
             <span>{label}</span>
-            <ExternalLink size={14} className="text-slate-400 group-hover:text-highland transition-colors" />
+            <ExternalLink size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
           </a>
         ) : (
           <p className="mt-2 text-xs text-slate-500 dark:text-dark-muted">{missingText || `${title} not available`}</p>
@@ -954,7 +954,7 @@ function ContactRowPremium({ icon: Icon, label, children }) {
   return (
     <div>
       <dt className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-        <Icon size={14} className="text-highland" />
+        <Icon size={14} className="text-slate-600 dark:text-slate-400" />
         {label}
       </dt>
       <dd className="text-sm">{children}</dd>

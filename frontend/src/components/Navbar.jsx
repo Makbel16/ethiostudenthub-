@@ -77,7 +77,7 @@ const NAV_SECTIONS = [
   {
     label: "Explore",
     items: [
-      { to: "/", label: "Home", icon: HomeIcon },
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authOnly: true },
       { to: "/universities", label: "Universities", icon: Building2, topNav: true },
       { to: "/browse", label: "Browse", icon: Search, topNav: true },
     ],
@@ -86,7 +86,6 @@ const NAV_SECTIONS = [
     label: "Workspace",
     items: [
       { to: "/upload", label: "Upload", icon: UploadCloud, authOnly: true },
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authOnly: true },
     ],
   },
   {

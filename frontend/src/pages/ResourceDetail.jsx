@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +14,8 @@ import {
   Tag,
   Trash2,
   UserRound,
+  Bot,
+  Send,
 } from "lucide-react";
 import api from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -109,6 +111,13 @@ export default function ResourceDetail() {
   const [fileActionError, setFileActionError] = useState("");
   const [isOpeningFile, setIsOpeningFile] = useState(false);
   const [isDownloadingFile, setIsDownloadingFile] = useState(false);
+  
+  // AI Chat state
+  const [aiMessages, setAiMessages] = useState([]);
+  const [aiInputMessage, setAiInputMessage] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const aiMessagesEndRef = useRef(null);
 
   const {
     data: resource,
@@ -169,6 +178,47 @@ export default function ResourceDetail() {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [preview.data]);
+
+  // AI Chat functions
+  useEffect(() => {
+    aiMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [aiMessages]);
+
+  const sendAiMessage = async () => {
+    if (!aiInputMessage.trim()) return;
+
+    const userMessage = aiInputMessage.trim();
+    setAiInputMessage("");
+    setAiError(null);
+
+    try {
+      setAiLoading(true);
+      setAiMessages([...aiMessages, { role: "user", content: userMessage }]);
+
+      const response = await api.post("/ai/chat", {
+        message: userMessage,
+        context: `About resource: ${resource?.title}. ${resource?.description || ""}`,
+      });
+
+      setAiMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response.data.response },
+      ]);
+    } catch (error) {
+      console.error("Failed to send AI message:", error);
+      setAiError("Failed to get a response. Please try again.");
+      setAiMessages([...aiMessages, { role: "user", content: userMessage }]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAiKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendAiMessage();
+    }
+  };
 
   if (isLoading) return <p className="page-shell py-12 text-sm text-muted">Loading resource...</p>;
   if (isError || !resource) {
@@ -268,7 +318,7 @@ export default function ResourceDetail() {
   return (
     <div className="page-shell py-10">
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <article className="section-panel rounded-xl p-6 sm:p-8">
+        <article className="section-panel rounded-xl p-6 sm:p-8 max-h-[calc(187vh-100px)] overflow-y-auto">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
             <div>
               <div className="mb-4 flex flex-wrap gap-2">
@@ -408,7 +458,7 @@ export default function ResourceDetail() {
                     <iframe
                       src={preview.data}
                       title={`${resource.title} file preview`}
-                      className="h-[70vh] min-h-[420px] w-full bg-white dark:bg-dark-surface"
+                      className="h-[100vh] min-h-[420px] w-full bg-white dark:bg-dark-surface"
                     />
                   )}
                 </div>
@@ -539,14 +589,100 @@ export default function ResourceDetail() {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-highland/20 bg-highland-light p-5 dark:bg-highland/20 dark:border-highland/30">
-            <p className="font-semibold text-highland-dark">Keep the library useful</p>
-            <p className="mt-2 text-sm leading-6 text-highland-dark/75">
-              {isUsefulLinkResource
-                ? "Open links with care, add context in comments, and submit better references when you have them."
-                : "Download only what you need, add context in comments, and upload better copies when you have them."}
-            </p>
-          </div>
+          {user && (
+            <div className="rounded-xl border border-highland/20 bg-gradient-to-br from-highland/10 to-highland/5 p-5 dark:from-highland/20 dark:to-highland/10 dark:border-highland/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highland to-highland-dark text-white shadow-lg">
+                  <Bot size={24} />
+                </div>
+                <div>
+                  <p className="font-semibold text-highland-dark dark:text-highland-light text-base">AI Study Assistant</p>
+                  <p className="mt-0.5 text-xs text-highland-dark/75 dark:text-highland-light/75">Ask about this resource</p>
+                </div>
+              </div>
+              
+              <div className="mb-4 max-h-80 overflow-y-auto space-y-3 rounded-lg bg-white/50 dark:bg-dark-surface/50 p-3">
+                {aiMessages.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-highland/10 mx-auto mb-3">
+                      <Bot size={28} className="text-highland" />
+                    </div>
+                    <p className="text-sm font-medium text-highland-dark dark:text-highland-light mb-1">
+                      Ask a question about this material
+                    </p>
+                    <p className="text-xs text-highland-dark/60 dark:text-highland-light/60">
+                      I can help explain concepts, summarize content, or answer questions about this resource.
+                    </p>
+                  </div>
+                ) : (
+                  aiMessages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-full rounded-2xl px-4 py-3 text-sm ${
+                          message.role === "user"
+                            ? "bg-gradient-to-br from-highland to-highland-dark text-white shadow-md"
+                            : "bg-white text-ink shadow-sm dark:bg-dark-surface dark:text-dark-text"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {message.role === "assistant" && (
+                            <Bot size={16} className="shrink-0 mt-0.5 text-highland" />
+                          )}
+                          <div className="flex-1">
+                            <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                {aiLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white rounded-2xl px-4 py-3 text-sm shadow-sm dark:bg-dark-surface">
+                      <div className="flex items-center gap-2">
+                        <Bot size={16} className="text-highland" />
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-highland rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-highland rounded-full animate-bounce delay-100" />
+                          <div className="w-2 h-2 bg-highland rounded-full animate-bounce delay-200" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {aiError && (
+                  <div className="flex justify-start">
+                    <div className="bg-ember/10 border border-ember/30 rounded-2xl px-4 py-3 text-sm">
+                      <p className="text-ember font-medium">{aiError}</p>
+                    </div>
+                  </div>
+                )}
+                <div ref={aiMessagesEndRef} />
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={aiInputMessage}
+                  onChange={(e) => setAiInputMessage(e.target.value)}
+                  onKeyPress={handleAiKeyPress}
+                  placeholder="Ask a question..."
+                  className="flex-1 rounded-xl border border-highland/30 bg-white px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-highland focus:ring-2 focus:ring-highland/20 dark:bg-dark-surface dark:border-highland/40 dark:text-dark-text dark:placeholder:text-dark-muted shadow-sm"
+                  disabled={aiLoading}
+                />
+                <button
+                  onClick={sendAiMessage}
+                  disabled={aiLoading || !aiInputMessage.trim()}
+                  className="btn-primary px-4 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </div>
+          )}
         </aside>
       </div>
     </div>
