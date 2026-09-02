@@ -261,15 +261,15 @@ export default function UniversityDetail() {
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-300 dark:bg-emerald-700 rounded-full blur-3xl"></div>
             </div>
             
-            <div className="relative p-8 md:p-10 lg:p-12">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+            <div className="relative p-6 md:p-8 lg:p-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
                 {/* Logo */}
                 <div className="relative group">
-                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 dark:bg-dark-border/20 backdrop-blur-xl border-2 border-white/30 dark:border-dark-border/30 overflow-hidden shadow-2xl flex items-center justify-center">
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/10 dark:bg-dark-border/20 backdrop-blur-xl border-2 border-white/30 dark:border-dark-border/30 overflow-hidden shadow-2xl flex items-center justify-center">
                     {item.logoUrl ? (
                       <img src={item.logoUrl} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
-                      <Building2 size={56} className="text-white/80" />
+                      <Building2 size={48} className="text-white/80" />
                     )}
                   </div>
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-bg flex items-center justify-center">
@@ -322,22 +322,22 @@ export default function UniversityDetail() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 w-full lg:w-auto">
+                <div className="flex flex-col gap-2 w-full lg:w-auto">
                   <Link 
                     to={`/browse?universityId=${item.id}`}
-                    className="inline-flex items-center justify-center gap-2 bg-white dark:bg-dark-surface text-highland dark:text-highland-light px-8 py-4 rounded-2xl font-bold hover:bg-highland-light/10 dark:hover:bg-dark-border transition shadow-xl hover:shadow-2xl hover:scale-105 duration-300"
+                    className="inline-flex items-center justify-center gap-2 bg-white dark:bg-dark-surface text-highland dark:text-highland-light px-6 py-3 rounded-2xl font-bold hover:bg-highland-light/10 dark:hover:bg-dark-border transition shadow-xl hover:shadow-2xl hover:scale-105 duration-300"
                   >
-                    <BookOpen size={20} />
+                    <BookOpen size={18} />
                     Explore Resources
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </Link>
                   <div className="flex gap-2">
-                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
-                      <Heart size={18} />
+                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-3 py-2 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
+                      <Heart size={16} />
                       Save
                     </button>
-                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
-                      <Share2 size={18} />
+                    <button className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm text-white px-3 py-2 rounded-xl font-medium border border-white/30 dark:border-dark-border/30 hover:bg-white/30 dark:hover:bg-dark-border/40 transition">
+                      <Share2 size={16} />
                       Share
                     </button>
                   </div>
