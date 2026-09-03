@@ -20,7 +20,8 @@ export function AuthProvider({ children }) {
       setUser(data);
       // Fetch notifications on login
       await fetchNotifications();
-    } catch {
+    } catch (error) {
+      console.error("AuthContext loadUser error:", error);
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
     } finally {
