@@ -22,10 +22,10 @@
     "cloudinary": "^2.4.0",
     "zod": "^3.23.8",
     "nodemailer": "^6.9.14",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "prisma": "^5.18.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4",
-    "prisma": "^5.18.0"
+    "nodemon": "^3.1.4"
   }
 }
