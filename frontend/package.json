@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vite",
-    "build": "npx vite build",
-    "preview": "npx vite preview"
+    "dev": "npx vite@latest",
+    "build": "npx vite@latest build",
+    "preview": "npx vite@latest preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
