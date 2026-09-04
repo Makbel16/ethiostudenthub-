@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "prisma:generate": "./node_modules/.bin/prisma generate",
-    "prisma:migrate": "./node_modules/.bin/prisma migrate dev",
-    "prisma:migrate:deploy": "./node_modules/.bin/prisma migrate deploy",
+    "postinstall": "npx prisma@5.18.0 generate",
+    "prisma:generate": "npx prisma@5.18.0 generate",
+    "prisma:migrate": "npx prisma@5.18.0 migrate dev",
+    "prisma:migrate:deploy": "npx prisma@5.18.0 migrate deploy",
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
@@ -23,8 +24,7 @@
     "cloudinary": "^2.4.0",
     "zod": "^3.23.8",
     "nodemailer": "^6.9.14",
-    "socket.io": "^4.7.5",
-    "prisma": "^5.18.0"
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
