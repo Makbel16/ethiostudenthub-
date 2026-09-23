@@ -109,11 +109,15 @@ router.post("/chat", requireAuth, async (req, res) => {
       }
     }
 
-    // Add current user prompt
-    contents.push({
-      role: "user",
-      parts: [{ text: promptText }],
-    });
+    // Add current user prompt ensuring strictly alternating turns
+    if (contents.length > 0 && contents[contents.length - 1].role === "user") {
+      contents[contents.length - 1].parts[0].text += `\n\n${promptText}`;
+    } else {
+      contents.push({
+        role: "user",
+        parts: [{ text: promptText }],
+      });
+    }
 
     // Candidates prioritize modern models: gemini-3.6-flash, gemini-2.5-flash, gemini-2.5-pro
     const primaryModel = process.env.GEMINI_MODEL;
@@ -210,10 +214,30 @@ router.post("/chat", requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error("AI chat error:", error);
+    const detailMsg = error.errorData?.error?.message || error.message || "Failed to get AI response";
     res.status(500).json({ 
-      error: "Failed to get AI response",
-      response: "I'm sorry, but I'm having trouble connecting to the AI service. Please try again later."
+      error: detailMsg,
+      response: `AI service error: ${detailMsg}`
     });
+  }
+});
+
+// GET /api/ai/models - Diagnostic endpoint to check available models for current API key
+router.get("/models", requireAuth, async (req, res) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "No GEMINI_API_KEY set" });
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, {
+      headers: { "x-goog-api-key": apiKey },
+    });
+    const data = await response.json();
+    res.json({
+      status: response.status,
+      activeModel: cachedWorkingModel,
+      models: data.models?.map((m) => ({ name: m.name, methods: m.supportedGenerationMethods })) || data,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

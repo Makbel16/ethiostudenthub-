@@ -1,3 +1,6 @@
+
+
+
 import { useState, useEffect, useRef } from "react";
 import { Bot, Send, MessageSquare, Trash2, Plus, Sparkles } from "lucide-react";
 import api from "../api/client.js";
@@ -80,7 +83,13 @@ export default function AIAssistant() {
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      setError("Failed to get a response. Please try again.");
+      const detail =
+        error.response?.data?.error ||
+        error.response?.data?.response ||
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to get a response. Please try again.";
+      setError(detail);
       setMessages([...messages, { role: "user", content: userMessage }]);
     } finally {
       setLoading(false);
