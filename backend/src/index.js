@@ -45,6 +45,10 @@ const corsOrigin = (origin, callback) => {
 };
 
 const app = express();
+
+// Trust reverse proxy (e.g. Render, Heroku) so client IP and rate-limiting work properly
+app.set("trust proxy", process.env.TRUST_PROXY ? (isNaN(process.env.TRUST_PROXY) ? process.env.TRUST_PROXY : Number(process.env.TRUST_PROXY)) : 1);
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: corsOrigin, credentials: true },

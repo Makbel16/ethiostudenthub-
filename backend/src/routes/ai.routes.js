@@ -7,60 +7,126 @@ const router = Router();
 // POST /api/ai/chat - Send message to AI (Gemini via REST API)
 router.post("/chat", requireAuth, async (req, res) => {
   try {
-    const { message, conversationId } = req.body;
+    const { message, conversationId, context } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
       return res.status(500).json({ 
         error: "AI service not configured",
         response: "I'm sorry, but the AI service is not configured. Please add a GEMINI_API_KEY to your environment variables."
       });
     }
 
-    // Call Gemini API via REST (supports new AQ key format)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: message
-              }
-            ]
+    const trimmedMessage = message.trim();
+    const promptText = context && typeof context === "string" && context.trim()
+      ? `[Context: ${context.trim()}]\n\nQuestion: ${trimmedMessage}`
+      : trimmedMessage;
+
+    // Build multi-turn contents for Gemini
+    let contents = [];
+    let conversation;
+
+    if (conversationId) {
+      conversation = await prisma.conversation.findFirst({
+        where: { id: conversationId, userId: req.user.id },
+        include: {
+          messages: {
+            orderBy: { createdAt: "asc" },
+            take: 20,
+          },
+        },
+      });
+
+      if (conversation && conversation.messages?.length > 0) {
+        for (const msg of conversation.messages) {
+          const role = msg.role === "assistant" ? "model" : "user";
+          if (contents.length > 0 && contents[contents.length - 1].role === role) {
+            contents[contents.length - 1].parts[0].text += `\n${msg.content}`;
+          } else {
+            contents.push({
+              role,
+              parts: [{ text: msg.content }],
+            });
           }
-        ]
-      }),
+        }
+        // Ensure conversation starts with user turn
+        while (contents.length > 0 && contents[0].role !== "user") {
+          contents.shift();
+        }
+      }
+    }
+
+    // Add current user prompt
+    contents.push({
+      role: "user",
+      parts: [{ text: promptText }],
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    // Supported modern Gemini models with automatic fallback
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+    const modelsToTry = [primaryModel, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+      .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+
+    let aiResponse = null;
+    let lastError = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 2048,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(`Gemini API error with model '${model}':`, response.status, errorData);
+          lastError = new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+          if (response.status === 404) {
+            // Model not found for this endpoint/key, try next fallback
+            continue;
+          }
+          throw lastError;
+        }
+
+        const data = await response.json();
+        aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (aiResponse) {
+          break; // successfully received content
+        }
+      } catch (err) {
+        lastError = err;
+        if (!err.message?.includes("404")) {
+          throw err;
+        }
+      }
     }
 
-    const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I couldn't generate a response.";
+    if (!aiResponse) {
+      if (lastError) throw lastError;
+      aiResponse = "I apologize, but I couldn't generate a response.";
+    }
 
     // Save conversation if it doesn't exist
-    let conversation;
-    if (conversationId) {
-      conversation = await prisma.conversation.findUnique({
-        where: { id: conversationId },
-      });
-    }
-
     if (!conversation) {
       conversation = await prisma.conversation.create({
         data: {
           userId: req.user.id,
-          title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+          title: trimmedMessage.substring(0, 50) + (trimmedMessage.length > 50 ? "..." : ""),
         },
       });
     }
@@ -70,12 +136,12 @@ router.post("/chat", requireAuth, async (req, res) => {
       data: [
         {
           conversationId: conversation.id,
-          role: 'user',
-          content: message,
+          role: "user",
+          content: trimmedMessage,
         },
         {
           conversationId: conversation.id,
-          role: 'assistant',
+          role: "assistant",
           content: aiResponse,
         },
       ],
