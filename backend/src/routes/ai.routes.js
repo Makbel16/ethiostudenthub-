@@ -27,7 +27,7 @@ router.post("/chat", requireAuth, async (req, res) => {
     }
 
     // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
     const result = await model.generateContent(message);
     const aiResponse = result.response.text() || "I apologize, but I couldn't generate a response.";
