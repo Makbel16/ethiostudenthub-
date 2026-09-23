@@ -1,10 +1,16 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import prisma from "../config/prisma.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = Router();
 
-// POST /api/ai/chat - Send message to AI (Ollama)
+// Initialize Gemini AI
+const genAI = process.env.GEMINI_API_KEY 
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  : null;
+
+// POST /api/ai/chat - Send message to AI (Gemini)
 router.post("/chat", requireAuth, async (req, res) => {
   try {
     const { message, conversationId } = req.body;
@@ -13,30 +19,18 @@ router.post("/chat", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    // Call Ollama API
-    const ollamaResponse = await fetch(`${process.env.OLLAMA_URL || 'http://localhost:11434'}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: process.env.OLLAMA_MODEL || 'llama3.2',
-        messages: [
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-        stream: false,
-      }),
-    });
-
-    if (!ollamaResponse.ok) {
-      throw new Error('Ollama API request failed');
+    if (!genAI) {
+      return res.status(500).json({ 
+        error: "AI service not configured",
+        response: "I'm sorry, but the AI service is not configured. Please add a GEMINI_API_KEY to your environment variables."
+      });
     }
 
-    const ollamaData = await ollamaResponse.json();
-    const aiResponse = ollamaData.message?.content || "I apologize, but I couldn't generate a response.";
+    // Call Gemini API
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const result = await model.generateContent(message);
+    const aiResponse = result.response.text() || "I apologize, but I couldn't generate a response.";
 
     // Save conversation if it doesn't exist
     let conversation;
