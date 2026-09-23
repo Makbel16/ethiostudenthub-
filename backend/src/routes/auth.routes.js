@@ -36,7 +36,9 @@ const isTrustedClientOrigin = (origin) => {
       configuredClientOrigins.has(origin) ||
       ["localhost", "127.0.0.1", "::1"].includes(hostname) ||
       hostname.endsWith(".ngrok-free.app") ||
-      hostname.endsWith(".ngrok.app")
+      hostname.endsWith(".ngrok.app") ||
+      hostname.endsWith(".vercel.app") ||
+      hostname.endsWith(".onrender.com")
     );
   } catch {
     return false;
