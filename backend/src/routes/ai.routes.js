@@ -1,16 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import prisma from "../config/prisma.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = Router();
 
-// Initialize Gemini AI - supports both old AIza and new AQ key formats
-const genAI = process.env.GEMINI_API_KEY 
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
-
-// POST /api/ai/chat - Send message to AI (Gemini)
+// POST /api/ai/chat - Send message to AI (Gemini via REST API)
 router.post("/chat", requireAuth, async (req, res) => {
   try {
     const { message, conversationId } = req.body;
@@ -19,18 +13,40 @@ router.post("/chat", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    if (!genAI) {
+    if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ 
         error: "AI service not configured",
         response: "I'm sorry, but the AI service is not configured. Please add a GEMINI_API_KEY to your environment variables."
       });
     }
 
-    // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
-    const result = await model.generateContent(message);
-    const aiResponse = result.response.text() || "I apologize, but I couldn't generate a response.";
+    // Call Gemini API via REST (supports new AQ key format)
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: message
+              }
+            ]
+          }
+        ]
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini API error:', errorData);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I couldn't generate a response.";
 
     // Save conversation if it doesn't exist
     let conversation;
