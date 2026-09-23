@@ -4,6 +4,55 @@ import prisma from "../config/prisma.js";
 
 const router = Router();
 
+let cachedWorkingModel = null;
+
+async function listSupportedModels(apiKey) {
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, {
+      headers: { "x-goog-api-key": apiKey },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return (data.models || [])
+        .filter((m) => m.supportedGenerationMethods?.includes("generateContent"))
+        .map((m) => m.name.replace(/^models\//, ""));
+    }
+  } catch (err) {
+    console.error("Failed to query ModelService.ListModels:", err.message);
+  }
+  return [];
+}
+
+async function requestGenerateContent(model, apiKey, contents) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify({
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error(`Gemini API error with model '${model}':`, response.status, errorData);
+    const err = new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    err.status = response.status;
+    err.errorData = errorData;
+    throw err;
+  }
+
+  const data = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text;
+}
+
 // POST /api/ai/chat - Send message to AI (Gemini via REST API)
 router.post("/chat", requireAuth, async (req, res) => {
   try {
@@ -66,52 +115,54 @@ router.post("/chat", requireAuth, async (req, res) => {
       parts: [{ text: promptText }],
     });
 
-    // Supported modern Gemini models with automatic fallback
-    const primaryModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-    const modelsToTry = [primaryModel, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
-      .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+    // Candidates prioritize modern models: gemini-3.6-flash, gemini-2.5-flash, gemini-2.5-pro
+    const primaryModel = process.env.GEMINI_MODEL;
+    let modelsToTry = [
+      primaryModel,
+      cachedWorkingModel,
+      "gemini-3.6-flash",
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
+      "gemini-1.5-flash",
+    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
     let aiResponse = null;
     let lastError = null;
 
     for (const model of modelsToTry) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey,
-          },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 2048,
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(`Gemini API error with model '${model}':`, response.status, errorData);
-          lastError = new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-          if (response.status === 404) {
-            // Model not found for this endpoint/key, try next fallback
-            continue;
-          }
-          throw lastError;
-        }
-
-        const data = await response.json();
-        aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (aiResponse) {
-          break; // successfully received content
+        const text = await requestGenerateContent(model, apiKey, contents);
+        if (text) {
+          aiResponse = text;
+          cachedWorkingModel = model;
+          break;
         }
       } catch (err) {
         lastError = err;
-        if (!err.message?.includes("404")) {
+        if (err.status !== 404) {
+          // If error is not 404 (e.g. 429 quota or auth issue), don't try other models
           throw err;
+        }
+      }
+    }
+
+    // Fallback: If static candidates returned 404, query ModelService.ListModels dynamically
+    if (!aiResponse) {
+      console.log("Candidate models returned 404, querying available models from Google API...");
+      const availableModels = await listSupportedModels(apiKey);
+      console.log("Available generateContent models:", availableModels);
+      for (const model of availableModels) {
+        if (modelsToTry.includes(model)) continue;
+        try {
+          const text = await requestGenerateContent(model, apiKey, contents);
+          if (text) {
+            aiResponse = text;
+            cachedWorkingModel = model;
+            break;
+          }
+        } catch (err) {
+          lastError = err;
+          if (err.status !== 404) break;
         }
       }
     }
