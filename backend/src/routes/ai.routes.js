@@ -5,6 +5,17 @@ import prisma from "../config/prisma.js";
 const router = Router();
 
 let cachedWorkingModel = null;
+const modelCooloffs = new Map();
+
+function isAuthOrKeyError(err) {
+  if (!err) return false;
+  const status = err.status || err.code;
+  const msg = (err.message || "").toLowerCase();
+  if (status === 400 && (msg.includes("api_key_invalid") || msg.includes("api key not valid"))) return true;
+  if (status === 401) return true;
+  if (status === 403 && (msg.includes("api key") || msg.includes("permission_denied") || msg.includes("account suspended"))) return true;
+  return false;
+}
 
 async function listSupportedModels(apiKey) {
   try {
@@ -42,8 +53,9 @@ async function requestGenerateContent(model, apiKey, contents) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    console.error(`Gemini API error with model '${model}':`, response.status, errorData);
-    const err = new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    const message = errorData.error?.message || `${response.status} ${response.statusText}`;
+    console.error(`Gemini API error with model '${model}':`, response.status, message);
+    const err = new Error(message);
     err.status = response.status;
     err.errorData = errorData;
     throw err;
@@ -121,7 +133,7 @@ router.post("/chat", requireAuth, async (req, res) => {
 
     // Candidates prioritize modern models: gemini-3.8-flash, gemini-3.7-flash, gemini-3.6-flash, gemini-2.5-flash
     const primaryModel = process.env.GEMINI_MODEL;
-    let modelsToTry = [
+    let candidateModels = [
       primaryModel,
       cachedWorkingModel,
       "gemini-3.8-flash",
@@ -129,36 +141,63 @@ router.post("/chat", requireAuth, async (req, res) => {
       "gemini-3.6-flash",
       "gemini-2.5-flash",
       "gemini-2.5-pro",
-      "gemini-1.5-flash",
     ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+
+    // Prioritize models that are not in temporary cooloff due to high demand
+    const now = Date.now();
+    candidateModels.sort((a, b) => {
+      const coolA = (modelCooloffs.get(a) || 0) > now ? 1 : 0;
+      const coolB = (modelCooloffs.get(b) || 0) > now ? 1 : 0;
+      return coolA - coolB;
+    });
 
     let aiResponse = null;
     let lastError = null;
 
-    for (const model of modelsToTry) {
+    for (const model of candidateModels) {
       try {
+        console.log(`[AI] Attempting generation with model '${model}'...`);
         const text = await requestGenerateContent(model, apiKey, contents);
         if (text) {
           aiResponse = text;
           cachedWorkingModel = model;
+          modelCooloffs.delete(model);
           break;
         }
       } catch (err) {
         lastError = err;
-        if (err.status !== 404) {
-          // If error is not 404 (e.g. 429 quota or auth issue), don't try other models
+        if (cachedWorkingModel === model) {
+          cachedWorkingModel = null;
+        }
+
+        const isHighDemand =
+          err.status === 503 ||
+          err.status === 429 ||
+          (err.message && err.message.toLowerCase().includes("high demand"));
+
+        if (isHighDemand) {
+          // Put this model in a 60-second cooloff so it doesn't block subsequent immediate requests
+          modelCooloffs.set(model, Date.now() + 60 * 1000);
+          console.warn(`[AI] Model '${model}' is experiencing high demand (503/429). Falling back to next available model...`);
+        } else {
+          console.warn(`[AI] Model '${model}' failed with status ${err.status}: ${err.message}. Trying next candidate model...`);
+        }
+
+        // If the API key is completely invalid or revoked, fail immediately
+        if (isAuthOrKeyError(err)) {
           throw err;
         }
+        // Otherwise continue to next model (handles 404, 429, 503 high demand, 500, etc.)
       }
     }
 
-    // Fallback: If static candidates returned 404, query ModelService.ListModels dynamically
-    if (!aiResponse) {
-      console.log("Candidate models returned 404, querying available models from Google API...");
+    // Fallback: If static candidates failed, query ModelService.ListModels dynamically
+    if (!aiResponse && !isAuthOrKeyError(lastError)) {
+      console.log("Candidate models failed, querying available models from Google API dynamic listing...");
       const availableModels = await listSupportedModels(apiKey);
       console.log("Available generateContent models:", availableModels);
       for (const model of availableModels) {
-        if (modelsToTry.includes(model)) continue;
+        if (candidateModels.includes(model)) continue;
         try {
           const text = await requestGenerateContent(model, apiKey, contents);
           if (text) {
@@ -168,13 +207,20 @@ router.post("/chat", requireAuth, async (req, res) => {
           }
         } catch (err) {
           lastError = err;
-          if (err.status !== 404) break;
+          console.warn(`[AI] Dynamic fallback model '${model}' failed (${err.status}): ${err.message}`);
+          if (isAuthOrKeyError(err)) break;
         }
       }
     }
 
     if (!aiResponse) {
-      if (lastError) throw lastError;
+      if (lastError) {
+        if (isAuthOrKeyError(lastError)) throw lastError;
+        return res.status(503).json({
+          error: lastError.message || "All models are currently experiencing high demand",
+          response: "All AI models are currently experiencing high demand. Please wait a moment and try again."
+        });
+      }
       aiResponse = "I apologize, but I couldn't generate a response.";
     }
 
@@ -213,6 +259,7 @@ router.post("/chat", requireAuth, async (req, res) => {
     res.json({
       response: aiResponse,
       conversationId: conversation.id,
+      model: cachedWorkingModel || primaryModel || "gemini-3.8-flash",
     });
   } catch (error) {
     console.error("AI chat error:", error);

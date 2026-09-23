@@ -64,6 +64,7 @@ export default function AIAssistant() {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [activeModel, setActiveModel] = useState("Gemini 3.8 Flash");
 
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
@@ -245,6 +246,24 @@ export default function AIAssistant() {
 
       streamResponse(fullReply, assistantMessageIndex);
 
+      if (response.data.model) {
+        const raw = response.data.model;
+        const formatted = raw
+          .replace(/^models\//, "")
+          .split("-")
+          .map((w) =>
+            w.toLowerCase() === "gemini"
+              ? "Gemini"
+              : w.toLowerCase() === "flash"
+              ? "Flash"
+              : w.toLowerCase() === "pro"
+              ? "Pro"
+              : w
+          )
+          .join(" ");
+        setActiveModel(formatted);
+      }
+
       if (response.data.conversationId) {
         if (!currentConversation) {
           setCurrentConversation({ id: response.data.conversationId });
@@ -309,7 +328,7 @@ export default function AIAssistant() {
               </h2>
               <span className="inline-flex items-center gap-1 text-[10px] font-medium text-highland dark:text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-highland animate-pulse" />
-                Gemini 3.8 Flash
+                {activeModel}
               </span>
             </div>
           </div>
@@ -425,7 +444,7 @@ export default function AIAssistant() {
                 {currentConversation?.title || "New Study Chat"}
               </span>
               <span className="hidden sm:inline-flex items-center rounded-md border border-highland/30 bg-highland/10 px-2 py-0.5 text-[10px] font-semibold text-highland dark:bg-highland/20 dark:text-emerald-300">
-                Gemini 3.8 Flash
+                {activeModel}
               </span>
             </div>
           </div>
@@ -586,7 +605,7 @@ export default function AIAssistant() {
                 <div className="rounded-2xl border border-line bg-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface">
                   <div className="flex items-center gap-2 text-xs text-muted">
                     <span className="inline-block h-2 w-2 rounded-full bg-highland animate-ping" />
-                    <span>Thinking with Gemini 3.8 Flash...</span>
+                    <span>Thinking with {activeModel}...</span>
                   </div>
                 </div>
               </div>
@@ -600,12 +619,20 @@ export default function AIAssistant() {
                     <h5 className="font-semibold text-xs uppercase tracking-wide">Error</h5>
                     <p className="mt-1 text-xs leading-relaxed">{error}</p>
                   </div>
-                  <button
-                    onClick={() => setError(null)}
-                    className="text-xs font-semibold underline hover:no-underline"
-                  >
-                    Dismiss
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleRegenerate}
+                      className="rounded-lg bg-ember px-2.5 py-1 text-xs font-semibold text-white hover:bg-ember/90 transition-colors shadow-sm"
+                    >
+                      Retry
+                    </button>
+                    <button
+                      onClick={() => setError(null)}
+                      className="text-xs font-semibold underline hover:no-underline"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
