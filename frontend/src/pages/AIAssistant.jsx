@@ -65,10 +65,11 @@ export default function AIAssistant() {
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedIndex, setCopiedIndex] = useState(null);
 
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
   const typingTimerRef = useRef(null);
   const abortTypingRef = useRef(false);
+  const isAutoScrollActive = useRef(true);
 
   useEffect(() => {
     fetchConversations();
@@ -82,8 +83,19 @@ export default function AIAssistant() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior = "smooth") => {
+    if (!chatContainerRef.current || !isAutoScrollActive.current) return;
+    chatContainerRef.current.scrollTo({
+      top: chatContainerRef.current.scrollHeight,
+      behavior,
+    });
+  };
+
+  const handleChatScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Keep auto-scroll active if user is near bottom
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isAutoScrollActive.current = atBottom;
   };
 
   // Auto-resize textarea as user types
@@ -208,6 +220,7 @@ export default function AIAssistant() {
 
     setInputMessage("");
     setError(null);
+    isAutoScrollActive.current = true;
 
     // Optimistically push user message + blank assistant placeholder
     const nextMessages = [
@@ -429,8 +442,12 @@ export default function AIAssistant() {
           </div>
         </header>
 
-        {/* Messages Stream Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+        {/* Messages Stream Area (Internal Scroller Only) */}
+        <div
+          ref={chatContainerRef}
+          onScroll={handleChatScroll}
+          className="flex-1 overflow-y-auto px-4 py-6 md:px-8"
+        >
           <div className="mx-auto max-w-3xl space-y-6">
             {/* EMPTY STATE: 3D Orb + ChatGPT-style Welcome */}
             {messages.length === 0 && (
@@ -593,7 +610,7 @@ export default function AIAssistant() {
               </div>
             )}
 
-            <div ref={messagesEndRef} />
+            <div className="h-6" />
           </div>
         </div>
 
