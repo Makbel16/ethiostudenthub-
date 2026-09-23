@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import prisma from "../config/prisma.js";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = Router();
 
-// Initialize Gemini AI with new SDK
-const ai = process.env.GEMINI_API_KEY 
-  ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+// Initialize Gemini AI - supports both old AIza and new AQ key formats
+const genAI = process.env.GEMINI_API_KEY 
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
   : null;
 
 // POST /api/ai/chat - Send message to AI (Gemini)
@@ -19,20 +19,18 @@ router.post("/chat", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    if (!ai) {
+    if (!genAI) {
       return res.status(500).json({ 
         error: "AI service not configured",
         response: "I'm sorry, but the AI service is not configured. Please add a GEMINI_API_KEY to your environment variables."
       });
     }
 
-    // Call Gemini API with new SDK
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: message,
-    });
+    // Call Gemini API
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const aiResponse = response.text || "I apologize, but I couldn't generate a response.";
+    const result = await model.generateContent(message);
+    const aiResponse = result.response.text() || "I apologize, but I couldn't generate a response.";
 
     // Save conversation if it doesn't exist
     let conversation;
