@@ -309,7 +309,7 @@ export default function AIAssistant() {
               </h2>
               <span className="inline-flex items-center gap-1 text-[10px] font-medium text-highland dark:text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-highland animate-pulse" />
-                Gemini 3.6 Flash
+                Gemini 3.8 Flash
               </span>
             </div>
           </div>
@@ -425,7 +425,7 @@ export default function AIAssistant() {
                 {currentConversation?.title || "New Study Chat"}
               </span>
               <span className="hidden sm:inline-flex items-center rounded-md border border-highland/30 bg-highland/10 px-2 py-0.5 text-[10px] font-semibold text-highland dark:bg-highland/20 dark:text-emerald-300">
-                Gemini 3.6 Flash
+                Gemini 3.8 Flash
               </span>
             </div>
           </div>
@@ -586,7 +586,7 @@ export default function AIAssistant() {
                 <div className="rounded-2xl border border-line bg-surface px-4 py-3 dark:border-dark-border dark:bg-dark-surface">
                   <div className="flex items-center gap-2 text-xs text-muted">
                     <span className="inline-block h-2 w-2 rounded-full bg-highland animate-ping" />
-                    <span>Thinking with Gemini 3.6 Flash...</span>
+                    <span>Thinking with Gemini 3.8 Flash...</span>
                   </div>
                 </div>
               </div>

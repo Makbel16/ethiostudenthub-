@@ -119,11 +119,13 @@ router.post("/chat", requireAuth, async (req, res) => {
       });
     }
 
-    // Candidates prioritize modern models: gemini-3.6-flash, gemini-2.5-flash, gemini-2.5-pro
+    // Candidates prioritize modern models: gemini-3.8-flash, gemini-3.7-flash, gemini-3.6-flash, gemini-2.5-flash
     const primaryModel = process.env.GEMINI_MODEL;
     let modelsToTry = [
       primaryModel,
       cachedWorkingModel,
+      "gemini-3.8-flash",
+      "gemini-3.7-flash",
       "gemini-3.6-flash",
       "gemini-2.5-flash",
       "gemini-2.5-pro",
