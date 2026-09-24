@@ -28,8 +28,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Fraunces", "serif"],
-        body: ["Inter", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
+        body: ["Plus Jakarta Sans", "Inter", "sans-serif"],
         mono: ["IBM Plex Mono", "monospace"],
       },
       animation: {

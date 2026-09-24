@@ -259,69 +259,94 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-paper text-ink transition-colors dark:bg-dark-bg dark:text-dark-text overflow-hidden">
       {/* ========================================================================= */}
-      {/* 1. HERO SECTION WITH 3D ACADEMIC UNIVERSE */}
+      {/* 1. HERO SECTION (3D PLANET ON LEFT, CLEAN SPACIOUS CONTENT ON RIGHT) */}
       {/* ========================================================================= */}
-      <section className="relative pt-12 pb-20 md:pt-16 md:pb-28 overflow-hidden">
+      <section className="relative pt-8 pb-16 md:pt-14 md:pb-24 overflow-hidden">
         {/* Ambient atmospheric glows */}
         <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-highland/10 blur-[130px] dark:bg-highland/20" />
         <div className="pointer-events-none absolute top-1/4 -right-32 h-[550px] w-[550px] rounded-full bg-gold/10 blur-[140px] dark:bg-gold/15" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 h-[400px] w-[400px] rounded-full bg-blue-500/10 blur-[120px] dark:bg-blue-600/10" />
 
         <div className="page-shell relative">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
-            {/* Left Column: Hero Text & Search */}
-            <div className="space-y-8 text-left">
-              {/* Shimmering Top Pill */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-highland/30 bg-surface/80 px-4 py-1.5 text-xs font-semibold text-highland shadow-sm backdrop-blur-md dark:border-highland/40 dark:bg-dark-surface/80 dark:text-emerald-400">
-                <span className="flex h-2 w-2 rounded-full bg-highland animate-ping" />
-                <Sparkles size={14} className="text-gold" />
-                <span>Ethiopia's National Higher Education Academic Hub</span>
-              </div>
+          <div className="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
+            {/* Left Column: 3D Animated Planet (University Constellation) */}
+            <div className="relative flex items-center justify-center order-2 lg:order-1">
+              <div className="relative w-full max-w-[500px] rounded-3xl border border-line/80 bg-surface/40 p-2 shadow-2xl backdrop-blur-xl dark:border-dark-border/80 dark:bg-dark-surface/40">
+                {/* 3D Campus Universe */}
+                <AcademicUniverse3D
+                  onSelectCampus={(campus) => {
+                    navigate(`/universities?q=${encodeURIComponent(campus.name)}`);
+                  }}
+                />
 
+                {/* Floating Micro-Cards around 3D core */}
+                <div className="absolute -bottom-3 -left-3 hidden sm:flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-highland/10 text-highland dark:bg-highland/20">
+                    <GraduationCap size={18} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-ink dark:text-white">15,000+ Exam Papers</p>
+                    <p className="text-[10px] text-muted dark:text-dark-muted">AAU, ASTU, Jimma & more</p>
+                  </div>
+                </div>
+
+                <div className="absolute -top-3 -right-3 hidden sm:flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float" style={{ animationDelay: "1.5s" }}>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold/10 text-gold dark:bg-gold/20">
+                    <Bot size={18} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-ink dark:text-white">Gemini 3.8 Flash</p>
+                    <p className="text-[10px] text-muted dark:text-dark-muted">Active AI Study Tutor</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Clean, Spacious, User-Friendly Hero Content */}
+            <div className="space-y-6 text-left order-1 lg:order-2">
               {/* Main Headline */}
               <div className="space-y-3">
-                <h1 className="font-display text-4xl font-bold tracking-tight text-ink sm:text-6xl lg:text-6xl xl:text-7xl leading-[1.08] dark:text-white">
-                  Every University.{" "}
+                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-ink dark:text-white leading-[1.12]">
+                  All Ethiopian Universities.{" "}
                   <span className="block bg-gradient-to-r from-highland via-emerald-600 to-gold bg-clip-text text-transparent">
-                    Every Course & Exam.
+                    One Academic Hub.
                   </span>
-                  One Unified Hub.
                 </h1>
-                <p className="max-w-xl text-base sm:text-lg leading-relaxed text-muted dark:text-dark-muted font-normal">
-                  Stop digging through scattered Telegram channels. Access 15,000+ verified past midterms, finals, lecture slides, and official campus portals across 50+ Ethiopian universities — with an AI tutor powered by Gemini 3.8 Flash.
+                <p className="text-base sm:text-lg text-muted dark:text-dark-muted font-normal leading-relaxed max-w-lg">
+                  Access verified past exams, lecture notes, official campus portals, and AI study help across 50+ Ethiopian universities.
                 </p>
               </div>
 
               {/* Omnibar Interactive Search */}
-              <div className="max-w-xl space-y-3">
+              <div className="max-w-xl space-y-2.5">
                 <form
                   onSubmit={handleSearchSubmit}
                   className="group relative flex items-center rounded-2xl border-2 border-line bg-surface p-1.5 shadow-xl transition-all focus-within:border-highland focus-within:ring-4 focus-within:ring-highland/15 dark:border-dark-border dark:bg-dark-surface"
                 >
                   <div className="flex pl-3 text-muted dark:text-dark-muted">
-                    <Search size={22} className="group-focus-within:text-highland transition-colors" />
+                    <Search size={20} className="group-focus-within:text-highland transition-colors" />
                   </div>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder='Search e.g. "AAU CoSc2012 Final", "ASTU Mechanics", "Jimma Medicine"...'
-                    className="w-full bg-transparent px-3 py-3 text-sm sm:text-base text-ink placeholder:text-muted/70 focus:outline-none dark:text-white"
+                    className="w-full bg-transparent px-3 py-2.5 text-sm sm:text-base text-ink placeholder:text-muted/70 focus:outline-none dark:text-white"
                   />
                   <button
                     type="submit"
-                    className="btn-primary rounded-xl px-5 py-3 text-sm font-semibold shadow-md whitespace-nowrap"
+                    className="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold shadow-md whitespace-nowrap"
                   >
-                    Search Vault
+                    Search
                   </button>
                 </form>
 
                 {/* Trending Search Chips */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted dark:text-dark-muted mr-1 flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <span className="text-[11px] font-semibold text-muted dark:text-dark-muted mr-1 flex items-center gap-1">
                     <TrendingUp size={12} className="text-highland" /> Trending:
                   </span>
-                  {TRENDING_SEARCHES.map((chip) => (
+                  {TRENDING_SEARCHES.slice(0, 4).map((chip) => (
                     <button
                       key={chip.label}
                       onClick={() => navigate(`/browse?q=${encodeURIComponent(chip.query)}`)}
@@ -333,81 +358,59 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* CTA Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
                   to="/universities"
-                  className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold shadow-lg shadow-highland/20 hover:scale-[1.02] transition-transform"
+                  className="btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg shadow-highland/20 hover:scale-[1.02] transition-transform"
                 >
-                  <Building2 size={18} />
+                  <Building2 size={17} />
                   Explore 50+ Campuses
-                  <ArrowRight size={16} />
-                </Link>
-
-                <Link
-                  to="/ai-assistant"
-                  className="inline-flex items-center gap-2 rounded-xl border border-highland/30 bg-highland/10 px-5 py-3.5 text-sm font-semibold text-highland transition-all hover:bg-highland/20 dark:border-highland/40 dark:bg-highland/20 dark:text-emerald-300"
-                >
-                  <Bot size={18} />
-                  Gemini 3.8 AI Tutor
+                  <ArrowRight size={15} />
                 </Link>
 
                 <Link
                   to="/browse?type=PREVIOUS_EXAM"
-                  className="btn-secondary inline-flex items-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold"
+                  className="btn-secondary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
                 >
-                  <FileText size={18} />
+                  <FileText size={17} />
                   Past Exam Vault
+                </Link>
+
+                <Link
+                  to="/ai-assistant"
+                  className="inline-flex items-center gap-2 rounded-xl border border-highland/30 bg-highland/10 px-4 py-3 text-sm font-semibold text-highland transition-all hover:bg-highland/20 dark:border-highland/40 dark:bg-highland/20 dark:text-emerald-300"
+                >
+                  <Bot size={17} />
+                  Gemini 3.8 AI Tutor
                 </Link>
               </div>
 
-              {/* Quick Trust Stat Pills */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-line/70 dark:border-dark-border/70">
-                {PLATFORM_STATS.map((stat) => (
-                  <div key={stat.label} className="text-left">
-                    <p className="font-display text-2xl font-bold text-ink dark:text-white leading-none">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
-                      {stat.label}
-                    </p>
-                    <p className="text-[11px] text-muted dark:text-dark-muted hidden sm:block">
-                      {stat.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Column: Interactive 3D Academic Universe Component */}
-            <div className="relative flex items-center justify-center">
-              <div className="relative w-full max-w-[540px] rounded-3xl border border-line/80 bg-surface/40 p-2 shadow-2xl backdrop-blur-xl dark:border-dark-border/80 dark:bg-dark-surface/40">
-                {/* 3D Campus Universe */}
-                <AcademicUniverse3D
-                  onSelectCampus={(campus) => {
-                    navigate(`/universities?q=${encodeURIComponent(campus.name)}`);
-                  }}
-                />
-
-                {/* Floating Micro-Cards around 3D core */}
-                <div className="absolute -bottom-4 -left-4 hidden sm:flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-highland/10 text-highland dark:bg-highland/20">
-                    <GraduationCap size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-ink dark:text-white">15,000+ Exam Papers</p>
-                    <p className="text-[11px] text-muted dark:text-dark-muted">AAU, ASTU, Jimma & more</p>
-                  </div>
+              {/* Simple Clean Stats */}
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-line/70 dark:border-dark-border/70 max-w-lg">
+                <div>
+                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
+                    50+
+                  </p>
+                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
+                    Universities
+                  </p>
                 </div>
-
-                <div className="absolute -top-4 -right-4 hidden sm:flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float" style={{ animationDelay: "1.5s" }}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 text-gold dark:bg-gold/20">
-                    <Bot size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-ink dark:text-white">Gemini 3.8 Flash</p>
-                    <p className="text-[11px] text-muted dark:text-dark-muted">Active AI Study Tutor</p>
-                  </div>
+                <div>
+                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
+                    15,000+
+                  </p>
+                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
+                    Past Exams
+                  </p>
+                </div>
+                <div>
+                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
+                    85,000+
+                  </p>
+                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
+                    Students
+                  </p>
                 </div>
               </div>
             </div>
@@ -434,12 +437,9 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 3. LIVE INTERACTIVE STUDENT OS SIMULATOR */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-28 relative">
+      <section className="py-16 sm:py-24 relative">
         <div className="page-shell">
-          <div className="mx-auto max-w-3xl text-center mb-12 space-y-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-highland/30 bg-highland/10 px-3 py-1 text-xs font-semibold text-highland dark:bg-highland/20 dark:text-emerald-400">
-              <Zap size={14} /> Interactive Student Experience
-            </div>
+          <div className="mx-auto max-w-3xl text-center mb-10 space-y-2.5">
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl dark:text-white">
               The Student Operating System in Action
             </h2>
