@@ -15,6 +15,7 @@ export default function AcademicUniverse3D({ onSelectCampus }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [hoveredNode, setHoveredNode] = useState(null);
+  const hoveredNodeRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -108,12 +109,15 @@ export default function AcademicUniverse3D({ onSelectCampus }) {
           }
         }
       }
-      setHoveredNode(found);
+      if (found?.name !== hoveredNodeRef.current?.name) {
+        hoveredNodeRef.current = found;
+        setHoveredNode(found);
+      }
     };
 
     const handleClick = () => {
-      if (hoveredNode && onSelectCampus) {
-        onSelectCampus(hoveredNode);
+      if (hoveredNodeRef.current && onSelectCampus) {
+        onSelectCampus(hoveredNodeRef.current);
       }
     };
 
@@ -242,7 +246,7 @@ export default function AcademicUniverse3D({ onSelectCampus }) {
           z: z2,
           scale,
           depthAlpha,
-          renderedSize: node.size * scale * (hoveredNode?.name === node.name ? 1.4 : 1),
+          renderedSize: node.size * scale * (hoveredNodeRef.current?.name === node.name ? 1.4 : 1),
         };
       });
 
@@ -303,7 +307,7 @@ export default function AcademicUniverse3D({ onSelectCampus }) {
 
       // Draw nodes and badges
       projected.forEach((node) => {
-        const isHovered = hoveredNode?.name === node.name;
+        const isHovered = hoveredNodeRef.current?.name === node.name;
 
         // Outer glow
         const glowRadius = node.renderedSize * (isHovered ? 3.5 : 2.2);
@@ -378,7 +382,7 @@ export default function AcademicUniverse3D({ onSelectCampus }) {
       canvas.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [hoveredNode, onSelectCampus]);
+  }, [onSelectCampus]);
 
   return (
     <div

@@ -6,6 +6,7 @@ import {
   BookOpen,
   Building2,
   CheckCircle2,
+  Download,
   FileText,
   GraduationCap,
   Search,
