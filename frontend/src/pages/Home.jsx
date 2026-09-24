@@ -306,8 +306,8 @@ export default function Home() {
             <div className="space-y-6 text-left order-1 lg:order-2">
               {/* Main Headline */}
               <div className="space-y-3">
-                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-ink dark:text-white leading-[1.12]">
-                  All Ethiopian Universities.{" "}
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-bold tracking-tight text-ink dark:text-white leading-tight">
+                  <span className="block sm:whitespace-nowrap">All Ethiopian Universities.</span>
                   <span className="block bg-gradient-to-r from-highland via-emerald-600 to-gold bg-clip-text text-transparent">
                     One Academic Hub.
                   </span>
