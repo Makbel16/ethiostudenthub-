@@ -367,7 +367,7 @@ export default function Admin() {
               key={resource.id}
               resource={resource}
               onApprove={(id) => moderate.mutate({ id, status: "APPROVED" })}
-              onReject={(id) => moderate.mutate({ id, status: "REJECTED" })}
+              onReject={(id, reason) => moderate.mutate({ id, status: "REJECTED", reason })}
               isPending={moderate.isPending}
             />
           ))}
