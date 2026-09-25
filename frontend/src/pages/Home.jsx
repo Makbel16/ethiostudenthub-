@@ -273,16 +273,6 @@ export default function Home() {
                     <p className="text-[10px] text-muted dark:text-dark-muted">AAU, ASTU, Jimma & more</p>
                   </div>
                 </div>
-
-                <div className="absolute -top-3 -right-3 hidden sm:flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float" style={{ animationDelay: "1.5s" }}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold/10 text-gold dark:bg-gold/20">
-                    <Bot size={18} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-ink dark:text-white">Gemini 3.8 Flash</p>
-                    <p className="text-[10px] text-muted dark:text-dark-muted">Active AI Study Tutor</p>
-                  </div>
-                </div>
               </div>
             </div>
 
