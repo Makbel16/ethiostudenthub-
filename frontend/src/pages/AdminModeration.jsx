@@ -16,6 +16,9 @@ import {
   Clock,
   Sparkles,
   Layers,
+  Lock,
+  Activity,
+  Check,
 } from "lucide-react";
 import api from "../api/client.js";
 import ModerationResourceCard, {
@@ -122,41 +125,106 @@ export default function AdminModeration() {
       {/* ========================================================================= */}
       {/* 1. ADVANCED MODERATION COCKPIT HEADER */}
       {/* ========================================================================= */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-line/70 dark:border-dark-border/70 pb-8">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck size={16} />
-            <span>Anti-Malware & Content Moderation Console</span>
+      <div className="relative overflow-hidden rounded-3xl border border-line/80 bg-gradient-to-br from-surface via-surface/95 to-mist/40 p-6 sm:p-8 shadow-sm backdrop-blur-md dark:border-dark-border dark:from-dark-surface dark:via-dark-surface dark:to-dark-bg/60">
+        {/* Decorative Top Accent Glow Line */}
+        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-500 via-highland to-amber-500 opacity-90" />
+
+        {/* Ambient Radiant Glow in Background */}
+        <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          {/* Left Column: Shield Icon, Tag, Title, Subtitle, and Security Chips */}
+          <div className="space-y-4 max-w-3xl">
+            {/* Top Security Status Bar */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-extrabold tracking-wide uppercase text-emerald-700 dark:text-emerald-400 shadow-sm font-mono">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <span>Anti-Malware & Content Moderation Console</span>
+              </span>
+
+              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-line/60 bg-paper/80 px-3 py-1 text-xs font-semibold text-muted dark:border-dark-border/60 dark:bg-dark-bg/80 dark:text-dark-muted shadow-sm">
+                <Lock size={12} className="text-highland" />
+                <span>Protected Sandbox Active</span>
+              </span>
+            </div>
+
+            {/* Title Block with Icon */}
+            <div className="flex items-start gap-4">
+              <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500/20 via-highland/20 to-teal-500/20 text-highland dark:text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                <ShieldCheck size={30} />
+              </div>
+              <div>
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-ink dark:text-white leading-tight">
+                  Resource Moderation & Safety Center
+                </h1>
+                <p className="mt-2 text-xs sm:text-sm text-muted dark:text-dark-muted leading-relaxed">
+                  Inspect uploaded documents, videos, and links in a protected sandbox. Verify academic legitimacy before publishing to Ethiopian university students.
+                </p>
+              </div>
+            </div>
+
+            {/* Trust and Safety Feature Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-paper/80 dark:bg-dark-bg/80 border border-line/60 dark:border-dark-border/60 px-3 py-1.5 text-[11px] font-semibold text-ink/80 dark:text-dark-text/80 shadow-sm">
+                <Check size={12} className="text-emerald-500" />
+                Zero-Execution Isolation
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-paper/80 dark:bg-dark-bg/80 border border-line/60 dark:border-dark-border/60 px-3 py-1.5 text-[11px] font-semibold text-ink/80 dark:text-dark-text/80 shadow-sm">
+                <Check size={12} className="text-emerald-500" />
+                Higher Ed Academic Integrity
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-paper/80 dark:bg-dark-bg/80 border border-line/60 dark:border-dark-border/60 px-3 py-1.5 text-[11px] font-semibold text-ink/80 dark:text-dark-text/80 shadow-sm">
+                <Check size={12} className="text-emerald-500" />
+                In-App Cinema Video Streaming
+              </span>
+            </div>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-ink dark:text-white">
-            Resource Moderation & Safety Center
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-muted dark:text-dark-muted max-w-2xl leading-relaxed">
-            Inspect uploaded documents, videos, and links in a protected sandbox. Verify academic legitimacy before publishing to Ethiopian university students.
-          </p>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setExpandAll((prev) => !prev)}
-            className="btn-secondary text-xs py-2.5 px-4 inline-flex items-center gap-2 shadow-sm"
-          >
-            {expandAll ? <EyeOff size={15} /> : <Eye size={15} />}
-            <span>{expandAll ? "Collapse All In-App Players" : "Expand All In-App Players"}</span>
-          </button>
+          {/* Right Column: High-Impact Action Controls Dock */}
+          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            {/* Expand / Collapse In-App Players Button */}
+            <button
+              type="button"
+              onClick={() => setExpandAll((prev) => !prev)}
+              className={`inline-flex items-center justify-center gap-2.5 rounded-2xl px-5 py-3 text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                expandAll
+                  ? "bg-stone-900 text-white shadow-lg ring-2 ring-emerald-500/50 dark:bg-white dark:text-stone-900"
+                  : "border border-line/80 bg-paper hover:bg-mist dark:border-dark-border dark:bg-dark-surface dark:hover:bg-dark-bg text-ink dark:text-white hover:border-highland/40"
+              }`}
+            >
+              {expandAll ? <EyeOff size={16} /> : <Eye size={16} className="text-highland" />}
+              <span>{expandAll ? "Collapse In-App Players" : "Expand All In-App Players"}</span>
+              <span
+                className={`ml-1 rounded-md px-1.5 py-0.5 text-[10px] font-extrabold uppercase ${
+                  expandAll
+                    ? "bg-emerald-500 text-white"
+                    : "bg-mist text-muted dark:bg-dark-bg dark:text-dark-muted"
+                }`}
+              >
+                {expandAll ? "Active" : "Auto"}
+              </span>
+            </button>
 
-          <button
-            type="button"
-            disabled={queue.isFetching}
-            onClick={() => queue.refetch()}
-            className="btn-secondary text-xs py-2.5 px-3.5 inline-flex items-center gap-1.5"
-            title="Refresh Moderation Queue"
-          >
-            <RefreshCw size={15} className={queue.isFetching ? "animate-spin text-highland" : ""} />
-            <span>Refresh</span>
-          </button>
+            {/* Refresh Moderation Queue Button */}
+            <button
+              type="button"
+              disabled={queue.isFetching}
+              onClick={() => queue.refetch()}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line/80 bg-paper hover:bg-mist dark:border-dark-border dark:bg-dark-surface dark:hover:bg-dark-bg px-4 py-3 text-xs font-bold text-ink dark:text-white shadow-sm hover:border-emerald-500/40 transition-all cursor-pointer disabled:opacity-50"
+              title="Refresh and sync moderation queue"
+            >
+              <RefreshCw
+                size={15}
+                className={queue.isFetching ? "animate-spin text-highland" : "text-highland"}
+              />
+              <span>{queue.isFetching ? "Syncing..." : "Refresh Queue"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
