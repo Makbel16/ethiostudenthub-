@@ -233,16 +233,15 @@ export default function ResourceDetail() {
     };
   }, []);
 
-  // AI Chat functions & auto-scroll
+  // AI Chat functions & auto-scroll (strictly scoped to chat box, NEVER scrolls the window/page)
   const scrollToBottom = (smooth = true) => {
-    const behavior = smooth ? "smooth" : "auto";
     const containers = [chatContainerRef.current, modalChatContainerRef.current].filter(Boolean);
     containers.forEach((container) => {
-      container.scrollTo({ top: container.scrollHeight, behavior });
-    });
-    const anchors = [aiMessagesEndRef.current, modalAiMessagesEndRef.current].filter(Boolean);
-    anchors.forEach((anchor) => {
-      anchor.scrollIntoView({ behavior, block: "end" });
+      if (smooth) {
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
     });
   };
 
@@ -954,7 +953,7 @@ function AIChatBox({
       {/* Message Stream */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
+        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth overscroll-contain"
       >
         {messages.length === 0 ? (
           <div className="py-6 px-2 text-center space-y-4">
