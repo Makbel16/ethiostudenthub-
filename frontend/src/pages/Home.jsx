@@ -9,10 +9,9 @@ import {
   Download,
   FileText,
   GraduationCap,
-  Search,
   ShieldCheck,
-  UploadCloud,
   TrendingUp,
+  UploadCloud,
   Users,
   Zap,
   Sparkles,
@@ -33,15 +32,6 @@ import api from "../api/client.js";
 import AcademicUniverse3D from "../components/3d/AcademicUniverse3D.jsx";
 import CampusMarquee from "../components/home/CampusMarquee.jsx";
 import StudentOSDemo from "../components/home/StudentOSDemo.jsx";
-
-const TRENDING_SEARCHES = [
-  { label: "AAU CoSc2012 Final Exam", query: "CoSc2012" },
-  { label: "ASTU Applied Mechanics", query: "Ingeg2041" },
-  { label: "Jimma Medicine Block 2", query: "Medicine" },
-  { label: "Hawassa Economics", query: "Economics" },
-  { label: "MoE Scholarships 2024", query: "Scholarship" },
-  { label: "Freshman Physics", query: "Phys1011" },
-];
 
 const PLATFORM_STATS = [
   { value: "50+", label: "Verified Universities", desc: "Public & private campuses" },
@@ -230,7 +220,6 @@ const FALLBACK_RESOURCES = [
 ];
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(0);
   const navigate = useNavigate();
 
@@ -245,11 +234,6 @@ export default function Home() {
     queryFn: () => api.get("/resources?pageSize=6&sort=popular").then((r) => r.data),
     retry: false,
   });
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    navigate(`/browse${searchQuery.trim() ? `?q=${encodeURIComponent(searchQuery.trim())}` : ""}`);
-  };
 
   const displayResources =
     resourcesQuery.data?.items && resourcesQuery.data.items.length > 0
@@ -303,10 +287,10 @@ export default function Home() {
             </div>
 
             {/* Right Column: Clean, Spacious, User-Friendly Hero Content */}
-            <div className="space-y-6 text-left order-1 lg:order-2">
+            <div className="space-y-8 text-left order-1 lg:order-2">
               {/* Main Headline */}
-              <div className="space-y-3">
-                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-bold tracking-tight text-ink dark:text-white leading-tight">
+              <div className="space-y-4">
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-bold tracking-tight text-ink dark:text-white leading-[1.18]">
                   <span className="block sm:whitespace-nowrap">All Ethiopian Universities.</span>
                   <span className="block bg-gradient-to-r from-highland via-emerald-600 to-gold bg-clip-text text-transparent">
                     One Academic Hub.
@@ -317,100 +301,82 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Omnibar Interactive Search */}
-              <div className="max-w-xl space-y-2.5">
-                <form
-                  onSubmit={handleSearchSubmit}
-                  className="group relative flex items-center rounded-2xl border-2 border-line bg-surface p-1.5 shadow-xl transition-all focus-within:border-highland focus-within:ring-4 focus-within:ring-highland/15 dark:border-dark-border dark:bg-dark-surface"
-                >
-                  <div className="flex pl-3 text-muted dark:text-dark-muted">
-                    <Search size={20} className="group-focus-within:text-highland transition-colors" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder='Search e.g. "AAU CoSc2012 Final", "ASTU Mechanics", "Jimma Medicine"...'
-                    className="w-full bg-transparent px-3 py-2.5 text-sm sm:text-base text-ink placeholder:text-muted/70 focus:outline-none dark:text-white"
-                  />
-                  <button
-                    type="submit"
-                    className="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold shadow-md whitespace-nowrap"
-                  >
-                    Search
-                  </button>
-                </form>
-
-                {/* Trending Search Chips */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span className="text-[11px] font-semibold text-muted dark:text-dark-muted mr-1 flex items-center gap-1">
-                    <TrendingUp size={12} className="text-highland" /> Trending:
-                  </span>
-                  {TRENDING_SEARCHES.slice(0, 4).map((chip) => (
-                    <button
-                      key={chip.label}
-                      onClick={() => navigate(`/browse?q=${encodeURIComponent(chip.query)}`)}
-                      className="rounded-lg border border-line bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-muted transition-all hover:border-highland/40 hover:bg-highland/10 hover:text-highland dark:border-dark-border dark:bg-dark-surface/80 dark:text-dark-muted dark:hover:text-emerald-300"
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Action Buttons in Professional Alignment */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-1">
                 <Link
                   to="/universities"
-                  className="btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg shadow-highland/20 hover:scale-[1.02] transition-transform"
+                  className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold shadow-lg shadow-highland/20 hover:scale-[1.02] transition-transform"
                 >
-                  <Building2 size={17} />
-                  Explore 50+ Campuses
-                  <ArrowRight size={15} />
+                  <Building2 size={18} />
+                  <span>Explore 50+ Campuses</span>
+                  <ArrowRight size={16} />
                 </Link>
 
                 <Link
                   to="/browse?type=PREVIOUS_EXAM"
-                  className="btn-secondary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
+                  className="btn-secondary inline-flex items-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold"
                 >
-                  <FileText size={17} />
-                  Past Exam Vault
+                  <FileText size={18} />
+                  <span>Past Exam Vault</span>
                 </Link>
 
                 <Link
                   to="/ai-assistant"
-                  className="inline-flex items-center gap-2 rounded-xl border border-highland/30 bg-highland/10 px-4 py-3 text-sm font-semibold text-highland transition-all hover:bg-highland/20 dark:border-highland/40 dark:bg-highland/20 dark:text-emerald-300"
+                  className="inline-flex items-center gap-2 rounded-xl border border-highland/30 bg-highland/10 px-5 py-3.5 text-sm font-semibold text-highland transition-all hover:bg-highland/20 dark:border-highland/40 dark:bg-highland/20 dark:text-emerald-300"
                 >
-                  <Bot size={17} />
-                  Gemini 3.8 AI Tutor
+                  <Bot size={18} />
+                  <span>Gemini 3.8 AI Tutor</span>
                 </Link>
               </div>
 
-              {/* Simple Clean Stats */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-line/70 dark:border-dark-border/70 max-w-lg">
-                <div>
-                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
-                    50+
-                  </p>
-                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
-                    Universities
-                  </p>
+              {/* Stats & Trust Indicators in Professional Alignment */}
+              <div className="pt-6 border-t border-line/70 dark:border-dark-border/70 max-w-lg space-y-4">
+                <div className="grid grid-cols-3 gap-6">
+                  <div>
+                    <p className="font-display text-2xl sm:text-3xl font-extrabold text-ink dark:text-white leading-none">
+                      50+
+                    </p>
+                    <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1.5">
+                      Campuses
+                    </p>
+                    <p className="text-[11px] text-muted dark:text-dark-muted hidden sm:block mt-0.5">
+                      Public & Private
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl sm:text-3xl font-extrabold text-ink dark:text-white leading-none">
+                      15,000+
+                    </p>
+                    <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1.5">
+                      Past Exams
+                    </p>
+                    <p className="text-[11px] text-muted dark:text-dark-muted hidden sm:block mt-0.5">
+                      Verified Solutions
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl sm:text-3xl font-extrabold text-ink dark:text-white leading-none">
+                      85,000+
+                    </p>
+                    <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1.5">
+                      Students
+                    </p>
+                    <p className="text-[11px] text-muted dark:text-dark-muted hidden sm:block mt-0.5">
+                      Nationwide Hub
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
-                    15,000+
-                  </p>
-                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
-                    Past Exams
-                  </p>
-                </div>
-                <div>
-                  <p className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white leading-none">
-                    85,000+
-                  </p>
-                  <p className="text-xs font-semibold text-highland dark:text-emerald-400 mt-1">
-                    Students
-                  </p>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-muted dark:text-dark-muted pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-highland" /> 100% Free for Students
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-highland" /> Peer-Verified Materials
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-highland" /> Official Campus Portals
+                  </span>
                 </div>
               </div>
             </div>
