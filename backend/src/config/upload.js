@@ -60,10 +60,17 @@ const uploadToLocalDisk = (buffer, originalname) => {
   return { secure_url: `${base}/uploads/${filename}` };
 };
 
-const uploadToCloudinaryImpl = (buffer, folder = "ethiostudenthub") =>
+const uploadToCloudinaryImpl = (buffer, folder = "ethiostudenthub", originalname = "file") =>
   new Promise((resolve, reject) => {
+    const ext = path.extname(originalname || "").toLowerCase();
+    const isDoc = [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".zip"].includes(ext);
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "auto" },
+      {
+        folder,
+        resource_type: isDoc ? "raw" : "auto",
+        use_filename: true,
+        unique_filename: true,
+      },
       (err, result) => (err ? reject(err) : resolve(result))
     );
     stream.end(buffer);

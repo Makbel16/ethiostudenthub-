@@ -76,11 +76,31 @@ const contentDisposition = (disposition, filename) => {
   return `${disposition}; filename="${asciiFilename}"; filename*=UTF-8''${encodeRFC5987(filename)}`;
 };
 
-const inferContentType = (fileUrl, upstreamContentType) => {
+const inferContentType = (fileUrl, upstreamContentType, resourceType) => {
   const normalized = upstreamContentType?.split(";")[0]?.trim().toLowerCase();
   if (normalized && !GENERIC_CONTENT_TYPES.has(normalized)) return upstreamContentType;
 
-  return CONTENT_TYPE_BY_EXTENSION[getFileExtension(fileUrl)] || upstreamContentType || "application/octet-stream";
+  const ext = getFileExtension(fileUrl);
+  if (CONTENT_TYPE_BY_EXTENSION[ext]) return CONTENT_TYPE_BY_EXTENSION[ext];
+
+  if (
+    ext === ".pdf" ||
+    fileUrl?.includes(".pdf") ||
+    [
+      "PREVIOUS_EXAM",
+      "MODEL_EXAM",
+      "LECTURE_NOTE",
+      "BOOK",
+      "ASSIGNMENT",
+      "LAB_MANUAL",
+      "RESEARCH_PAPER",
+      "CHEAT_SHEET",
+    ].includes(resourceType)
+  ) {
+    return "application/pdf";
+  }
+
+  return upstreamContentType || "application/octet-stream";
 };
 
 const getLocalUploadPath = (fileUrl) => {
@@ -157,7 +177,29 @@ const sendResourceFile = async (req, res, resource, disposition, onReady) => {
   const upstreamHeaders = {};
   if (req.headers.range) upstreamHeaders.Range = req.headers.range;
 
-  const upstream = await fetch(remoteUrl, { headers: upstreamHeaders, redirect: "follow" });
+  let upstream = await fetch(remoteUrl, { headers: upstreamHeaders, redirect: "follow" });
+  let isImageFallback = false;
+
+  // Cloudinary ACL fallback: by default Cloudinary blocks raw .pdf delivery with 401 (deny or ACL failure)
+  // unless "Allow delivery of PDF and ZIP files" is enabled in Cloudinary console security settings.
+  // However, Cloudinary readily generates PNG/JPG renderings of the document!
+  if (
+    (!upstream.ok || upstream.status === 401) &&
+    resource.fileUrl &&
+    resource.fileUrl.includes("res.cloudinary.com")
+  ) {
+    const fallbackPngUrl = remoteUrl.toString().replace(/\.pdf$/i, ".png");
+    try {
+      const fallbackUpstream = await fetch(fallbackPngUrl, { headers: upstreamHeaders, redirect: "follow" });
+      if (fallbackUpstream.ok && fallbackUpstream.body) {
+        upstream = fallbackUpstream;
+        isImageFallback = true;
+      }
+    } catch (e) {
+      console.warn("Cloudinary fallback fetch failed:", e);
+    }
+  }
+
   if (upstream.status === 416) {
     const contentRange = upstream.headers.get("content-range");
     if (contentRange) res.setHeader("Content-Range", contentRange);
@@ -170,7 +212,11 @@ const sendResourceFile = async (req, res, resource, disposition, onReady) => {
 
   await onReady?.();
 
-  headers["Content-Type"] = inferContentType(resource.fileUrl, upstream.headers.get("content-type"));
+  if (isImageFallback) {
+    headers["Content-Type"] = "image/png";
+  } else {
+    headers["Content-Type"] = inferContentType(resource.fileUrl, upstream.headers.get("content-type"), resource.type);
+  }
 
   const contentLength = upstream.headers.get("content-length");
   const contentRange = upstream.headers.get("content-range");
@@ -564,12 +610,18 @@ router.delete("/:id/comments/:commentId", requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// GET /api/resources/:id/open - authenticated inline stream for in-browser preview
-router.get("/:id/open", requireAuth, async (req, res) => {
+// GET /api/resources/:id/open - inline stream for in-browser preview (public for approved resources)
+router.get("/:id/open", optionalAuth, async (req, res) => {
   try {
     const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
     if (!resource) return res.status(404).json({ error: "Resource not found" });
     if (isUsefulLink(resource)) return res.status(400).json({ error: "Useful links do not have a file preview" });
+
+    const canViewPending =
+      req.user && (req.user.id === resource.uploaderId || ["ADMIN", "MODERATOR"].includes(req.user.role));
+    if (resource.status !== "APPROVED" && !canViewPending) {
+      return res.status(403).json({ error: "Resource is not approved yet" });
+    }
 
     await sendResourceFile(req, res, resource, "inline");
   } catch (err) {
@@ -578,12 +630,18 @@ router.get("/:id/open", requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/resources/:id/download - authenticated download stream
-router.get("/:id/download", requireAuth, async (req, res) => {
+// GET /api/resources/:id/download - download stream (public for approved resources)
+router.get("/:id/download", optionalAuth, async (req, res) => {
   try {
     const resource = await prisma.resource.findUnique({ where: { id: req.params.id } });
     if (!resource) return res.status(404).json({ error: "Resource not found" });
     if (isUsefulLink(resource)) return res.status(400).json({ error: "Useful links do not have a downloadable file" });
+
+    const canViewPending =
+      req.user && (req.user.id === resource.uploaderId || ["ADMIN", "MODERATOR"].includes(req.user.role));
+    if (resource.status !== "APPROVED" && !canViewPending) {
+      return res.status(403).json({ error: "Resource is not approved yet" });
+    }
 
     const shouldIncrementDownload = !req.headers.range || /^bytes=0-/i.test(req.headers.range);
 

@@ -78,11 +78,28 @@ const getFileExtension = (fileUrl = "") => {
 };
 
 const getPreviewKind = (resource) => {
-  const extension = getFileExtension(resource.fileUrl);
+  if (!resource) return null;
+  const fileUrl = resource.fileUrl || "";
+  const extension = getFileExtension(fileUrl);
 
-  if ([".jpg", ".jpeg", ".png"].includes(extension)) return "image";
-  if (extension === ".mp4" || resource.type === "VIDEO") return "video";
-  if (extension === ".pdf") return "document";
+  if ([".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(extension)) return "image";
+  if (extension === ".mp4" || extension === ".webm" || resource.type === "VIDEO") return "video";
+  if (
+    extension === ".pdf" ||
+    fileUrl.includes(".pdf") ||
+    [
+      "PREVIOUS_EXAM",
+      "MODEL_EXAM",
+      "LECTURE_NOTE",
+      "BOOK",
+      "ASSIGNMENT",
+      "LAB_MANUAL",
+      "RESEARCH_PAPER",
+      "CHEAT_SHEET",
+    ].includes(resource.type)
+  ) {
+    return "document";
+  }
   return null;
 };
 
@@ -160,24 +177,47 @@ export default function ResourceDetail() {
     onSuccess: () => navigate("/browse"),
   });
 
+  const blobUrlRef = useRef(null);
+
   const preview = useQuery({
     queryKey: ["resource-preview", id],
     queryFn: async () => {
       const response = await api.get(`/resources/${id}/open`, { responseType: "blob" });
-      return URL.createObjectURL(response.data);
+      const contentType =
+        response.headers?.["content-type"] ||
+        (getPreviewKind(resource) === "image" ? "image/png" : "application/pdf");
+      const blob = new Blob([response.data], { type: contentType });
+      const objectUrl = URL.createObjectURL(blob);
+      return {
+        url: objectUrl,
+        contentType,
+        isImage: contentType.startsWith("image/"),
+        isPdf: contentType.includes("pdf"),
+      };
     },
-    enabled: Boolean(user && resource && !isUsefulLinkResource && getPreviewKind(resource)),
-    staleTime: Infinity,
-    gcTime: 0,
-    retry: false,
+    enabled: Boolean(resource && !isUsefulLinkResource && getPreviewKind(resource)),
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
+    retry: 1,
   });
 
   useEffect(() => {
-    const previewUrl = preview.data;
+    if (preview.data?.url) {
+      if (blobUrlRef.current && blobUrlRef.current !== preview.data.url) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+      blobUrlRef.current = preview.data.url;
+    }
+  }, [preview.data?.url]);
+
+  useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
     };
-  }, [preview.data]);
+  }, []);
 
   // AI Chat functions
   useEffect(() => {
@@ -244,55 +284,40 @@ export default function ResourceDetail() {
   };
 
   const handleOpenFile = async () => {
-    if (!user) return;
-
     setFileActionError("");
     setIsOpeningFile(true);
 
-    const openedWindow = window.open("", "_blank");
-    if (openedWindow) {
-      openedWindow.document.title = "Opening file";
-      openedWindow.opener = null;
-    }
-
     try {
-      let blobUrl = preview.data;
-      let shouldRevoke = false;
-
-      if (!blobUrl) {
+      let openUrl = preview.data?.url;
+      if (!openUrl) {
         const response = await api.get(`/resources/${id}/open`, { responseType: "blob" });
-        blobUrl = URL.createObjectURL(response.data);
-        shouldRevoke = true;
+        const contentType = response.headers?.["content-type"] || "application/pdf";
+        const blob = new Blob([response.data], { type: contentType });
+        openUrl = URL.createObjectURL(blob);
+        setTimeout(() => URL.revokeObjectURL(openUrl), 60_000);
       }
 
-      if (openedWindow) {
-        openedWindow.location.href = blobUrl;
-      } else {
-        window.open(blobUrl, "_blank", "noopener,noreferrer");
-      }
-
-      if (shouldRevoke) setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+      window.open(openUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
-      if (openedWindow) openedWindow.close();
-      setFileActionError(err.response?.data?.error || "Could not open this file. Please log in again and retry.");
+      setFileActionError(err.response?.data?.error || "Could not open this file. Please retry.");
     } finally {
       setIsOpeningFile(false);
     }
   };
 
   const handleDownloadFile = async () => {
-    if (!user) return;
-
     setFileActionError("");
     setIsDownloadingFile(true);
 
     try {
       const response = await api.get(`/resources/${id}/download`, { responseType: "blob" });
-      const blobUrl = URL.createObjectURL(response.data);
+      const contentType = response.headers?.["content-type"] || "application/pdf";
+      const blob = new Blob([response.data], { type: contentType });
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
 
       link.href = blobUrl;
-      link.download = getFilenameFromDisposition(response.headers["content-disposition"], resource.title);
+      link.download = getFilenameFromDisposition(response.headers?.["content-disposition"], resource.title);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -300,7 +325,7 @@ export default function ResourceDetail() {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
       setTimeout(invalidate, 800);
     } catch (err) {
-      setFileActionError(err.response?.data?.error || "Could not download this file. Please log in again and retry.");
+      setFileActionError(err.response?.data?.error || "Could not download this file. Please retry.");
     } finally {
       setIsDownloadingFile(false);
     }
@@ -434,32 +459,96 @@ export default function ResourceDetail() {
             </section>
           )}
 
-          {user && previewKind && (
-            <section className="mt-10 border-t border-line pt-8">
+          {previewKind && (
+            <section className="mt-10 border-t border-line pt-8 dark:border-dark-border">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">File preview</h2>
-                <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary">
-                  <ExternalLink size={16} />
-                  {isOpeningFile ? "Opening..." : "Open in new tab"}
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <h2 className="font-display text-2xl font-semibold text-ink dark:text-dark-text">Document Preview</h2>
+                  <span className="badge-green text-xs font-semibold">Verified Material</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenFile}
+                    disabled={isOpeningFile}
+                    className="btn-secondary text-xs py-2 px-3 inline-flex items-center gap-1.5"
+                  >
+                    <ExternalLink size={14} />
+                    {isOpeningFile ? "Opening..." : "Full Screen / New Tab"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadFile}
+                    disabled={isDownloadingFile}
+                    className="btn-primary text-xs py-2 px-3 inline-flex items-center gap-1.5"
+                  >
+                    <Download size={14} />
+                    {isDownloadingFile ? "Downloading..." : "Download"}
+                  </button>
+                </div>
               </div>
 
-              {preview.isLoading && <div className="empty-state">Loading file preview...</div>}
-              {preview.isError && <div className="empty-state">Could not load the file preview.</div>}
+              {preview.isLoading && (
+                <div className="empty-state py-12 flex flex-col items-center justify-center gap-3">
+                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-highland border-t-transparent" />
+                  <p className="text-sm font-medium text-muted dark:text-dark-muted">Loading document preview...</p>
+                </div>
+              )}
+
+              {preview.isError && (
+                <div className="rounded-xl border border-line bg-paper p-8 text-center dark:border-dark-border dark:bg-dark-surface space-y-4">
+                  <p className="text-sm font-medium text-ink dark:text-dark-text">
+                    Could not display the document preview directly in this browser frame.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <button type="button" onClick={handleOpenFile} className="btn-secondary text-xs">
+                      <ExternalLink size={14} /> Open in New Tab
+                    </button>
+                    <button type="button" onClick={handleDownloadFile} className="btn-primary text-xs">
+                      <Download size={14} /> Download Document
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {preview.data && (
-                <div className="overflow-hidden rounded-lg border border-line bg-paper dark:bg-dark-surface dark:border-dark-border">
-                  {previewKind === "image" && (
-                    <img src={preview.data} alt={resource.title} className="max-h-[70vh] w-full bg-white object-contain dark:bg-dark-surface" />
+                <div className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm dark:bg-dark-surface dark:border-dark-border">
+                  {/* Image Document / Fallback Render */}
+                  {(preview.data.isImage || previewKind === "image") && (
+                    <div className="relative group max-h-[85vh] overflow-y-auto bg-stone-100 dark:bg-neutral-900 p-2 sm:p-4 text-center">
+                      <img
+                        src={preview.data.url}
+                        alt={resource.title}
+                        className="mx-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-md object-contain bg-white"
+                      />
+                    </div>
                   )}
+
+                  {/* Video Document */}
                   {previewKind === "video" && (
-                    <video src={preview.data} controls preload="metadata" className="aspect-video w-full bg-black" />
-                  )}
-                  {previewKind === "document" && (
-                    <iframe
-                      src={preview.data}
-                      title={`${resource.title} file preview`}
-                      className="h-[100vh] min-h-[420px] w-full bg-white dark:bg-dark-surface"
+                    <video
+                      src={preview.data.url}
+                      controls
+                      preload="metadata"
+                      className="aspect-video w-full bg-black rounded-lg"
                     />
+                  )}
+
+                  {/* PDF Document Reader */}
+                  {(preview.data.isPdf || (!preview.data.isImage && previewKind === "document")) && (
+                    <div className="relative w-full bg-stone-100 dark:bg-neutral-900">
+                      <object
+                        data={`${preview.data.url}#toolbar=1&navpanes=0`}
+                        type="application/pdf"
+                        className="h-[80vh] min-h-[550px] w-full rounded-lg"
+                      >
+                        <iframe
+                          src={`${preview.data.url}#toolbar=1`}
+                          title={`${resource.title} file preview`}
+                          className="h-[80vh] min-h-[550px] w-full rounded-lg border-0 bg-white"
+                        />
+                      </object>
+                    </div>
                   )}
                 </div>
               )}
@@ -536,7 +625,7 @@ export default function ResourceDetail() {
                 <ExternalLink size={18} />
                 Open Link
               </button>
-            ) : user ? (
+            ) : (
               <div className="space-y-3">
                 <button type="button" onClick={handleOpenFile} disabled={isOpeningFile} className="btn-secondary w-full">
                   <ExternalLink size={18} />
@@ -546,13 +635,6 @@ export default function ResourceDetail() {
                   <Download size={18} />
                   {isDownloadingFile ? "Downloading..." : "Download file"}
                 </button>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-line bg-paper p-4 text-center">
-                <p className="text-sm leading-6 text-muted dark:text-dark-muted">Log in to open or download this file.</p>
-                <Link to="/login" className="btn-dark mt-3 w-full">
-                  Log in
-                </Link>
               </div>
             )}
             {fileActionError && <p className="mt-3 text-center text-xs font-semibold text-ember">{fileActionError}</p>}
