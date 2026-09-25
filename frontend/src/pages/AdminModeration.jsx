@@ -161,98 +161,195 @@ export default function AdminModeration() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. STATS OVERVIEW CARDS */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {/* Total Pending */}
+      {/* 2. STATS OVERVIEW CARDS (EXECUTIVE DASHBOARD STYLE) */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Total Pending Review */}
         <div
           onClick={() => setSelectedType("ALL")}
-          className={`cursor-pointer rounded-2xl border p-4.5 transition-all ${
+          className={`group relative overflow-hidden rounded-2xl border p-5 cursor-pointer transition-all duration-300 ${
             selectedType === "ALL"
-              ? "border-highland bg-highland/10 shadow-md dark:border-highland dark:bg-highland/20"
-              : "border-line bg-surface hover:border-highland/40 dark:border-dark-border dark:bg-dark-surface"
+              ? "border-amber-500/70 bg-gradient-to-b from-amber-500/15 via-surface to-surface shadow-lg shadow-amber-500/10 ring-2 ring-amber-500/30 dark:from-amber-500/20 dark:via-dark-surface dark:to-dark-surface"
+              : "border-line/80 bg-surface/90 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-md dark:border-dark-border/80 dark:bg-dark-surface/90"
           }`}
         >
+          {/* Accent Glow in background */}
+          <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl group-hover:bg-amber-500/20 transition-colors" />
+
+          {/* Top Row: Icon + Status Pill */}
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
-              Total Pending
-            </span>
-            <Clock size={16} className="text-amber-500" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 group-hover:scale-105 transition-transform">
+              <Clock size={20} />
+            </div>
+            {selectedType === "ALL" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                Active View
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-muted dark:text-dark-muted">
+                All Types
+              </span>
+            )}
           </div>
-          <p className="font-display text-3xl font-extrabold text-ink dark:text-white mt-2">
-            {metrics.total}
-          </p>
-          <p className="text-[11px] text-muted dark:text-dark-muted mt-1">
-            Across all categories
+
+          {/* Middle Row: Big Counter & Title */}
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
+              Total Queue
+            </p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="font-display text-3xl sm:text-4xl font-black text-ink dark:text-white tracking-tight">
+                {metrics.total}
+              </span>
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                Submissions
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom Row: Contextual Helper Description */}
+          <p className="mt-3 text-xs text-muted dark:text-dark-muted leading-relaxed border-t border-line/50 dark:border-dark-border/50 pt-2.5">
+            Awaiting verification across all departments & universities.
           </p>
         </div>
 
-        {/* Documents & PDFs */}
+        {/* Card 2: Academic Documents & PDFs */}
         <div
           onClick={() => setSelectedType("DOCUMENTS")}
-          className={`cursor-pointer rounded-2xl border p-4.5 transition-all ${
+          className={`group relative overflow-hidden rounded-2xl border p-5 cursor-pointer transition-all duration-300 ${
             selectedType === "DOCUMENTS"
-              ? "border-highland bg-highland/10 shadow-md dark:border-highland dark:bg-highland/20"
-              : "border-line bg-surface hover:border-highland/40 dark:border-dark-border dark:bg-dark-surface"
+              ? "border-emerald-500/70 bg-gradient-to-b from-emerald-500/15 via-surface to-surface shadow-lg shadow-emerald-500/10 ring-2 ring-emerald-500/30 dark:from-emerald-500/20 dark:via-dark-surface dark:to-dark-surface"
+              : "border-line/80 bg-surface/90 hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-md dark:border-dark-border/80 dark:bg-dark-surface/90"
           }`}
         >
+          <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/20 transition-colors" />
+
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
-              Documents & PDFs
-            </span>
-            <FileText size={16} className="text-highland" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+              <FileText size={20} />
+            </div>
+            {selectedType === "DOCUMENTS" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Active View
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-muted dark:text-dark-muted">
+                PDF & Docs
+              </span>
+            )}
           </div>
-          <p className="font-display text-3xl font-extrabold text-ink dark:text-white mt-2">
-            {metrics.docs}
-          </p>
-          <p className="text-[11px] text-muted dark:text-dark-muted mt-1">
-            Midterms, finals, notes
+
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
+              Academic Documents
+            </p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="font-display text-3xl sm:text-4xl font-black text-ink dark:text-white tracking-tight">
+                {metrics.docs}
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                Exam Papers & Notes
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-muted dark:text-dark-muted leading-relaxed border-t border-line/50 dark:border-dark-border/50 pt-2.5">
+            Verified past midterms, finals, model exams & lecture handouts.
           </p>
         </div>
 
-        {/* Videos & YouTube */}
+        {/* Card 3: Video Lectures & Media */}
         <div
           onClick={() => setSelectedType("VIDEOS")}
-          className={`cursor-pointer rounded-2xl border p-4.5 transition-all ${
+          className={`group relative overflow-hidden rounded-2xl border p-5 cursor-pointer transition-all duration-300 ${
             selectedType === "VIDEOS"
-              ? "border-red-500 bg-red-500/10 shadow-md dark:border-red-500 dark:bg-red-500/20"
-              : "border-line bg-surface hover:border-red-500/40 dark:border-dark-border dark:bg-dark-surface"
+              ? "border-rose-500/70 bg-gradient-to-b from-rose-500/15 via-surface to-surface shadow-lg shadow-rose-500/10 ring-2 ring-rose-500/30 dark:from-rose-500/20 dark:via-dark-surface dark:to-dark-surface"
+              : "border-line/80 bg-surface/90 hover:border-rose-500/40 hover:-translate-y-1 hover:shadow-md dark:border-dark-border/80 dark:bg-dark-surface/90"
           }`}
         >
+          <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full bg-rose-500/10 blur-2xl group-hover:bg-rose-500/20 transition-colors" />
+
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
-              Videos & YouTube
-            </span>
-            <Film size={16} className="text-red-500" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 group-hover:scale-105 transition-transform">
+              <Film size={20} />
+            </div>
+            {selectedType === "VIDEOS" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+                Active View
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-muted dark:text-dark-muted">
+                YouTube & Streams
+              </span>
+            )}
           </div>
-          <p className="font-display text-3xl font-extrabold text-ink dark:text-white mt-2">
-            {metrics.videos}
-          </p>
-          <p className="text-[11px] text-muted dark:text-dark-muted mt-1">
-            In-app embedded preview
+
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
+              Video & Media
+            </p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="font-display text-3xl sm:text-4xl font-black text-ink dark:text-white tracking-tight">
+                {metrics.videos}
+              </span>
+              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                In-App Playable
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-muted dark:text-dark-muted leading-relaxed border-t border-line/50 dark:border-dark-border/50 pt-2.5">
+            YouTube, Vimeo, & direct lecture clips streamable directly here.
           </p>
         </div>
 
-        {/* External Web Links */}
+        {/* Card 4: External Web Links */}
         <div
           onClick={() => setSelectedType("LINKS")}
-          className={`cursor-pointer rounded-2xl border p-4.5 transition-all ${
+          className={`group relative overflow-hidden rounded-2xl border p-5 cursor-pointer transition-all duration-300 ${
             selectedType === "LINKS"
-              ? "border-blue-500 bg-blue-500/10 shadow-md dark:border-blue-500 dark:bg-blue-500/20"
-              : "border-line bg-surface hover:border-blue-500/40 dark:border-dark-border dark:bg-dark-surface"
+              ? "border-blue-500/70 bg-gradient-to-b from-blue-500/15 via-surface to-surface shadow-lg shadow-blue-500/10 ring-2 ring-blue-500/30 dark:from-blue-500/20 dark:via-dark-surface dark:to-dark-surface"
+              : "border-line/80 bg-surface/90 hover:border-blue-500/40 hover:-translate-y-1 hover:shadow-md dark:border-dark-border/80 dark:bg-dark-surface/90"
           }`}
         >
+          <div className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full bg-blue-500/10 blur-2xl group-hover:bg-blue-500/20 transition-colors" />
+
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
-              External Links
-            </span>
-            <Globe size={16} className="text-blue-500" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 group-hover:scale-105 transition-transform">
+              <Globe size={20} />
+            </div>
+            {selectedType === "LINKS" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 border border-blue-500/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                Active View
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold text-muted dark:text-dark-muted">
+                URL References
+              </span>
+            )}
           </div>
-          <p className="font-display text-3xl font-extrabold text-ink dark:text-white mt-2">
-            {metrics.links}
-          </p>
-          <p className="text-[11px] text-muted dark:text-dark-muted mt-1">
-            Domain safety check
+
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
+              External Portals
+            </p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="font-display text-3xl sm:text-4xl font-black text-ink dark:text-white tracking-tight">
+                {metrics.links}
+              </span>
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                Web Links
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-muted dark:text-dark-muted leading-relaxed border-t border-line/50 dark:border-dark-border/50 pt-2.5">
+            Campus portals, digital libraries & online study tools.
           </p>
         </div>
       </div>
