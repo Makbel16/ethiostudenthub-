@@ -29,7 +29,6 @@ import {
   Check,
 } from "lucide-react";
 import api from "../api/client.js";
-import AcademicUniverse3D from "../components/3d/AcademicUniverse3D.jsx";
 import CampusMarquee from "../components/home/CampusMarquee.jsx";
 import StudentOSDemo from "../components/home/StudentOSDemo.jsx";
 
@@ -253,24 +252,60 @@ export default function Home() {
 
         <div className="page-shell relative">
           <div className="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
-            {/* Left Column: 3D Animated Planet (University Constellation) */}
+            {/* Left Column: Ethiopian Student Visual Showcase */}
             <div className="relative flex items-center justify-center order-2 lg:order-1">
-              <div className="relative w-full max-w-[500px] rounded-3xl border border-line/80 bg-surface/40 p-2 shadow-2xl backdrop-blur-xl dark:border-dark-border/80 dark:bg-dark-surface/40">
-                {/* 3D Campus Universe */}
-                <AcademicUniverse3D
-                  onSelectCampus={(campus) => {
-                    navigate(`/universities?q=${encodeURIComponent(campus.name)}`);
-                  }}
-                />
+              <div className="relative w-full max-w-[440px] group">
+                {/* Ambient glow behind the student card */}
+                <div className="absolute -inset-1 rounded-[32px] bg-gradient-to-r from-highland/30 via-emerald-500/20 to-gold/30 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {/* Floating Micro-Cards around 3D core */}
-                <div className="absolute -bottom-3 -left-3 hidden sm:flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 shadow-xl dark:border-dark-border dark:bg-dark-surface animate-float">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-highland/10 text-highland dark:bg-highland/20">
-                    <GraduationCap size={18} />
+                {/* Main Card Container */}
+                <div className="relative overflow-hidden rounded-3xl border border-line/90 bg-gradient-to-b from-stone-900 via-neutral-950 to-black p-3 sm:p-5 shadow-2xl backdrop-blur-xl dark:border-dark-border/90">
+                  {/* Decorative top bar */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
+                        EthioStudent Life
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-medium text-white/50">AAU • ASTU • JU</span>
                   </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-ink dark:text-white">15,000+ Exam Papers</p>
-                    <p className="text-[10px] text-muted dark:text-dark-muted">AAU, ASTU, Jimma & more</p>
+
+                  {/* Student Image Showcase */}
+                  <div className="relative flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-t from-black via-neutral-950 to-neutral-900/60 pt-4 pb-1">
+                    <img
+                      src="/stud.png"
+                      alt="Ethiopian University Student"
+                      className="h-[380px] sm:h-[440px] w-auto object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+
+                    {/* Gradient shading at the bottom so feet blend smoothly */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  </div>
+
+                  {/* Floating Micro-Badge Bottom Left */}
+                  <div className="absolute bottom-5 left-5 hidden sm:flex items-center gap-3 rounded-2xl border border-white/15 bg-black/75 p-3 shadow-2xl backdrop-blur-md animate-float">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-highland/25 text-emerald-400 border border-emerald-500/30">
+                      <GraduationCap size={20} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-white">15,000+ Exam Papers</p>
+                      <p className="text-[10px] text-white/70">Verified Semester Vault</p>
+                    </div>
+                  </div>
+
+                  {/* Floating Micro-Badge Top Right */}
+                  <div
+                    className="absolute top-16 right-5 hidden sm:flex items-center gap-2.5 rounded-2xl border border-white/15 bg-black/75 px-3.5 py-2.5 shadow-2xl backdrop-blur-md animate-float"
+                    style={{ animationDelay: "1.8s" }}
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold/25 text-amber-300 border border-amber-400/30">
+                      <Sparkles size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-white">Smart Study OS</p>
+                      <p className="text-[10px] text-white/70">50+ Campuses</p>
+                    </div>
                   </div>
                 </div>
               </div>
