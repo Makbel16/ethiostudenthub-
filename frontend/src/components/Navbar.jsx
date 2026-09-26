@@ -374,11 +374,11 @@ export default function Navbar() {
 
       {/* Content Area with Sidebar */}
       <div className="flex flex-1 relative">
-        {/* Desktop Sidebar - Below header, fixed position */}
+        {/* Desktop Sidebar - Sticky in flex flow so it never overlaps or hides main content */}
         {user && (
           <aside
-            className={`hidden lg:flex flex-col border-r border-line/70 bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md transition-all duration-300 ease-in-out fixed top-16 bottom-0 left-0 dark:border-dark-border/70 z-30 shadow-xs ${
-              desktopCollapsed ? "w-[68px]" : "w-68"
+            className={`hidden lg:flex flex-col border-r border-line/70 bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md transition-all duration-300 ease-in-out sticky top-16 h-[calc(100vh-4rem)] shrink-0 dark:border-dark-border/70 z-30 shadow-xs ${
+              desktopCollapsed ? "w-[68px]" : "w-64"
             }`}
           >
             {/* Header / Collapse Bar */}
@@ -569,7 +569,7 @@ export default function Navbar() {
         )}
 
         {/* Main Content */}
-        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${user ? (desktopCollapsed ? "lg:ml-[68px]" : "lg:ml-68") : ""}`}>
+        <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
           {/* Mobile Sidebar Overlay - Only for logged-in users */}
           {user && (
             <div className={`fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`} aria-hidden={!mobileOpen}>
