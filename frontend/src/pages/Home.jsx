@@ -14,7 +14,6 @@ import {
   UploadCloud,
   Users,
   Zap,
-  Sparkles,
   Globe,
   Bot,
   Star,
@@ -105,7 +104,7 @@ const BENTO_FEATURES = [
     title: "MoE, DAAD & Global Scholarships",
     description:
       "Access curated undergraduate and postgraduate scholarships, Mastercard Foundation grants, and Ethiopian tech internships.",
-    icon: Sparkles,
+    icon: Award,
     link: "/scholarships",
     cta: "Find Scholarships",
     highlight: "text-sky-500",
@@ -300,7 +299,7 @@ export default function Home() {
                     style={{ animationDelay: "1.8s" }}
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold/25 text-amber-300 border border-amber-400/30">
-                      <Sparkles size={16} />
+                      <Bot size={16} />
                     </div>
                     <div className="text-left">
                       <p className="text-xs font-bold text-white">Smart Study OS</p>
@@ -687,7 +686,7 @@ export default function Home() {
 
             <div className="relative mx-auto max-w-2xl space-y-6">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-emerald-200 backdrop-blur-md">
-                <Sparkles size={14} className="text-gold" />
+                <GraduationCap size={14} className="text-gold" />
                 Empowering Ethiopia's Future Leaders
               </div>
 

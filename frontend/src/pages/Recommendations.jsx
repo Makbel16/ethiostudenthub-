@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, BookOpen, MessageSquare, Briefcase, TrendingUp } from "lucide-react";
+import { Compass, BookOpen, MessageSquare, Briefcase, TrendingUp } from "lucide-react";
 import api from "../api/client.js";
 
 export default function Recommendations() {
@@ -35,7 +35,7 @@ export default function Recommendations() {
     <div className="page-shell py-10">
       <div className="mb-8">
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-highland/20 bg-white px-3 py-1.5 text-sm font-semibold text-highland dark:bg-dark-surface dark:border-dark-border">
-          <Sparkles size={16} />
+          <Compass size={16} />
           Personalized Recommendations
         </div>
         <h1 className="font-display text-4xl font-semibold text-ink">Recommended For You</h1>
@@ -48,7 +48,7 @@ export default function Recommendations() {
         <div className="section-panel rounded-xl p-6">
           <div className="flex gap-2">
             {[
-              { id: "all", label: "All", icon: Sparkles },
+              { id: "all", label: "All", icon: Compass },
               { id: "resources", label: "Resources", icon: BookOpen },
               { id: "questions", label: "Questions", icon: MessageSquare },
               { id: "opportunities", label: "Opportunities", icon: Briefcase },

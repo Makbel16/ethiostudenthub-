@@ -5,7 +5,6 @@ import {
   MessageSquare,
   Trash2,
   Plus,
-  Sparkles,
   PanelLeftClose,
   PanelLeft,
   Copy,
@@ -477,7 +476,7 @@ export default function AIAssistant() {
                 </div>
 
                 <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-highland/30 bg-highland/10 px-3.5 py-1 text-xs font-semibold text-highland dark:bg-highland/20 dark:text-emerald-300 shadow-xs">
-                  <Sparkles size={14} />
+                  <Bot size={14} />
                   Ethiopian University AI Study Companion
                 </div>
 

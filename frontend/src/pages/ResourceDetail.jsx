@@ -16,7 +16,6 @@ import {
   UserRound,
   Bot,
   Send,
-  Sparkles,
   RotateCcw,
   Copy,
   Check,
@@ -1066,7 +1065,7 @@ function AIChatBox({
         {messages.length === 0 ? (
           <div className="py-6 px-2 text-center space-y-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500/15 to-highland/20 text-highland dark:text-emerald-400 border border-emerald-500/20 mx-auto shadow-sm">
-              <Sparkles size={28} />
+              <Bot size={28} />
             </div>
             <div>
               <p className="font-display text-sm font-bold text-ink dark:text-white">
@@ -1340,7 +1339,6 @@ function AIExpandedModal({
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-display font-bold text-sm sm:text-base text-ink dark:text-white flex items-center gap-1.5">
                   AI Academic Study Studio
-                  <Sparkles size={14} className="text-amber-500" />
                 </h3>
                 <span className="rounded-full bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Active Session
@@ -1630,7 +1628,7 @@ function AIExpandedModal({
               {messages.length === 0 ? (
                 <div className="py-12 px-4 text-center space-y-4 max-w-md mx-auto">
                   <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-highland/20 to-teal-500/20 text-highland dark:text-emerald-400 border border-emerald-500/25 mx-auto shadow-md">
-                    <Sparkles size={32} />
+                    <Bot size={32} />
                   </div>
                   <div>
                     <h4 className="font-display text-lg font-bold text-ink dark:text-white">

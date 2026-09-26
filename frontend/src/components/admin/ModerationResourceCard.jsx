@@ -20,7 +20,6 @@ import {
   ChevronUp,
   Tag,
   BookOpen,
-  Sparkles,
   Layers,
 } from "lucide-react";
 import api from "../../api/client.js";

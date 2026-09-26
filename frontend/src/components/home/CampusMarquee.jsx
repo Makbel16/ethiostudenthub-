@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Building2, Sparkles, MapPin } from "lucide-react";
+import { Building2, MapPin } from "lucide-react";
 
 const CAMPUSES = [
   { name: "Addis Ababa University", code: "AAU", city: "Addis Ababa", est: "1950", color: "from-emerald-600 to-green-700" },

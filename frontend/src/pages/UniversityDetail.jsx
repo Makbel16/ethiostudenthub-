@@ -16,7 +16,6 @@ import {
   Phone,
   School,
   UsersRound,
-  Sparkles,
   Star,
   Award,
   TrendingUp,
@@ -286,7 +285,7 @@ export default function UniversityDetail() {
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1.5 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white">
-                      <Sparkles size={14} />
+                      <Building2 size={14} />
                       {labelFromEnum(item.ownership)}
                     </span>
                     <span className="inline-flex items-center gap-1.5 bg-white/20 dark:bg-dark-border/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white">

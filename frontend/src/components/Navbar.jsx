@@ -11,6 +11,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   FileText,
   Home as HomeIcon,
   LayoutDashboard,
@@ -21,9 +22,11 @@ import {
   Menu,
   MessageSquare,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   ShieldCheck,
-  Sparkles,
+  Compass,
   Sun,
   UploadCloud,
   UserCircle,
@@ -65,6 +68,12 @@ import CVBuilder from "../pages/CVBuilder.jsx";
 import AIAssistant from "../pages/AIAssistant.jsx";
 import Recommendations from "../pages/Recommendations.jsx";
 
+const getInitials = (name = "") => {
+  const parts = String(name || "").trim().split(/\s+/);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return (name[0] || "U").toUpperCase();
+};
+
 const ROLE_PERMISSIONS = {
   GUEST: [],
   STUDENT: [],
@@ -75,42 +84,42 @@ const ROLE_PERMISSIONS = {
 
 const NAV_SECTIONS = [
   {
-    label: "Explore",
-    items: [
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authOnly: true },
-      { to: "/universities", label: "Universities", icon: Building2, topNav: true },
-      { to: "/browse", label: "Browse", icon: Search, topNav: true },
-    ],
-  },
-  {
     label: "Workspace",
     items: [
-      { to: "/upload", label: "Upload", icon: UploadCloud, authOnly: true },
-    ],
-  },
-  {
-    label: "Student Tools",
-    items: [
-      { to: "/gpa-calculator", label: "GPA Calculator", icon: Calculator, authOnly: true },
-      { to: "/academic-roadmap", label: "Academic Roadmap", icon: MapPin, authOnly: true },
-      { to: "/study-planner", label: "Study Planner", icon: Calendar, authOnly: true },
-      { to: "/scholarships", label: "Scholarships", icon: Award, authOnly: true },
-      { to: "/jobs-internships", label: "Jobs & Internships", icon: Briefcase, authOnly: true },
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authOnly: true },
+      { to: "/upload", label: "Upload Resource", icon: UploadCloud, authOnly: true },
       { to: "/notifications", label: "Notifications", icon: Bell, authOnly: true },
     ],
   },
   {
-    label: "Learning & Career",
+    label: "Explore & Network",
     items: [
-      { to: "/qa", label: "Q&A", icon: MessageSquare, authOnly: true },
-      { to: "/career-center", label: "Career Center", icon: Briefcase, authOnly: true },
-      { to: "/cv-builder", label: "CV Builder", icon: FileText, authOnly: true },
-      { to: "/ai-assistant", label: "AI Assistant", icon: Bot, authOnly: true },
-      { to: "/recommendations", label: "Recommendations", icon: Sparkles, authOnly: true },
+      { to: "/browse", label: "Browse Library", icon: Search, topNav: true },
+      { to: "/universities", label: "Universities", icon: Building2, topNav: true },
+      { to: "/recommendations", label: "Curated For You", icon: Compass, authOnly: true },
     ],
   },
   {
-    label: "Management",
+    label: "Academic Tools",
+    items: [
+      { to: "/gpa-calculator", label: "GPA Calculator", icon: Calculator, authOnly: true },
+      { to: "/academic-roadmap", label: "Academic Roadmap", icon: MapPin, authOnly: true },
+      { to: "/study-planner", label: "Study Planner", icon: Calendar, authOnly: true },
+      { to: "/qa", label: "Peer Q&A", icon: MessageSquare, authOnly: true },
+      { to: "/ai-assistant", label: "Study Assistant", icon: Bot, authOnly: true },
+    ],
+  },
+  {
+    label: "Career Center",
+    items: [
+      { to: "/scholarships", label: "Scholarships", icon: Award, authOnly: true },
+      { to: "/jobs-internships", label: "Jobs & Internships", icon: Briefcase, authOnly: true },
+      { to: "/career-center", label: "Career Center", icon: Briefcase, authOnly: true },
+      { to: "/cv-builder", label: "CV Builder", icon: FileText, authOnly: true },
+    ],
+  },
+  {
+    label: "Administration",
     items: [
       {
         to: "/university-manager",
@@ -121,28 +130,28 @@ const NAV_SECTIONS = [
       },
       {
         to: "/admin/moderation",
-        label: "Moderation",
+        label: "Moderation Queue",
         icon: ShieldCheck,
         roles: ["ADMIN", "MODERATOR"],
         permissions: ["resources:moderate"],
       },
       {
         to: "/admin/users",
-        label: "Users",
+        label: "User Management",
         icon: UsersRound,
         roles: ["ADMIN"],
         permissions: ["users:manage"],
       },
       {
         to: "/admin/universities",
-        label: "Universities",
+        label: "Campus Directory",
         icon: Building2,
         roles: ["ADMIN", "MODERATOR"],
         permissions: ["admin:access"],
       },
       {
         to: "/admin/structure",
-        label: "Structure",
+        label: "Curriculum Structure",
         icon: Layers3,
         roles: ["ADMIN", "MODERATOR"],
         permissions: ["admin:access"],
@@ -177,14 +186,27 @@ const canViewItem = (item, user) => {
 };
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser, unreadCount } = useAuth();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("esh_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
   const [expandedSections, setExpandedSections] = useState({});
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const toggleDesktopCollapse = (nextState) => {
+    setDesktopCollapsed(nextState);
+    try {
+      localStorage.setItem("esh_sidebar_collapsed", String(nextState));
+    } catch {}
+  };
 
   const visibleSections = useMemo(
     () =>
@@ -355,118 +377,191 @@ export default function Navbar() {
         {/* Desktop Sidebar - Below header, fixed position */}
         {user && (
           <aside
-            className={`hidden lg:flex flex-col border-r border-line bg-white transition-all duration-200 fixed top-16 bottom-0 left-0 dark:bg-dark-surface dark:border-dark-border ${
-              desktopCollapsed ? "w-16" : "w-64"
+            className={`hidden lg:flex flex-col border-r border-line/70 bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md transition-all duration-300 ease-in-out fixed top-16 bottom-0 left-0 dark:border-dark-border/70 z-30 shadow-xs ${
+              desktopCollapsed ? "w-[68px]" : "w-68"
             }`}
           >
-            {/* User Profile Header */}
-            <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 dark:border-dark-border">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="relative group">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-highland text-white overflow-hidden">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
-                    ) : (
-                      <UserCircle size={24} />
-                    )}
-                  </div>
-                  {!desktopCollapsed && (
-                    <label className={`absolute inset-0 flex items-center justify-center bg-black/50 rounded-full transition-opacity cursor-pointer ${uploadingAvatar ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                      <input type="file" className="hidden" accept="image/*" disabled={uploadingAvatar} onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          handleAvatarUpload(file);
-                        }
-                      }} />
-                      {uploadingAvatar ? (
-                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+            {/* Header / Collapse Bar */}
+            {!desktopCollapsed ? (
+              /* EXPANDED HEADER: Profile Photo + Info on Left, Collapse button situated to the RIGHT of profile */
+              <div className="flex items-center justify-between gap-3 border-b border-line/70 dark:border-dark-border/70 p-3.5 bg-paper/40 dark:bg-dark-bg/30">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="relative group shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-highland text-white font-bold text-sm shadow-xs overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+                      {user.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.fullName || "User"} className="h-full w-full object-cover" />
                       ) : (
-                        <UploadCloud size={16} className="text-white" />
+                        <span>{getInitials(user.fullName || user.email)}</span>
+                      )}
+                    </div>
+                    <label
+                      className={`absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl transition-opacity cursor-pointer ${
+                        uploadingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`}
+                      title="Upload profile photo"
+                    >
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        disabled={uploadingAvatar}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleAvatarUpload(file);
+                        }}
+                      />
+                      {uploadingAvatar ? (
+                        <div className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <UploadCloud size={15} className="text-white" />
                       )}
                     </label>
-                  )}
-                </div>
-                {!desktopCollapsed && (
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ink text-sm dark:text-dark-text">{user.fullName || user.email}</p>
-                    <p className="truncate text-xs font-medium text-muted dark:text-dark-muted">{user.role?.replaceAll("_", " ")}</p>
                   </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setDesktopCollapsed(!desktopCollapsed)}
-                className="btn-ghost h-8 w-8 px-0 shrink-0"
-                aria-label={desktopCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              >
-                <Menu size={20} />
-              </button>
-            </div>
 
-            {/* Always visible collapse/expand button for collapsed state */}
-            {desktopCollapsed && (
-              <div className="flex items-center justify-center px-2 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-ink text-xs sm:text-sm dark:text-white leading-tight">
+                      {user.fullName || user.email}
+                    </p>
+                    <span className="inline-block mt-0.5 rounded-md bg-highland/10 dark:bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highland-dark dark:text-emerald-300 border border-highland/15 dark:border-emerald-500/20">
+                      {user.role?.replaceAll("_", " ") || "STUDENT"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Collapse button situated directly to the RIGHT of the profile */}
                 <button
                   type="button"
-                  onClick={() => setDesktopCollapsed(!desktopCollapsed)}
-                  className="btn-ghost h-8 w-8 px-0 shrink-0"
+                  onClick={() => toggleDesktopCollapse(true)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:text-ink dark:text-dark-muted dark:hover:text-white hover:bg-mist dark:hover:bg-dark-border border border-line/60 dark:border-dark-border/60 transition-colors cursor-pointer shrink-0"
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
+                >
+                  <PanelLeftClose size={16} />
+                </button>
+              </div>
+            ) : (
+              /* COLLAPSED HEADER: Profile photo is completely INVISIBLE! Only the expand button is shown */
+              <div className="flex items-center justify-center py-3 border-b border-line/70 dark:border-dark-border/70 bg-paper/40 dark:bg-dark-bg/30">
+                <button
+                  type="button"
+                  onClick={() => toggleDesktopCollapse(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl text-ink/75 hover:text-highland hover:bg-highland/10 dark:text-dark-text/75 dark:hover:text-white dark:hover:bg-dark-border border border-line/60 dark:border-dark-border/60 transition-all cursor-pointer group shadow-2xs"
+                  title="Expand sidebar"
                   aria-label="Expand sidebar"
                 >
-                  <Menu size={20} />
+                  <PanelLeftOpen size={18} className="group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             )}
 
-            <nav className="flex-1 overflow-y-auto px-3 py-4">
-              <div className="grid gap-2">
-                {visibleSections.map((section) => {
-                  const isExpanded = expandedSections[section.label] || desktopCollapsed;
-                  const Icon = section.items[0]?.icon;
-                  return (
-                    <div key={section.label}>
-                      <button
-                        onClick={() => !desktopCollapsed && toggleSection(section.label)}
-                        className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors ${
-                          isExpanded ? "bg-mist dark:bg-dark-border text-ink dark:text-dark-text" : "text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-ink dark:hover:text-dark-text"
-                        } ${desktopCollapsed ? "justify-center px-2" : ""}`}
-                        title={desktopCollapsed ? section.label : undefined}
-                      >
-                        {Icon && <Icon size={18} className="shrink-0" />}
-                        {!desktopCollapsed && (
-                          <>
-                            <span className="flex-1 truncate">{section.label}</span>
-                            {!desktopCollapsed && (
-                              isExpanded ? (
-                                <ChevronDown size={16} className="shrink-0 text-muted dark:text-dark-muted" />
-                              ) : (
-                                <ChevronRight size={16} className="shrink-0 text-muted dark:text-dark-muted" />
-                              )
-                            )}
-                          </>
+            {/* Navigation Body */}
+            <nav className="flex-1 overflow-y-auto px-2.5 py-3 space-y-3 no-scrollbar">
+              {!desktopCollapsed ? (
+                /* EXPANDED NAVIGATION */
+                <div className="space-y-4">
+                  {visibleSections.map((section) => {
+                    const isExpanded = expandedSections[section.label] !== false;
+                    return (
+                      <div key={section.label} className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(section.label)}
+                          className="flex w-full items-center justify-between px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted hover:text-ink dark:text-dark-muted dark:hover:text-white transition-colors cursor-pointer group"
+                        >
+                          <span>{section.label}</span>
+                          {isExpanded ? (
+                            <ChevronDown size={13} className="text-muted group-hover:text-ink dark:group-hover:text-white transition-colors" />
+                          ) : (
+                            <ChevronRight size={13} className="text-muted group-hover:text-ink dark:group-hover:text-white transition-colors" />
+                          )}
+                        </button>
+
+                        {isExpanded && (
+                          <div className="space-y-0.5">
+                            {section.items.map((item) => {
+                              const ItemIcon = item.icon;
+                              return (
+                                <NavLink
+                                  key={item.to}
+                                  to={item.to}
+                                  className={({ isActive }) =>
+                                    `flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                      isActive
+                                        ? "bg-highland text-white shadow-xs font-semibold"
+                                        : "text-ink/80 dark:text-dark-text/80 hover:bg-mist dark:hover:bg-dark-border hover:text-highland dark:hover:text-emerald-400"
+                                    }`
+                                  }
+                                >
+                                  <ItemIcon size={16} className="shrink-0" />
+                                  <span className="truncate">{item.label}</span>
+                                  {item.to === "/notifications" && unreadCount > 0 && (
+                                    <span className="ml-auto flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                                      {unreadCount > 99 ? "99+" : unreadCount}
+                                    </span>
+                                  )}
+                                </NavLink>
+                              );
+                            })}
+                          </div>
                         )}
-                      </button>
-                      {isExpanded && !desktopCollapsed && (
-                        <div className="ml-4 mt-1 grid gap-1">
-                          {section.items.map((item) => {
-                            const ItemIcon = item.icon;
-                            return (
-                              <NavLink key={item.to} to={item.to} className={sidebarLinkClass}>
-                                <ItemIcon size={16} className="shrink-0" />
-                                <span className="truncate">{item.label}</span>
-                              </NavLink>
-                            );
-                          })}
-                        </div>
-                      )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* COLLAPSED NAVIGATION: Clean, centered icon rail with tooltips */
+                <div className="space-y-2">
+                  {visibleSections.map((section) => (
+                    <div
+                      key={section.label}
+                      className="py-1.5 border-b border-line/40 dark:border-dark-border/40 last:border-0 flex flex-col items-center gap-1.5"
+                    >
+                      {section.items.map((item) => {
+                        const ItemIcon = item.icon;
+                        return (
+                          <div key={item.to} className="relative group flex items-center justify-center">
+                            <NavLink
+                              to={item.to}
+                              className={({ isActive }) =>
+                                `relative flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                                  isActive
+                                    ? "bg-highland text-white shadow-xs font-bold"
+                                    : "text-ink/70 hover:text-highland hover:bg-highland/10 dark:text-dark-text/70 dark:hover:text-emerald-400 dark:hover:bg-dark-border"
+                                }`
+                              }
+                              title={item.label}
+                            >
+                              <ItemIcon size={18} />
+                              {item.to === "/notifications" && unreadCount > 0 && (
+                                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark-surface" />
+                              )}
+                            </NavLink>
+                            {/* Floating tooltip on hover */}
+                            <div className="absolute left-full ml-2.5 hidden group-hover:flex items-center z-50 pointer-events-none">
+                              <div className="px-2.5 py-1 text-xs font-medium text-white bg-ink/90 dark:bg-dark-surface dark:text-dark-text dark:border dark:border-dark-border rounded-lg shadow-lg whitespace-nowrap">
+                                {item.label}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </nav>
 
-            <div className="border-t border-line p-4 dark:border-dark-border">
-              <button onClick={onLogout} className="btn-secondary w-full" title={desktopCollapsed ? "Log out" : undefined}>
-                <LogOut size={16} />
+            {/* Sidebar Bottom Footer */}
+            <div className="border-t border-line/70 p-3 dark:border-dark-border/70 bg-paper/40 dark:bg-dark-bg/30">
+              <button
+                type="button"
+                onClick={onLogout}
+                className={`flex items-center justify-center rounded-xl border border-line/80 text-muted hover:text-red-500 hover:border-red-500/40 hover:bg-red-500/10 dark:border-dark-border dark:text-dark-muted dark:hover:text-red-400 transition-all cursor-pointer ${
+                  desktopCollapsed ? "h-10 w-10 mx-auto" : "w-full gap-2 px-3 py-2 text-xs font-semibold"
+                }`}
+                title={desktopCollapsed ? "Log out" : undefined}
+              >
+                <LogOut size={16} className="shrink-0" />
                 {!desktopCollapsed && <span>Log out</span>}
               </button>
             </div>
@@ -474,7 +569,7 @@ export default function Navbar() {
         )}
 
         {/* Main Content */}
-        <div className={`flex-1 flex flex-col overflow-hidden ${user ? (desktopCollapsed ? "lg:ml-16" : "lg:ml-64") : ""}`}>
+        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${user ? (desktopCollapsed ? "lg:ml-[68px]" : "lg:ml-68") : ""}`}>
           {/* Mobile Sidebar Overlay - Only for logged-in users */}
           {user && (
             <div className={`fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`} aria-hidden={!mobileOpen}>

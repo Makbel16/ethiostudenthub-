@@ -14,7 +14,6 @@ import {
   EyeOff,
   CheckCircle2,
   Clock,
-  Sparkles,
   Layers,
   Lock,
   Activity,

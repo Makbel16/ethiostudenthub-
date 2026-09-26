@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calculator, Plus, Trash2, Award, TrendingUp, Sparkles, BookOpen } from "lucide-react";
+import { Calculator, Plus, Trash2, Award, TrendingUp, Lightbulb, BookOpen } from "lucide-react";
 
 export default function GpaCalculator() {
   const [courses, setCourses] = useState([
@@ -92,7 +92,7 @@ export default function GpaCalculator() {
 
         <div className="page-shell relative py-12 sm:py-16">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-highland/30 bg-white/80 px-4 py-2 text-sm font-semibold text-highland shadow-lg backdrop-blur-sm dark:bg-dark-surface/80 dark:border-highland/40">
-            <Sparkles size={16} className="animate-pulse" />
+            <Calculator size={16} />
             Academic Tools
           </div>
           <h1 className="font-display text-5xl font-bold text-ink dark:text-dark-text">
@@ -282,7 +282,7 @@ export default function GpaCalculator() {
             {/* Tips Card */}
             <div className="rounded-2xl border border-line bg-white p-6 shadow-lg dark:border-dark-border dark:bg-dark-surface">
               <div className="mb-4 flex items-center gap-2">
-                <Sparkles size={18} className="text-highland" />
+                <Lightbulb size={18} className="text-highland" />
                 <h3 className="font-display font-semibold text-ink dark:text-dark-text">Tips</h3>
               </div>
               <ul className="space-y-3 text-sm text-muted dark:text-dark-muted">

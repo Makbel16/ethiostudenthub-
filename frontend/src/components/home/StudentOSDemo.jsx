@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText,
-  Sparkles,
   Calculator,
   Building2,
   CheckCircle2,
@@ -137,7 +136,7 @@ export default function StudentOSDemo() {
         <div className="flex items-center gap-1 rounded-xl bg-white p-1 shadow-sm border border-line dark:bg-dark-surface dark:border-dark-border w-full sm:w-auto overflow-x-auto">
           {[
             { id: "exams", label: "Exam Vault", icon: FileText },
-            { id: "ai", label: "Gemini 3.8 AI", icon: Sparkles },
+            { id: "ai", label: "Gemini 3.8 AI", icon: Bot },
             { id: "gpa", label: "GPA Calculator", icon: Calculator },
             { id: "portals", label: "Campus Portals", icon: Building2 },
           ].map((tab) => {
