@@ -75,7 +75,6 @@ const uploadToCloudinaryImpl = (buffer, folder = "ethiostudenthub", originalname
     );
     stream.end(buffer);
   });
-
 // Single entry point used by routes — picks Cloudinary or local disk automatically
 export const uploadToCloudinary = (buffer, folder = "ethiostudenthub", originalname = "file") =>
   hasCloudinaryConfig ? uploadToCloudinaryImpl(buffer, folder) : Promise.resolve(uploadToLocalDisk(buffer, originalname));

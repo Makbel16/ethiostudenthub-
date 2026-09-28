@@ -118,22 +118,22 @@ export default function StudentOSDemo() {
   const distinction = getDistinction(gradeScore);
 
   return (
-    <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-line/80 bg-white/90 shadow-2xl backdrop-blur-xl dark:border-dark-border dark:bg-dark-surface/90">
+    <div className="relative mx-auto max-w-6xl 2xl:max-w-7xl overflow-hidden rounded-3xl border border-line/80 bg-white/90 shadow-2xl backdrop-blur-xl dark:border-dark-border dark:bg-dark-surface/90">
       {/* Top Header with Window controls and Tab Switcher */}
-      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-line/80 bg-mist/60 px-5 py-4 dark:border-dark-border dark:bg-dark-border/40">
+      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-line/80 bg-mist/60 px-5 py-4 xl:px-8 xl:py-5 dark:border-dark-border dark:bg-dark-border/40">
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start mb-3 sm:mb-0">
           <div className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-full bg-red-400/80" />
             <span className="h-3 w-3 rounded-full bg-amber-400/80" />
             <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
           </div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-dark-muted font-mono">
+          <span className="text-xs xl:text-sm font-semibold uppercase tracking-wider text-muted dark:text-dark-muted font-mono">
             EthioStudentHub OS • Live Interactive Preview
           </span>
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1 rounded-xl bg-white p-1 shadow-sm border border-line dark:bg-dark-surface dark:border-dark-border w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1 rounded-xl bg-white p-1 xl:p-1.5 shadow-sm border border-line dark:bg-dark-surface dark:border-dark-border w-full sm:w-auto overflow-x-auto">
           {[
             { id: "exams", label: "Exam Vault", icon: FileText },
             { id: "ai", label: "Gemini 3.8 AI", icon: Bot },
@@ -146,13 +146,13 @@ export default function StudentOSDemo() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 xl:px-4 xl:py-2 text-xs xl:text-sm font-semibold transition-all whitespace-nowrap ${
                   isActive
                     ? "bg-highland text-white shadow-sm"
                     : "text-muted hover:text-ink dark:text-dark-muted dark:hover:text-white"
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} className="xl:scale-110" />
                 {tab.label}
               </button>
             );
@@ -161,7 +161,7 @@ export default function StudentOSDemo() {
       </div>
 
       {/* Main Tab Content */}
-      <div className="p-6 sm:p-8 min-h-[380px]">
+      <div className="p-6 sm:p-8 xl:p-10 min-h-[380px] xl:min-h-[420px]">
         {/* TAB 1: EXAM VAULT */}
         {activeTab === "exams" && (
           <div className="space-y-6 animate-fade-in-up">
@@ -182,7 +182,7 @@ export default function StudentOSDemo() {
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 xl:gap-6 sm:grid-cols-2">
               {SAMPLE_EXAMS.map((exam) => (
                 <div
                   key={exam.code}

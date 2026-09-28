@@ -19,27 +19,27 @@ const CAMPUSES = [
 
 export default function CampusMarquee() {
   return (
-    <div className="relative w-full overflow-hidden border-y border-line/70 bg-surface/80 py-6 backdrop-blur-sm dark:border-dark-border dark:bg-dark-surface/80">
+    <div className="relative w-full overflow-hidden border-y border-line/70 bg-surface/80 py-6 xl:py-8 backdrop-blur-sm dark:border-dark-border dark:bg-dark-surface/80">
       {/* Subtle edge fade gradients */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-paper to-transparent dark:from-dark-bg" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-paper to-transparent dark:from-dark-bg" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 xl:w-44 bg-gradient-to-r from-paper to-transparent dark:from-dark-bg" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 xl:w-44 bg-gradient-to-l from-paper to-transparent dark:from-dark-bg" />
 
-      <div className="flex w-max animate-marquee gap-4">
+      <div className="flex w-max animate-marquee gap-4 xl:gap-5">
         {[...CAMPUSES, ...CAMPUSES].map((campus, idx) => (
           <Link
             key={`${campus.code}-${idx}`}
             to="/universities"
-            className="group flex items-center gap-3 rounded-2xl border border-line bg-white/70 px-4 py-2.5 transition-all hover:-translate-y-0.5 hover:border-highland/50 hover:shadow-md dark:border-dark-border dark:bg-dark-border/40"
+            className="group flex items-center gap-3 rounded-2xl border border-line bg-white/70 px-4 py-2.5 xl:px-5 xl:py-3 transition-all hover:-translate-y-0.5 hover:border-highland/50 hover:shadow-md dark:border-dark-border dark:bg-dark-border/40"
           >
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${campus.color} text-white font-bold text-xs shadow-sm`}>
+            <div className={`flex h-9 w-9 xl:h-10 xl:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${campus.color} text-white font-bold text-xs xl:text-sm shadow-sm`}>
               {campus.code}
             </div>
             <div className="text-left whitespace-nowrap">
-              <p className="font-semibold text-xs text-ink dark:text-white group-hover:text-highland transition-colors">
+              <p className="font-semibold text-xs xl:text-sm text-ink dark:text-white group-hover:text-highland transition-colors">
                 {campus.name}
               </p>
-              <p className="text-[10px] text-muted dark:text-dark-muted flex items-center gap-1">
-                <MapPin size={10} /> {campus.city}
+              <p className="text-[10px] xl:text-xs text-muted dark:text-dark-muted flex items-center gap-1">
+                <MapPin size={10} className="xl:scale-110" /> {campus.city}
               </p>
             </div>
           </Link>
